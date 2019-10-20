@@ -19,8 +19,8 @@ from collections import OrderedDict
 """
 SID TEMPLATES AS MEMO
 sid_templates = {
-    'asset': '{project}|a|{cat}|{name}|{task}|{subtask}|{version}|{state}|{ext}',
-    'shot':  '{project}|s|{seq}|{shot}|{task}|{subtask}|{version}|{state}|{ext}',
+    'asset': '{project}/a/{cat}/{name}/{task}/{subtask}/{version}/{state}/{ext}',
+    'shot':  '{project}/s/{seq}/{shot}/{task}/{subtask}/{version}/{state}/{ext}',
     'project': '{project}',
 }
 
@@ -143,14 +143,14 @@ not_covered = [
 
 
 search_sids = [
-    'demo|*',       # ?
-    'demo|a|*',     # cats
-    'demo|a|characters|*',     #
-    'demo|a|characters|crab|*',     #
-    'demo|a|characters|crab|01_modeling|*',     #
-    'demo|a|characters|crab|01_modeling|maya|*',     #
-    'demo|a|characters|crab|01_modeling|maya|work_v001|*',     #
-    'demo|a|characters|crab|01_modeling|maya|work_v001|ma',     #
+    'demo/*',       # ?
+    'demo/a/*',     # cats
+    'demo/a/characters/*',     #
+    'demo/a/characters/crab/*',     #
+    'demo/a/characters/crab/01_modeling/*',     #
+    'demo/a/characters/crab/01_modeling/maya/*',     #
+    'demo/a/characters/crab/01_modeling/maya/work_v001/*',     #
+    'demo/a/characters/crab/01_modeling/maya/work_v001/ma',     #
 ]
 
 

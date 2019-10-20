@@ -20,10 +20,10 @@ from spil.conf.project_conf import projects
 # SID BASE CONFIG / PARTS CONFIG
 ###########################################################################################
 
-sip = '|'  # sid separator
+sip = '/'  # sid separator
 sid_templates = {
-    'asset': '{project}|a|{cat}|{name}|{task}|{subtask}|{version}|{state}|{ext}',
-    'shot':  '{project}|s|{seq}|{shot}|{task}|{subtask}|{version}|{state}|{ext}',
+    'asset': '{project}/a/{cat}/{name}/{task}/{subtask}/{version}/{state}/{ext}',
+    'shot':  '{project}/s/{seq}/{shot}/{task}/{subtask}/{version}/{state}/{ext}',
     'project': '{project}',
 }
 
@@ -204,67 +204,67 @@ def get_sidtype(data):
 
 test_sids = [
 
-    'demo|s|s010|master|01_layout|main|valid|p|ma',
-    'demo|a|characters|crab|modeling|maya|valid|p|ma',
+    'demo/s/s010/master/01_layout/main/valid/p/ma',
+    'demo/a/characters/crab/modeling/maya/valid/p/ma',
     'demo',
 
-    'demo|a|vehicles|race_car',
-    'demo|a|props|barrel',
-    'demo|a|sets|desert',
-    'demo|a|sets|cyberpunk_roof_top',
+    'demo/a/vehicles/race_car',
+    'demo/a/props/barrel',
+    'demo/a/sets/desert',
+    'demo/a/sets/cyberpunk_roof_top',
 
-    'demo|a|fx|smoke|setup|houdini|valid|p|hip',
-    'demo|a|fx|fire|setup|houdini|valid|p|hip',
-    'demo|a|props|barrel',
+    'demo/a/fx/smoke/setup/houdini/valid/p/hip',
+    'demo/a/fx/fire/setup/houdini/valid/p/hip',
+    'demo/a/props/barrel',
 
-    'demo|a|characters|dragon|setup|houdini|valid|p|ma',
-    'demo|a|characters|dragon|setup|houdini|v001|p|ma',
-    'demo|a|characters|dragon|setup|houdini|v001|w|ma',
-    'demo|a|characters|dragon|setup|houdini|v001',
-    'demo|a|characters|dragon|setup|houdini',
-    'demo|a|characters|dragon|setup',
-    'demo|a|characters|dragon',
+    'demo/a/characters/dragon/setup/houdini/valid/p/ma',
+    'demo/a/characters/dragon/setup/houdini/v001/p/ma',
+    'demo/a/characters/dragon/setup/houdini/v001/w/ma',
+    'demo/a/characters/dragon/setup/houdini/v001',
+    'demo/a/characters/dragon/setup/houdini',
+    'demo/a/characters/dragon/setup',
+    'demo/a/characters/dragon',
 
-    'demo|a|characters|crab|modeling_lo',
-    'demo|a|characters|crab|modeling|zbrush|v001|w',
-    'demo|a|characters|crab|modeling|maya|valid|p|ma',
-    'demo|a|characters|crab|modeling|maya|v001|p|ma',
-    'demo|a|characters|crab|modeling|maya|v001|w|ma',
-    'demo|a|characters|crab|modeling|maya|v001',
-    'demo|a|characters|crab|modeling|maya',
-    'demo|a|characters|crab|modeling',
-    'demo|a|characters|crab',
+    'demo/a/characters/crab/modeling_lo',
+    'demo/a/characters/crab/modeling/zbrush/v001/w',
+    'demo/a/characters/crab/modeling/maya/valid/p/ma',
+    'demo/a/characters/crab/modeling/maya/v001/p/ma',
+    'demo/a/characters/crab/modeling/maya/v001/w/ma',
+    'demo/a/characters/crab/modeling/maya/v001',
+    'demo/a/characters/crab/modeling/maya',
+    'demo/a/characters/crab/modeling',
+    'demo/a/characters/crab',
 
-    'demo|a|characters',
+    'demo/a/characters',
     
-    'demo|s|s010|p040',
+    'demo/s/s010/p040',
 
-    'demo|s|s010|p030|03_anim|main|valid|p|ma',
-    'demo|s|s010|p030|03_anim|main|v001|p|ma',
-    'demo|s|s010|p030|03_anim|main|v001|w|ma',
+    'demo/s/s010/p030/03_anim/main/valid/p/ma',
+    'demo/s/s010/p030/03_anim/main/v001/p/ma',
+    'demo/s/s010/p030/03_anim/main/v001/w/ma',
 
-    'demo|s|s010|p020|03_anim|main|v001|w|ma',
+    'demo/s/s010/p020/03_anim/main/v001/w/ma',
 
-    'demo|s|s010|p010|04_fx|water|v001|w|hip',
-    'demo|s|s010|p010|04_fx|pyro|v002|w|hip',
-    'demo|s|s010|p010|04_fx|pyro|v001|w|hip',
-    'demo|s|s010|p010|03_anim|main|v001|w|ma',
+    'demo/s/s010/p010/04_fx/water/v001/w/hip',
+    'demo/s/s010/p010/04_fx/pyro/v002/w/hip',
+    'demo/s/s010/p010/04_fx/pyro/v001/w/hip',
+    'demo/s/s010/p010/03_anim/main/v001/w/ma',
 
-    'demo|s|s010|p010|02_blocking|main|v001|w|ma',
-    'demo|s|s010|p010|02_blocking|main|v001|w',
-    'demo|s|s010|p010|02_blocking|main|v001',
-    'demo|s|s010|p010|02_blocking|main',
-    'demo|s|s010|p010|02_blocking',
-    'demo|s|s010|p010',
+    'demo/s/s010/p010/02_blocking/main/v001/w/ma',
+    'demo/s/s010/p010/02_blocking/main/v001/w',
+    'demo/s/s010/p010/02_blocking/main/v001',
+    'demo/s/s010/p010/02_blocking/main',
+    'demo/s/s010/p010/02_blocking',
+    'demo/s/s010/p010',
 
-    'demo|s|s010|master|01_layout|main|valid|p|ma',
-    'demo|s|s010|master|01_layout|main|v002|p|ma',
-    'demo|s|s010|master|01_layout|main|v002|w|ma',
-    'demo|s|s010|master|01_layout|main|v001|w|ma',
-    'demo|s|s010|master|01_layout',
-    'demo|s|s010|master',
-    'demo|s|s020',
-    'demo|s|s010',
+    'demo/s/s010/master/01_layout/main/valid/p/ma',
+    'demo/s/s010/master/01_layout/main/v002/p/ma',
+    'demo/s/s010/master/01_layout/main/v002/w/ma',
+    'demo/s/s010/master/01_layout/main/v001/w/ma',
+    'demo/s/s010/master/01_layout',
+    'demo/s/s010/master',
+    'demo/s/s020',
+    'demo/s/s010',
     'demo',
 
 ]

@@ -7,13 +7,13 @@ if __name__ == '__main__':
     setLevel(INFO)
     #setLevel(DEBUG)  # In case of problems, use DEBUG mode
 
-    sid = Sid('demo|s|010|0200|animation|*|001|w|ma')
+    sid = Sid('demo/s/010/0200/animation/*/001/w/ma')
     print(( sid + 'bla' ) )
 
-    sid = Sid('demo|s|010|0200|layout|*|002|p')
+    sid = Sid('demo/s/010/0200/layout/*/002/p')
     print( sid )
 
-    sid = Sid('demo|s|010|0200')
+    sid = Sid('demo/s/010/0200')
     print( sid + 'layout' + '*' + '002' + 'p' )
 
     debug('Tests are in the tests.sid_tests module')
