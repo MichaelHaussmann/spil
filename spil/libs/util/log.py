@@ -9,12 +9,16 @@ A simple logger shortcut / wrapper.
 Uses
 https://logzero.readthedocs.io/
 
+
+TODO: complete code clean.
+
 """
+import sys
 
 import logging
-
 import logzero
 from logzero import logger
+
 from spil.libs.util import conf
 
 
@@ -30,6 +34,13 @@ __logFormat = '[%(asctime)s] %(levelname)-6s| [%(module)s.%(funcName)s] %(messag
 for handler in logger.handlers:
     handler.setFormatter(logging.Formatter(fmt=__logFormat))
 """
+
+# we set a new handler
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logzero.LogFormatter(fmt=__logFormat, color=True))
+logger.handlers = []
+logger.addHandler(handler)
 
 logzero.formatter(logging.Formatter(fmt=__logFormat))
 
