@@ -174,7 +174,7 @@ class BaseSid(object):
     def values(self):
         """
         Returns a list of all values.
-        Empty values may be included.
+        Empty values are included.
 
         :return:
         """

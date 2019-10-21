@@ -41,6 +41,15 @@ class FS(object):
 
     @staticmethod
     def find(search_sid):
+        """
+        Finds Sids based on the given search Sid, using the Glob syntax.
+
+        Returns an iterator.
+        For a list call "found()"
+
+        :param search_sid:
+        :return: a result iterator
+        """
 
         search = Sid(search_sid)
 
@@ -69,6 +78,20 @@ class FS(object):
 
         for path in found:
             yield Sid(path=path)
+
+    @staticmethod
+    def found(search_sid):
+        """
+        Finds Sids based on the given search Sid, using the Glob syntax.
+
+        Returns a list.
+        For an iterator call "find()"
+
+        :param search_sid:
+        :return: a result list
+        """
+        found = [sid for sid in sorted(FS.find(search_sid))]
+        return found
 
     @staticmethod
     def get_children(sid):

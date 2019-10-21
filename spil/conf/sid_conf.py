@@ -204,8 +204,8 @@ def get_sidtype(data):
 
 test_sids = [
 
-    'demo/s/s010/master/01_layout/main/valid/p/ma',
     'demo/a/characters/crab/modeling/maya/valid/p/ma',
+    'demo/s/s010/master/01_layout/main/valid/p/ma',
     'demo',
 
     'demo/a/vehicles/race_car',
