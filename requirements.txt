@@ -1,5 +1,4 @@
 lucidity  # for python 2 only, python 3 version is in vendor package
-attrs
 six
 pathlib2  # for python 2 only, python 3 version is builtin
 logzero

@@ -12,30 +12,30 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+import six
+from spil import FS
+from spil.util.log import debug, setLevel, INFO, DEBUG, info
+from example_searches import searches
 
-import os
-import sys
 
-"""
-This package can be imported to force the vendor versions to be used. 
+def test_fs():
 
-The lucidity lib has some minor incompatibilities with Python 3. These were fixed in the vendor version. 
-
-"""
-
-vendor_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../vendor'))
-
-if vendor_path not in sys.path:
-    # print('inserting {}'.format(vendor_path))
-    sys.path.insert(0, vendor_path)
+    ls = FS()
+    for search_sid, comment in six.iteritems(searches):
+        print('*' * 10)
+        print('{} --> {}'.format(search_sid, comment))
+        double_check = set()
+        for i in ls.get(search_sid):
+            print(i)
+            if i in double_check:
+                print('--------------------------------------> Doublon {}'.format(i))
+            double_check.add(i)
+            # sid = Sid(i)
+            # print sid.path
 
 
 if __name__ == '__main__':
 
-    print(vendor_path)
+    setLevel(INFO)
 
-    from pprint import pprint
-    pprint(sys.path)
-
-    import lucidity
-    print(lucidity)
+    test_fs()

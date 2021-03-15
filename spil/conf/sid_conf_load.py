@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+
 This file is part of SPIL, The Simple Pipeline Lib.
 
 (C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
@@ -13,29 +14,33 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 
-import os
-import sys
+import importlib
+import inspect
 
-"""
-This package can be imported to force the vendor versions to be used. 
+from spil.conf.util import extrapolate, pattern_replacing
 
-The lucidity lib has some minor incompatibilities with Python 3. These were fixed in the vendor version. 
+# stubs that are replaced by imports
+sid_templates = {}
+key_types = {}
+key_patterns = {}
+extension_alias = {}
 
-"""
+module = importlib.import_module('sid_conf')
 
-vendor_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../vendor'))
+__all__ = []
+for name, value in inspect.getmembers(module):
+    if name.startswith('__'):
+        continue
 
-if vendor_path not in sys.path:
-    # print('inserting {}'.format(vendor_path))
-    sys.path.insert(0, vendor_path)
+    globals()[name] = value
+    __all__.append(name)
 
+sid_templates = extrapolate(sid_templates, key_types)
+pattern_replacing(sid_templates, key_patterns)
 
 if __name__ == '__main__':
 
-    print(vendor_path)
-
     from pprint import pprint
-    pprint(sys.path)
 
-    import lucidity
-    print(lucidity)
+    pprint(globals())
+

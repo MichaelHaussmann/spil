@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """
+
 This file is part of SPIL, The Simple Pipeline Lib.
 
 (C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
@@ -11,31 +12,27 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
 
-"""
-
-import os
-import sys
-
-"""
-This package can be imported to force the vendor versions to be used. 
-
-The lucidity lib has some minor incompatibilities with Python 3. These were fixed in the vendor version. 
 
 """
 
-vendor_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../vendor'))
 
-if vendor_path not in sys.path:
-    # print('inserting {}'.format(vendor_path))
-    sys.path.insert(0, vendor_path)
+class SpilException(Exception):
+    """
+    A SpilException.
+
+    This SpilException should always be raised and handled inside this Spil package.
+    """
+    pass
 
 
 if __name__ == '__main__':
-
-    print(vendor_path)
-
-    from pprint import pprint
-    pprint(sys.path)
-
-    import lucidity
-    print(lucidity)
+    
+    try:
+        try:
+            raise Exception('toto')
+        except Exception as ex:
+            raise SpilException(ex)
+        
+    except SpilException as pe:
+        
+        print('caught : ', pe)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -11,31 +10,30 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
 
+@author: michael.haussmann
 """
 
-import os
-import sys
 
-"""
-This package can be imported to force the vendor versions to be used. 
+class Singleton(object):
 
-The lucidity lib has some minor incompatibilities with Python 3. These were fixed in the vendor version. 
+    instances = {}
 
-"""
-
-vendor_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../vendor'))
-
-if vendor_path not in sys.path:
-    # print('inserting {}'.format(vendor_path))
-    sys.path.insert(0, vendor_path)
+    def __new__(cls, *args, **kwargs):
+        if Singleton.instances.get(cls) is None:
+            Singleton.instances[cls] = object.__new__(cls, *args, **kwargs)
+        return Singleton.instances[cls]
 
 
 if __name__ == '__main__':
 
-    print(vendor_path)
+    class Person(Singleton):
+        pass
 
-    from pprint import pprint
-    pprint(sys.path)
+    john = Person()
+    jane = Person()
 
-    import lucidity
-    print(lucidity)
+    assert(john is jane)
+
+    print(john)
+    print(jane)
+

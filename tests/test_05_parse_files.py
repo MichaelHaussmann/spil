@@ -12,30 +12,38 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+import six
 
-import os
-import sys
+from spil import Sid
+from spil.conf import projects
 
-"""
-This package can be imported to force the vendor versions to be used. 
+if six.PY2:
+    from pathlib2 import Path
+else:
+    from pathlib import Path
 
-The lucidity lib has some minor incompatibilities with Python 3. These were fixed in the vendor version. 
+from tests.test_02_save_sids_to_file import sid_file_path
 
-"""
 
-vendor_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../vendor'))
+def test_parse_files():
 
-if vendor_path not in sys.path:
-    # print('inserting {}'.format(vendor_path))
-    sys.path.insert(0, vendor_path)
+    sid_file = sid_file_path().parent / 'sids.parsed.txt'
+
+    for project in projects:
+
+        project_root = Path( Sid(project).path )
+        print('Root path : {}'.format(project_root))
+
+        with open(sid_file, 'w') as f:
+
+            for path in project_root.rglob('*'):
+                print(path)
+                sid = Sid(path=path)
+                if str(sid):
+                    f.write(str(sid) + '\n')
 
 
 if __name__ == '__main__':
 
-    print(vendor_path)
+    test_parse_files()
 
-    from pprint import pprint
-    pprint(sys.path)
-
-    import lucidity
-    print(lucidity)
