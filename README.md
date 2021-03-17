@@ -212,7 +212,7 @@ The Sid builds upon general concepts, as well as production proven CG pipeline c
 #### General concepts
 
 - Unique Identifier - Human readable Identifier - "Natural Key"  
-https://dzone.com/articles/7-strategies-for-assigning-ids-to-microservices
+https://dzone.com/articles/7-strategies-for-assigning-ids-to-microservices  
 https://medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575
 
 - File sytem path  
@@ -288,7 +288,9 @@ Core parts will need a C++ implementation.
 # 
 ### Plans and ongoing development
 
-The priority is to make the current feature set more robust and efficient.
+The priority is to make the current feature set more robust and efficient.  
+Adding tests and documentation.
+Optimization through generators, caches, better algorithms.
 
 Then, implement some important but missing core features and enhancements
 - add support for file sequences (integration of pyseq or fileseq, or similar)
@@ -309,7 +311,7 @@ For example `sid://play?hamlet/s/sq030/*/^/^/p/movie`
 For example `cd hamlet/s/sq010`
 
 
-Yeah, and we need a logo and quickstart videos... 
+Yeah, and we need a logo and a quickstart video... 
 
 # 
 ### Interested ?

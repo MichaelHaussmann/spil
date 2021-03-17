@@ -3,3 +3,7 @@ config.ini
 __pycache__
 .idea
 venv
+venv27
+*.egg-info
+drafts
+/drafts/
