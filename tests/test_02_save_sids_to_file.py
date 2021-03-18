@@ -42,7 +42,7 @@ def test_write_sids_file():
 
     from example_sids import sids  # generates the sids - potentially long loop
 
-    with open(sid_file, 'w') as f:
+    with open(str(sid_file), 'w') as f:
         for sid in sids:
             f.write(str(sid) + '\n')
 

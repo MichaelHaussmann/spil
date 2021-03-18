@@ -34,7 +34,7 @@ def test_parse_files():
         project_root = Path( Sid(project).path )
         print('Root path : {}'.format(project_root))
 
-        with open(sid_file, 'w') as f:
+        with open(str(sid_file), 'w') as f:
 
             for path in project_root.rglob('*'):
                 print(path)

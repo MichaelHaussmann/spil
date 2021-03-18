@@ -30,7 +30,7 @@ def test_generate_files(max_amount=100000):
 
     test_paths = []
 
-    with open(sid_file_path(), 'r') as f:
+    with open(str(sid_file_path()), 'r') as f:
         sids = f.read().splitlines()
 
     # if not input('Create if not existing ?'):

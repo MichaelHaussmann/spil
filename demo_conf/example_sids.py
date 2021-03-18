@@ -91,7 +91,7 @@ for i in range(repeat_times):
                                         data = [project, sid_type, cat, name, variant, task, version, state]
                                         if do_intermediates: append(sids, data)
 
-                                        for ext in random.choices(extensions, k=3):
+                                        for ext in random.sample(extensions, k=3):  # random.choices >py 3.6
                                             data = [project, sid_type, cat, name, variant, task, version, state, ext]
                                             append(sids, data)
 
@@ -121,7 +121,7 @@ for i in range(repeat_times):
                                         data = [project, sid_type, seq, shot, task, subtask, version, state]
                                         if do_intermediates: append(sids, data)
 
-                                        for ext in random.choices(extensions, k=3):
+                                        for ext in random.sample(extensions, k=3):  # random.choices >py 3.6
                                             data = [project, sid_type, seq, shot, task, subtask, version, state, ext]
                                             append(sids, data)
 

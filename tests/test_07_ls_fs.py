@@ -23,7 +23,7 @@ from tests.test_02_save_sids_to_file import sid_file_path
 
 def test_ls():
 
-    with open(sid_file_path(), 'r') as f:
+    with open(str(sid_file_path()), 'r') as f:
         sids = f.read().splitlines()
 
     search_list = sids
