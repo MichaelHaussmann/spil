@@ -25,7 +25,26 @@ key_types = {}
 key_patterns = {}
 extension_alias = {}
 
-module = importlib.import_module('sid_conf')
+try:
+    module = importlib.import_module('sid_conf')
+except ModuleNotFoundError as e:
+    problem = """
+    -------------------------------------------------------------------------------------------------------------
+    CONFIGURATION PROBLEM: 
+    
+    The configuration module "sid_conf" was not found.
+    
+    Ensure to either include "demo_conf" in your python path, 
+    or create your own "sid_conf" and add its folder to the python path.    
+    
+    (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
+    
+    Please see installation and configuration documentation.
+    
+    -------------------------------------------------------------------------------------------------------------
+    """
+    print(problem)
+    raise Exception(problem)
 
 __all__ = []
 for name, value in inspect.getmembers(module):

@@ -29,7 +29,27 @@ path_mapping = {}
 path_templates_reference = ''
 path_defaults = {}
 
-module = importlib.import_module('fs_conf')
+try:
+    module = importlib.import_module('fs_conf')
+except ModuleNotFoundError as e:
+    problem = """
+    -------------------------------------------------------------------------------------------------------------
+    CONFIGURATION PROBLEM: 
+
+    The configuration module "fs_conf" was not found.
+    
+    Ensure to either include "demo_conf" in your python path, 
+    or create your own "fs_conf" and add its folder to the python path.    
+
+    (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
+
+    Please see installation and configuration documentation.
+
+    -------------------------------------------------------------------------------------------------------------
+    """
+    print(problem)
+    raise Exception(problem)
+
 
 __all__ = []
 for name, value in inspect.getmembers(module):
