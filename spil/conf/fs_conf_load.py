@@ -18,6 +18,10 @@ import inspect
 
 from spil.conf.util import pattern_replacing
 
+import six
+if six.PY2:
+    ModuleNotFoundError = ImportError
+
 # stubs that are replaced by imports
 path_templates = {}
 key_types = {}

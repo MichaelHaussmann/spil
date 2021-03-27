@@ -37,7 +37,7 @@ path_templates = OrderedDict([
     ('asset__file',             r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:scenes}'),
     ('asset__movie_file',       r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:movies}'),
 
-    ('asset__state',          r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}'),
+    ('asset__state',            r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}'),
     # ('asset__version',            r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{}'),  # FIXME: should not exist as a folder
 
     ('asset__task',             r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}'),
@@ -51,7 +51,7 @@ path_templates = OrderedDict([
     ('shot__file',             r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:scenes}'),
     ('shot__movie_file',       r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:movies}'),
 
-    ('shot__state',          r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}'),
+    ('shot__state',            r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}'),
     #  ('shot__version',             r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{}'),
     ('shot__subtask',          r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}'),
     ('shot__task',             r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}'),

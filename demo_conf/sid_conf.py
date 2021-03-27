@@ -43,6 +43,8 @@ sid_templates = OrderedDict([
 
 ])
 
+to_extrapolate = ['asset__file', 'shot__file']
+
 projects = ['raj']  # A project code. Example for a "Romeo And Juliet" project.
 asset_tasks = ['design', 'modeling', 'setup', 'surfacing', 'groom']
 shot_tasks = ['animatic', 'layout', 'animation', 'render', 'fx']
@@ -92,14 +94,18 @@ key_patterns = {
 
 }
 
-
+# FIXME: this is redundant
 # sid types
-key_types = {  # FIXME: this is redundant
+# These keytypes are used by the resolver to sort the keys
+key_types = {
     'asset': ['project', 'type', 'cat', 'name', 'variant', 'task', 'version', 'state', 'ext'],
     'shot': ['project', 'type', 'seq', 'shot', 'task', 'subtask', 'version', 'state', 'ext'],
     'project': ['project'],
 }
 
+# These keytypes are used during "extrapolation"
+# Extrapolation is filling intermediate types from leave ("file") types
+extrapolate_types = key_types
 
 if __name__ == '__main__':
 

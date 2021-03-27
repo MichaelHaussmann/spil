@@ -13,15 +13,20 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-
 import importlib
 import inspect
 
 from spil.conf.util import extrapolate, pattern_replacing
 
+import six
+if six.PY2:
+    ModuleNotFoundError = ImportError
+
 # stubs that are replaced by imports
 sid_templates = {}
+to_extrapolate = []
 key_types = {}
+extrapolate_types = {}
 key_patterns = {}
 extension_alias = {}
 
@@ -54,7 +59,7 @@ for name, value in inspect.getmembers(module):
     globals()[name] = value
     __all__.append(name)
 
-sid_templates = extrapolate(sid_templates, key_types)
+sid_templates = extrapolate(sid_templates, extrapolate_types, to_extrapolate)
 pattern_replacing(sid_templates, key_patterns)
 
 if __name__ == '__main__':
