@@ -149,22 +149,6 @@ Finds:
 "hamlet/a/chars/ophelia/modeling/v004/p/mb"
 ```
 
--  "All the .ma or .mb files for Ophelia" ?
-```
-"hamlet/a/chars/ophelia/**/ma,mb"
-```
-Finds:
-```
-"hamlet/a/chars/ophelia/modeling/v001/w/ma"
-"hamlet/a/chars/ophelia/modeling/v001/p/mb"
-"hamlet/a/chars/ophelia/modeling/v002/w/ma"
-"hamlet/a/chars/ophelia/modeling/v003/w/ma"
-"hamlet/a/chars/ophelia/modeling/v004/w/ma"
-"hamlet/a/chars/ophelia/modeling/v004/p/mb"
-"hamlet/a/chars/ophelia/surfacing/v001/w/ma"
-"hamlet/a/chars/ophelia/surfacing/v002/w/ma"
-```
-
 - "Movie file (alias for mp4,mov) for last published version of last task, for all shots of hamlet's sequence 30" ?
 ```
 "hamlet/s/sq030/*/^/^/p/movie"
@@ -180,7 +164,7 @@ This search syntax is currently implemented:
 - to search the file system
 - to search in a list of Sids, for example a list of cached query results.
 
-It is possible to implement this search as a front to other query methods.
+It is possible (and planned) to implement this search as a front to other query methods.
 For example to translate to an SQL, Shotgun or Ftrack query. 
 
 

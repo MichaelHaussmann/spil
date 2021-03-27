@@ -5,5 +5,6 @@ __pycache__
 venv
 venv27
 *.egg-info
-drafts
 /drafts/
+/dist/
+/build/
