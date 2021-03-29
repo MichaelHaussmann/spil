@@ -46,7 +46,7 @@ def test_write_sids_file():
         for sid in sids:
             f.write(str(sid) + '\n')
 
-    print('Written Sids to {}'.format(sid_file))
+    print('Written {} Sids to {}'.format(len(sids), sid_file))
 
 
 if __name__ == '__main__':

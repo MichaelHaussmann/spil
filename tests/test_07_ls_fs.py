@@ -13,6 +13,13 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 import six
+
+if six.PY3:  #TODO: add Timer in package for PY3 (they have a great package setup) - Also add tox.
+    from codetiming import Timer
+else:
+    from tests.mock_timer import Timer
+
+from tests import test_00_init  # needs to be before spil.conf import
 from spil import LS
 from spil import FS
 from spil.util.log import debug, setLevel, INFO, DEBUG, info
@@ -21,7 +28,7 @@ from example_searches import searches
 from tests.test_02_save_sids_to_file import sid_file_path
 
 
-def test_ls():
+def test_ls_fs():
 
     with open(str(sid_file_path()), 'r') as f:
         sids = f.read().splitlines()
@@ -29,25 +36,39 @@ def test_ls():
     search_list = sids
     info('Searching in {} sids'.format(len(search_list)))
 
-    ls = LS(search_list, do_extrapolate=False)
+    global_timer = Timer(name="global")
+    global_timer.start()
+
+    ls = LS(search_list, do_extrapolate=False, do_pre_sort=False)
     fs = FS()
     for search_sid, comment in six.iteritems(searches):
-        print('*'*10)
+
+        print('*' * 10)
         print('{} --> {}'.format(search_sid, comment))
 
-        found_fs = set(fs.get(search_sid))
+        ls_timer = Timer(name="ls_timer")
+        ls_timer.start()
         found_ls = set(ls.get(search_sid))
-
         print('LS : {}'.format(len(found_ls)))
+        ls_timer.stop()
+
+        fs_timer = Timer(name="fs_timer")
+        fs_timer.start()
+        found_fs = set(fs.get(search_sid))
         print('FS : {}'.format(len(found_fs)))
+        fs_timer.stop()
 
         problems = found_fs ^ found_ls
 
         for i in problems:
             print('Problem: {}'.format(i))
 
+    print('*' * 10)
+    info('Done all searches.')
+    global_timer.stop()
+
 
 if __name__ == '__main__':
 
     setLevel(INFO)
-    test_ls()
+    test_ls_fs()

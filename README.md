@@ -1,11 +1,12 @@
-# spil
-The Simple Pipeline Lib
 
-A Simple library for CG Pipelines, built around the "**Sid**".
-<br/>
-<br/>
+[![Spil, the simple pipeline lib.](docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
-The goal of SPIL is to provide a simple, universal, hierarchical, human-readable and unique identifier for every entity or file of a CG production pipeline.
+
+# spil  
+The Simple Pipeline Lib.  
+A Simple library for CG Pipelines, built around the "**Sid**".   
+<br/>
+The goal of SPIL is to provide a simple, universal, hierarchical, human-readable and unique identifier for every entity or file of a CG production pipeline.   
 
 This identifier is called the "**Sid**" - for "Scene Identifier", or simply "String ID".
 
@@ -100,7 +101,7 @@ current.get('version')                # "v002"
 
 - The Sid could be resolved from an ftrack "link" string, or a cgwire json, or any datasource, after implementation of a mapping or translation.
 
-This makes the Sid a versatile data source abstraction layer.
+This makes the Sid a versatile and lightweight data source abstraction layer.
 
 
 #
@@ -151,7 +152,7 @@ Finds:
 
 - "Movie file (alias for mp4,mov) for last published version of last task, for all shots of hamlet's sequence 30" ?
 ```
-"hamlet/s/sq030/*/^/^/p/movie"
+"hamlet/s/sq030/*/>/>/p/movie"
 ```
 Finds:
 ```
@@ -286,16 +287,16 @@ Then, implement some important but missing core features and enhancements
 To take profit from the Sids universality, we then plan on building reusable open source bricks and pipeline tools.
 
 For example:
-- simple and universal file browser UI
+- simple and universal Sid browser UI
 - connectors to Shotgun and Relational Databases
-- using the sid as a USD Asset Resolver 
+- using the sid as a USD Asset Resolver / In a USD pipeline
 - protocol for pipeline actions  
-For example `sid://play?hamlet/s/sq030/*/^/^/p/movie`
+For example `sid://play?hamlet/s/sq030/*/>/>/p/movie`
 - file system style navigation and context handling    
 For example `cd hamlet/s/sq010`
 
 
-Yeah, and we need a logo and a quickstart video... 
+Yeah, and we need a quickstart video... 
 
 # 
 ### Interested ?

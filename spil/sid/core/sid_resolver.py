@@ -130,11 +130,11 @@ def dict_to_type(data, all=False):  # SMELL - this code is obscure and should be
     Retrieves the sid_keytypes for the given dict "data".
     "data" can be unsorted.
 
-    If "all" is False (default), the first matching sid_sub_type is returned.
-    If "all" is set to True, of list of corresponding sid_sub_types is returned,
+    If "all" is False (default), the first matching type is returned.
+    If "all" is set to True, of list of corresponding types is returned,
     although usually a single type should match.
 
-    The sid_sub_types are found by:
+    The types are found by:
     - comparing the keys of the dict with the keys of the existing templates
     - in case of matching keys, applying the template and resolving it back to a dict
 

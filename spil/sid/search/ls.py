@@ -16,9 +16,10 @@ If not, see <https://www.gnu.org/licenses/>.
 import re
 import itertools as it
 
-from spil.sid.search.transformers import extensions, or_op, expand, transform
+from sid_conf import sip
+from spil.sid.search.ss import SidSearch
 from spil.sid.sid import Sid
-from spil.util.log import debug
+from spil.util.log import debug, info, warn
 
 
 def glob2re(pat):
@@ -75,7 +76,7 @@ def extrapolate(sids):
 
     For example: the path "TEST/A/CHR/HERO/MOD/V001/W/avi"
     will generate: "TEST/A/CHR/HERO/MOD/V001/W", "TEST/A/CHR/HERO/MOD/V001", "TEST/A/CHR/HERO/MOD", etc.
-    unitl "TEST"
+    until "TEST"
 
     :param sids: generator
     :return:
@@ -102,73 +103,45 @@ def extrapolate(sids):
                 yield new_sid
 
 
-class LS(object):
+class LS(SidSearch):
     """
     List search.
 
     Searches for sids from a Sid string list.
 
-    Still experimental... barely a proof of concept.
-
-    # TODO : more tests, better algorithms, iterators
+    Still experimental.
 
     """
-    def __init__(self, search_list, do_extrapolate=False):
+    def __init__(self, searchlist, do_extrapolate=False, do_pre_sort=False):
         """
         Sets the search list, a list of sid strings.
 
-        Implementation ideas :
-
-        1) work with iterators.
-        Makes sense for star_search and qm_search, which do not sort.
-        (we could uniqfy using an itertool I suppose)
-        Makes less sense with the sorted search - although the input of the sorted search can also be an iterator.
-
-        2) allow Sid list.
-        Don't know if that makes sense.
-
-        :param search_list:
+        :param searchlist:
+        :param do_extrapolate:
+        :param do_pre_sort:
         """
-        # self.search_list = uniqfy(search_list)  # FIXME : this uniqfy loops through a long list. Is it worth it ?
         if do_extrapolate:
-            self.search_list = list(extrapolate(search_list))  # TODO: keep as generator
+            self.searchlist = list(extrapolate(searchlist))  # TODO: keep as generator
         else:
-            self.search_list = search_list
+            self.searchlist = searchlist
 
-    def get(self, search_sid):
-        """
-        Search dispatcher.
+        self.is_searchlist_sorted = False
 
-        :param search_list:
-        :param search_sid:
-        :return:
-        """
-        # we start by transforming
-        list_search_transformers = [extensions, or_op, expand]
-        search_sids = transform(search_sid, list_search_transformers)
+        if do_pre_sort:
+            self.sort_searchlist()
 
-        # depending on input, select the right generator
-        is_qm_search = any([ssid.count('?') for ssid in search_sids])
-        is_sorted_search = any([ssid.count('^') for ssid in search_sids])
+    def sort_searchlist(self):
+        self.searchlist = sorted(list(set(self.searchlist)))
+        debug('Pre-sorted {} sids'.format(len(self.searchlist)))
+        self.is_searchlist_sorted = True
 
-        if is_qm_search and is_sorted_search:
-            raise NotImplementedError('Currently no multi search implemented.')
+    def get_searchlist(self, do_sort=False):
+        if do_sort and not self.is_searchlist_sorted:
+            self.sort_searchlist()
+        return self.searchlist
+        # return (i for i in self.searchlist)  # new generator because list is used multiple times.
 
-        if is_sorted_search:
-            generator = self.sorted_search(search_sids)
-
-        elif is_qm_search:
-            if search_sids[0].endswith('?'):  # FIXME: check coherence
-                generator = self.star_search(search_sids)
-            else:
-                generator = self.qm_search(search_sids)
-        else:
-            generator = self.star_search(search_sids)
-
-        for i in generator:
-            yield i
-
-    def star_search(self, search_sids, as_sid=True):
+    def star_search(self, search_sids, as_sid=True, do_sort=False):
         """
         Simple star search.
 
@@ -176,6 +149,7 @@ class LS(object):
 
         :param search_sids:
         :param as_sid:
+        :param do_sort:
         :return:
         """
         done = set()
@@ -183,103 +157,27 @@ class LS(object):
         for search_sid in search_sids:
 
             pattern = glob2re(str(search_sid))
-            debug('[star_search] "{}" in {} (...)'.format(search_sid, []))  # self.search_list[:5]))
+            debug('[star_search] "{}" in {} (...)'.format(search_sid, []))  # self.searchlist[:5]))
 
-            for item in self.search_list:  # TODO: add check unique values
+            for item in self.get_searchlist(do_sort=do_sort):
                 if re.match(pattern, item):
                     # debug('match : {}'.format(item))
+                    if as_sid:
+                        yield Sid(item)
+                    else:
+                        yield item
+                    """ Check for doubles - Time consuming and probably not needed here
                     if item not in done:
                         done_add(item)
                         if as_sid:
                             yield Sid(item)
                         else:
                             yield item
-
-    def qm_search(self, search_sids):
-        """
-        Question mark search.
-
-        :param search_sids:
-        :param search_list:
-        :param search_sid:
-        :return:
-        """
-        # we get the requested types
-        ssid = str(search_sids[0])  # FIXME: check if coherent in all search_sids
-        parts = ssid.split('/?')
-        # debug(parts)
-        sid_types = []
-        new_ssid = ''
-        for part in parts[:-1]:
-            new_ssid = new_ssid + part + '/*'
-            sid_types.append(
-                list(Sid(new_ssid).data)[-1])  # FIXME: official method. Clarify Sid vocabulary (type, key, last, etc)
-
-        # debug ('Types {}'.format(key_types))
-
-        done = set()
-        for search_sid in search_sids:
-            ssid = str(search_sid)
-            for s in self.star_search([ssid.replace('?', '*')]):
-                for sid_type in sid_types:
-                    got = s.get_as(sid_type)
-                    if got not in done:
-                        done.add(got)
-                        yield got
-
-    def sorted_search(self, search_sids):
-        """
-        Operates a sorted search.
-        A sorted search contains the "^" sign, standing for "last"
-        or the "." sign, standing for "first". (not yet implemented)
-
-        :param search_sids:
-        :param search_sid:
-        :return:
-        """
-        # FIXME: check if index is coherent in all search_sids
-        index = str(search_sids[0]).split('/').index('^')
-        # indices = [i for i, x in enumerate(str(search_sid).split('/')) if x == '^']
-        # debug index, indices
-
-        founds = list()
-        for search_sid in search_sids:
-            ssid = str(search_sid).replace('^', '*')
-            founds.extend(self.star_search([ssid], as_sid=False))
-
-        founds = sorted(list(set(founds)), reverse=True)
-        # TODO: sort by row - and resort after each narrowing
-        #pprint(founds)
-        debug('found {} matches'.format(len(founds)))
-
-        # works with ^ in any position, but does not use sort by row, and no delegate sorting, and no special sorting
-        for key, grp in it.groupby(founds, key=lambda x: x.split('/')[0:index]):
-            result = list(grp)
-            # debug('{}: {}'.format(key, result))
-            yield result[0]
-
-        """
-        for index in indices:
-            if not founds:
-                break
-            filtered = []
-            for key, grp in it.groupby(founds, key=lambda x: x.split('/')[0:index]):
-                result = list(grp)
-                debug('{}: "{}" {}'.format(key, result[0].split('/')[index], result))
-                filtered.append(result[0])
-                filtered.extend(result)
-            founds = filtered
-        """
-
-        """
-        for index in indices:
-            for key, grp in it.groupby(founds, key=lambda x: x.split('/')[0:index]):
-                result = list(grp)
-                debug('{}: "{}" {}'.format(key, result[0].split('/')[index], result))
-        """
+                    else:
+                        warn('{} was already found, skipped. '.format(item))
+                    """
 
 
 if __name__ == '__main__':
 
     pass
-

@@ -125,24 +125,24 @@ search_path_mapping = {
 key_patterns = {
 
     '__': {
-        '{state}':   r'{state:(work|publish|\*|\^)}',     # "work" or "publish" or *
-        '{version}': r'{version:(v\w*|\*|\^)}',  # "v" followed by a word, or *
-        '{seq}':     r'{seq:(sq\w*|\*|\^)}',      # "sq" followed by a word, or *
-        '{shot}':    r'{shot:(sh\w*|\*|\^)}',      # "sh" followed by a word, or *
+        '{state}':   r'{state:(work|publish|\*)}',      # "work" or "publish" or *
+        '{version}': r'{version:(v\w*|\*)}',            # "v" followed by a word, or *
+        '{seq}':     r'{seq:(sq\w*|\*)}',               # "sq" followed by a word, or *
+        '{shot}':    r'{shot:(sh\w*|\*)}',              # "sh" followed by a word, or *
         # '{frame}':   r'{frame:(\*|\$\w*|#*|@*|[0-9]*)}',  # number, or "$" followed by a word, or "#"s, or "@"s, or *
 
-        '{ext:scenes}': r'{ext:(' + '|'.join(extensions_scene) + '|\*|\^)}',
-        '{ext:caches}': r'{ext:(' + '|'.join(extensions_cache) + '|\*|\^)}',
-        '{ext:images}': r'{ext:(' + '|'.join(extensions_image) + '|\*|\^)}',
-        '{ext:movies}': r'{ext:(' + '|'.join(extensions_movie) + '|\*|\^)}',
+        '{ext:scenes}': r'{ext:(' + '|'.join(extensions_scene) + '|\*)}',
+        '{ext:caches}': r'{ext:(' + '|'.join(extensions_cache) + '|\*)}',
+        '{ext:images}': r'{ext:(' + '|'.join(extensions_image) + '|\*)}',
+        '{ext:movies}': r'{ext:(' + '|'.join(extensions_movie) + '|\*)}',
     },
 
     'asset__': {
-        '{task}': r'{task:(' + '|'.join(asset_tasks) + '|\*|\^)}',
+        '{task}': r'{task:(' + '|'.join(asset_tasks) + '|\*)}',
     },
 
     'shot__': {
-        '{task}': r'{task:(' + '|'.join(shot_tasks) + '|\*|\^)}',
+        '{task}': r'{task:(' + '|'.join(shot_tasks) + '|\*)}',
     }
 
 }

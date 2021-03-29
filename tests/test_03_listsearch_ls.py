@@ -13,33 +13,53 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 import six
+
+if six.PY3:  #TODO: add Timer in package for PY3 (they have a great package setup) - Also add tox.
+    from codetiming import Timer
+else:
+    from tests.mock_timer import Timer
+
+from tests import test_00_init  # needs to be before spil.conf import
 from spil import LS
 from spil.util.log import debug, setLevel, INFO, DEBUG, info
 from example_searches import searches
 
 from tests.test_02_save_sids_to_file import sid_file_path
 
+# searches = {}
+searches['raj/a/location/?/**/maya'] = 'All sets that have maya files'
 
 def test_ls():
 
+    do_doublon_check = True  # Set to false when testing performance
+
     with open(str(sid_file_path()), 'r') as f:
         sids = f.read().splitlines()
-
     search_list = sids
     info('Searching in {} sids'.format(len(search_list)))
 
-    ls = LS(search_list, do_extrapolate=False)
+    global_timer = Timer(name="global")
+    global_timer.start()
+
+    ls = LS(search_list, do_extrapolate=False, do_pre_sort=False)
     for search_sid, comment in six.iteritems(searches):
-        print('*'*10)
+
+        print('*' * 10)
         print('{} --> {}'.format(search_sid, comment))
         double_check = set()
+
+        ls_timer = Timer(name="search_sid")
+        ls_timer.start()
         for i in ls.get(search_sid):
             print(i)
-            if i in double_check:
-                print('--------------------------------------> Doublon {}'.format(i))
-            double_check.add(i)
+            if do_doublon_check:
+                if i in double_check:
+                    print('--------------------------------------> Doublon {}'.format(i))
+                double_check.add(i)
             # sid = Sid(i)
             # print sid.path
+        ls_timer.stop()
+    global_timer.stop()
 
 
 if __name__ == '__main__':
@@ -47,7 +67,3 @@ if __name__ == '__main__':
     setLevel(INFO)
 
     test_ls()
-
-
-
-

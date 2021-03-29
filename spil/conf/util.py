@@ -53,7 +53,7 @@ def extrapolate(sid_templates, key_types, to_extrapolate=[]):
         if keytype.endswith('file'):
             parts = template.split('/')
             # keys = get_keys(template)
-            # print(keytype.split(sidtype_keytype_sep)[0])
+            # print(type.split(sidtype_keytype_sep)[0])
             keys = key_types.get(keytype.split(sidtype_keytype_sep)[0])
             # print(keys)
             for i, key in enumerate(reversed(keys[:-1]), 1):
@@ -90,7 +90,7 @@ def extrapolate(sid_templates, key_types, to_extrapolate=[]):
 def pattern_replacing(sid_templates, key_patterns):
     """
     Loops trough the templates in sid_templates
-    Uses the key_patterns dict to replace parts of the template according to the keytype.
+    Uses the key_patterns dict to replace parts of the template according to the type.
 
     Example:
     For this entry in sid_templates :
@@ -101,7 +101,7 @@ def pattern_replacing(sid_templates, key_patterns):
         '{task}': r'{task:(' + '|'.join(asset_tasks) + '|\*)}',
     },
 
-    For all keytypes containing "asset__*", the entry {task} is replaced by r'{task:(' + '|'.join(asset_tasks) + '|\*)}',
+    For all types containing "asset__*", the entry {task} is replaced by r'{task:(' + '|'.join(asset_tasks) + '|\*)}',
     Meaning that the asset tasks are specified in the asset templates.
 
     :param sid_templates:

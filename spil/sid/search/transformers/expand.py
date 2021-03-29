@@ -51,7 +51,7 @@ def expand(sid):  # FIXME: this code is slow and cryptic.
         raise Exception('Can only expand once in a Sid.')
 
     root = sid.split('/**')[0]
-    _type = Sid(root).keytype.split('__')[0]  # FIXME: Sid concept of root type
+    _type = Sid(root).type.split('__')[0]  # FIXME: Sid concept of root type
     #print(Sid(root).type)
     #print (_type)
     found = []

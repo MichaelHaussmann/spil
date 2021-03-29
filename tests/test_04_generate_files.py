@@ -15,8 +15,11 @@ If not, see <https://www.gnu.org/licenses/>.
 import os
 import six
 
-from spil import Sid
+from tests import test_00_init  # needs to be before spil.conf import
+
+from spil import Sid, SpilException
 from spil.util.utils import is_filename
+from spil.conf import projects
 
 if six.PY2:
     from pathlib2 import Path
@@ -27,6 +30,13 @@ from tests.test_02_save_sids_to_file import sid_file_path
 
 
 def test_generate_files(max_amount=100000):
+
+    projects_root = Path(Sid(projects[0]).path).parent
+    print('Root path : {}'.format(projects_root))
+
+    if len(list(projects_root.iterdir())) > 1:
+        raise SpilException(
+            'The root directory for Sids ({}) contains data. This test will fill the directory with test data. By security measure it must only contain the sids test file.'.format(projects_root))
 
     test_paths = []
 

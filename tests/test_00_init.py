@@ -44,7 +44,7 @@ if not SPIL_CONF_PATH:
 sys.path.append(SPIL_CONF_PATH)
 
 from pprint import pprint
-pprint(sys.path)
+# pprint(sys.path)
 
 import sid_conf
 print( sid_conf )

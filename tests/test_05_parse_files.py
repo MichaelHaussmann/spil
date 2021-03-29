@@ -13,7 +13,9 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 import six
+from tests import test_00_init  # needs to be before spil.conf import
 
+from spil.util.log import debug, setLevel, INFO, DEBUG, info
 from spil import Sid
 from spil.conf import projects
 
@@ -44,6 +46,8 @@ def test_parse_files():
 
 
 if __name__ == '__main__':
+
+    setLevel(INFO)
 
     test_parse_files()
 

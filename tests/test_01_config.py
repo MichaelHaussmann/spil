@@ -14,13 +14,13 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 import six
 
-from tests import test_00_init
-print(test_00_init)
+from tests import test_00_init  # import needed before spil.conf
 
 from spil.conf import sid_templates, path_templates
 from spil.util.log import info
 from warnings import warn
 
+print(test_00_init)
 
 def test_sid_duplicates():
 

@@ -63,33 +63,33 @@ extension_alias = {
     'movie': extensions_movie
 }
 
-
+#TODO: automatically add search related signs, eg *, >, etc. Definition of a "search sid"
 key_patterns = {
 
     '__': {
-        '{state}':   r'{state:(w|p|\*|\^)}',     # "w" or "p" or *
-        '{version}': r'{version:(v\w*|\*|\^)}',  # "v" followed by a word, or *
-        '{seq}':     r'{seq:(sq\w*|\*|\^)}',      # "sq" followed by a word, or *
-        '{shot}':    r'{shot:(sh\w*|\*|\^)}',      # "sh" followed by a word, or *
+        '{state}':   r'{state:(w|p|\*|\>)}',        # "w" or "p" or * or >
+        '{version}': r'{version:(v\w*|\*|\>)}',     # "v" followed by a word, or * or >
+        '{seq}':     r'{seq:(sq\w*|\*|\>)}',        # "sq" followed by a word, or * or >
+        '{shot}':    r'{shot:(sh\w*|\*|\>)}',       # "sh" followed by a word, or * or >
         # '{frame}':   r'{frame:(\*|\$\w*|#*|@*|[0-9]*)}',  # number, or "$" followed by a word, or "#"s, or "@"s, or *
 
-        '{ext:scenes}': r'{ext:(' + '|'.join(extensions_scene) + '|\*|\^)}',
-        '{ext:caches}': r'{ext:(' + '|'.join(extensions_cache) + '|\*|\^)}',
-        '{ext:images}': r'{ext:(' + '|'.join(extensions_image) + '|\*|\^)}',
-        '{ext:movies}': r'{ext:(' + '|'.join(extensions_movie) + '|\*|\^)}',
+        '{ext:scenes}': r'{ext:(' + '|'.join(extensions_scene) + '|\*|\>)}',
+        '{ext:caches}': r'{ext:(' + '|'.join(extensions_cache) + '|\*|\>)}',
+        '{ext:images}': r'{ext:(' + '|'.join(extensions_image) + '|\*|\>)}',
+        '{ext:movies}': r'{ext:(' + '|'.join(extensions_movie) + '|\*|\>)}',
     },
 
     'asset__': {
-        '{task}': r'{task:(' + '|'.join(asset_tasks) + '|\*|\^)}',
-        '{cat}': r'{cat:(' + '|'.join(asset_cats) + '|\*|\^)}',
+        '{task}': r'{task:(' + '|'.join(asset_tasks) + '|\*|\>)}',
+        '{cat}': r'{cat:(' + '|'.join(asset_cats) + '|\*|\>)}',
     },
 
     'shot__': {
-        '{task}': r'{task:(' + '|'.join(shot_tasks) + '|\*|\^)}',
+        '{task}': r'{task:(' + '|'.join(shot_tasks) + '|\*|\>)}',
     },
 
     't': {  # everything
-        '{project}': r'{project:(' + '|'.join(projects) + '|\*|\^)}',
+        '{project}': r'{project:(' + '|'.join(projects) + '|\*|\>)}',
     }
 
 }
