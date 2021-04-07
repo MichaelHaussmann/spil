@@ -50,8 +50,12 @@ searches['raj/s/sq001,sq002/sh0050/animation/**/maya'] = 'All H.....'
 searches['raj/s/sq001,sq002/sh0050/animation/*/*/*/maya'] = 'All H.....'
 searches['raj/s/sq001,sq002/sh0050/animation/*/>/p/maya'] = 'Last published (p) maya file for animation of shot 10 in sq 1 and 2'
 
+# QM searches
 searches['raj/a/location/?/**/maya'] = 'All sets that have maya files'
 searches['raj/a/prop/?/**/hip'] = 'All props that have hip files'
+searches['raj/a/prop/*/?/*'] = 'All subtasks of props that have tasks and versions'
+searches['raj/s/sq001,sq002/?/animation/*/*/*/maya'] = 'All H.....'
+searches['raj/s/sq001/sh0050/animation/*/?/p/maya'] = 'Versions of shot 50 animation that are published in maya'
 
 # currently not working - looks like sorted and double star do not work
 searches['raj/s/sq001/sh0020/**/>/p/avi'] = 'All last published (p) avi files of shot sq001/sh0020'

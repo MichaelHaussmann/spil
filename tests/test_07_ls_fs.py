@@ -36,6 +36,8 @@ def test_ls_fs():
     search_list = sids
     info('Searching in {} sids'.format(len(search_list)))
 
+    as_sid = False
+
     global_timer = Timer(name="global")
     global_timer.start()
 
@@ -48,13 +50,13 @@ def test_ls_fs():
 
         ls_timer = Timer(name="ls_timer")
         ls_timer.start()
-        found_ls = set(ls.get(search_sid))
+        found_ls = set(ls.get(search_sid, as_sid=as_sid))
         print('LS : {}'.format(len(found_ls)))
         ls_timer.stop()
 
         fs_timer = Timer(name="fs_timer")
         fs_timer.start()
-        found_fs = set(fs.get(search_sid))
+        found_fs = set(fs.get(search_sid, as_sid=as_sid))
         print('FS : {}'.format(len(found_fs)))
         fs_timer.stop()
 

@@ -24,13 +24,11 @@ from spil import FS
 from spil.util.log import debug, setLevel, INFO, DEBUG, info
 from example_searches import searches
 
-#searches = {}
-searches['raj/a/location/?/**/maya'] = 'All sets that have maya files'
-searches['raj/s/sq001/**/>/>/p/avi'] = 'All sets that have maya files'
 
 def test_fs():
 
     do_doublon_check = True  # Set to false when testing performance
+    as_sid = True
 
     global_timer = Timer(name="global")
     global_timer.start()
@@ -44,7 +42,7 @@ def test_fs():
 
         ls_timer = Timer(name="search_sid")
         ls_timer.start()
-        for i in ls.get(search_sid):
+        for i in ls.get(search_sid, as_sid=as_sid):
             print(i)
             if do_doublon_check:
                 if i in double_check:

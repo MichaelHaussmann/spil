@@ -26,12 +26,11 @@ from example_searches import searches
 
 from tests.test_02_save_sids_to_file import sid_file_path
 
-# searches = {}
-searches['raj/a/location/?/**/maya'] = 'All sets that have maya files'
 
 def test_ls():
 
     do_doublon_check = True  # Set to false when testing performance
+    as_sid = True
 
     with open(str(sid_file_path()), 'r') as f:
         sids = f.read().splitlines()
@@ -50,7 +49,7 @@ def test_ls():
 
         ls_timer = Timer(name="search_sid")
         ls_timer.start()
-        for i in ls.get(search_sid):
+        for i in ls.get(search_sid, as_sid=as_sid):
             print(i)
             if do_doublon_check:
                 if i in double_check:

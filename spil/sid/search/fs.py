@@ -36,7 +36,10 @@ class FS(SidSearch):
 
     """
 
-    def star_search(self, search_sids, as_sid=True, do_sort=False):
+    #def exists(self, search_sid):  TODO: Test and compare with SidSearch.exists
+    #    return os.path.exists(search_sid.path)
+
+    def star_search(self, search_sids, as_sid=False, do_sort=False):
         """
         Simple star search.
 
@@ -44,6 +47,7 @@ class FS(SidSearch):
 
         :param search_sids:
         :param as_sid:
+        :param do_sort:
         :return:
         """
         if do_sort:

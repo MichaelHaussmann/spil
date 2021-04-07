@@ -141,7 +141,7 @@ class LS(SidSearch):
         return self.searchlist
         # return (i for i in self.searchlist)  # new generator because list is used multiple times.
 
-    def star_search(self, search_sids, as_sid=True, do_sort=False):
+    def star_search(self, search_sids, as_sid=False, do_sort=False):
         """
         Simple star search.
 
@@ -152,12 +152,10 @@ class LS(SidSearch):
         :param do_sort:
         :return:
         """
-        done = set()
-        done_add = done.add  # performance
         for search_sid in search_sids:
 
             pattern = glob2re(str(search_sid))
-            debug('[star_search] "{}" in {} (...)'.format(search_sid, []))  # self.searchlist[:5]))
+            debug('[star_search] "{}" in {} (...)'.format(search_sid, []))
 
             for item in self.get_searchlist(do_sort=do_sort):
                 if re.match(pattern, item):
@@ -166,16 +164,6 @@ class LS(SidSearch):
                         yield Sid(item)
                     else:
                         yield item
-                    """ Check for doubles - Time consuming and probably not needed here
-                    if item not in done:
-                        done_add(item)
-                        if as_sid:
-                            yield Sid(item)
-                        else:
-                            yield item
-                    else:
-                        warn('{} was already found, skipped. '.format(item))
-                    """
 
 
 if __name__ == '__main__':
