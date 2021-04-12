@@ -19,6 +19,7 @@ import string
 
 import six
 
+from spil.util.exception import SpilException
 from spil.conf import sid_templates
 from spil.sid.core.sid_resolver import sid_to_dict
 from spil.sid.sid import Sid
@@ -48,10 +49,13 @@ def expand(sid):  # FIXME: this code is slow and cryptic.
         return [sid]
 
     if sid.count('/**') > 1:
-        raise Exception('Can only expand once in a Sid.')
+        raise SpilException('Can only expand once in a Sid.')
 
     root = sid.split('/**')[0]
-    _type = Sid(root).type.split('__')[0]  # FIXME: Sid concept of root type
+    _type = Sid(root).basetype
+    if not _type:
+        raise SpilException('The Search Sid "{}" is not typed, and cannot be expanded. This is probably a configuration error.'.format(sid))
+
     #print(Sid(root).type)
     #print (_type)
     found = []

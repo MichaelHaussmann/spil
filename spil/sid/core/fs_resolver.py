@@ -117,7 +117,7 @@ def dict_to_path(data, _type=None):
     for key, value in six.iteritems(data):
         if value and path_mapping.get(key):
             mapping = path_mapping.get(key)
-            data[key] = utils.get_key(mapping, value)
+            data[key] = utils.get_key(mapping, value, value)
 
     debug('sidtype: {}'.format(_type))
 

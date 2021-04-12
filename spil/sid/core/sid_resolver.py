@@ -72,7 +72,7 @@ def sid_to_dict(sid, _type=None):
         data, template = lucidity.parse(str(sid), templates)
         #print 'found', data, template
     except lucidity.ParseError as e:
-        debug(e)
+        debug('Lucidity did not find a matching pattern. Type given: {} (Message: "{}")'.format(_type, e))
         return None, None
 
     if not data:
@@ -159,6 +159,7 @@ def dict_to_type(data, all=False):  # SMELL - this code is obscure and should be
                 ltemplate = lucidity.Template(_type, template)
                 test = ltemplate.format(data)
                 if test:
+                    debug('Checking matching types ... (fails are normal)')  #FIXME / #SMELL : this code is plain nonsense...
                     a, b = sid_to_dict(test, _type)
                     if a:
                         # print _type

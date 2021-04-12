@@ -62,6 +62,9 @@ class Sid(object):
     def __eq__(self, other):
         return unicode(other) == unicode(self)
 
+    def __len__(self):
+        return len(self.data)
+
     def __define_by_sid(self, sid, do_check=False):
 
         self.string = str(sid)
@@ -80,7 +83,7 @@ class Sid(object):
                 warn('[Sid] Sid "{}" resolved to valid Sid data, but resolved back to "{}"'.format(sid, resolved_sid))
                 return
 
-        self.data = data
+        self.data = data or OrderedDict()
 
         if do_check:
             # checking for type uniqueness
@@ -90,16 +93,20 @@ class Sid(object):
 
         self.type = _type
 
-    def __define_by_data(self, data, do_check=False):
+    def __define_by_data(self, data, do_check=False):  #TODO: make a fast version when the data comes from an internal trusted and already typed call.
 
-        _type = sid_resolver.dict_to_type(data)
+        debug('__define_by_data : {}'.format(data))
+
+        _type = sid_resolver.dict_to_type(data)  # FIXME: terrible code
         if not _type:
             warn('[Sid] Data "{}" did not resolve to valid Sid type.'.format(data))
             return
 
         # Now getting sid and ordered dict
         self.string = sid_resolver.dict_to_sid(data, _type)
-        self.type, self.data = sid_resolver.sid_to_dict(self.string, _type)
+        self.type, data = sid_resolver.sid_to_dict(self.string, _type)
+
+        self.data = data or OrderedDict()
 
         # TDOD: implement check
 
@@ -119,7 +126,7 @@ class Sid(object):
             return
 
         self.string = resolved_sid
-        self.data = data
+        self.data = data or OrderedDict()
         self.type = _type
 
         # TDOD: implement check
@@ -168,7 +175,7 @@ class Sid(object):
     def get(self, key):
 
         if not self.data:
-            warn('[Sid] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            warn('[Sid][get] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
             return None
 
         return self.data.get(key)
@@ -176,7 +183,7 @@ class Sid(object):
     def get_as(self, key):
 
         if not self.data:
-            warn('[Sid] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            warn('[Sid][get_as] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
             return None
 
         data = OrderedDict()
@@ -216,11 +223,50 @@ class Sid(object):
             info('This Sid has no path. ({})'.format(e))
         return result
 
+    @property
+    def basetype(self):
+        """
+        return the first part of the type
+        """
+        result = None
+        if not self.type:
+            info('This Sid has no type. ({})'.format(self))
+            return None
+        try:
+            result = self.type.split(conf.sidtype_keytype_sep)[0]
+        except Exception as e:
+            info('[sid][basetype] Unable to get basetype. Sid: {} ("{}")'.format(self, e))
+        return result
+
+    """
+    def set(self, key=None, value=None, **kwargs):
+        if key:
+            kwargs[key] = value
+        self = self.get_with(**kwargs)
+    """
+
+    def get_last(self, key):
+        from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
+        return FS().get_one(self.get_with(key=key, value='>'))
+
+    def exists(self):
+        from spil import FS  # FIXME: explicit delegation and dynamic import
+        return FS().exists(self)
+
+    # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
+
 
 if __name__ == '__main__':
 
     from spil.util.log import debug, setLevel, INFO, DEBUG, info
-    setLevel(DEBUG)
+    setLevel(INFO)
 
-    sid = Sid('raj/s/sq001/sh0020/**/avi')
-    print(Sid().data)
+    # sid = Sid('raj/s/sq001/sh0020/**/avi')
+
+    sid = Sid('raj/a/char/juliet/low/design/v002/w/mp4')
+    print(sid)
+    #print( sid.get_last('state') )
+
+    sid.set(task='groom')
+    print(sid)
+
