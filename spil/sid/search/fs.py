@@ -95,9 +95,11 @@ class FS(SidSearch):
             debug('pattern : ' + str(pattern))
             debug('project_path : ' + str(project_path))
 
+            """
             if str(pattern) == str(project_path):
                 warn('No valid search pattern')
                 return
+            """
 
             """
             found = []

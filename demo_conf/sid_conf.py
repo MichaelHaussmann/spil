@@ -90,6 +90,8 @@ key_patterns = {
 
     't': {  # everything
         '{project}': r'{project:(' + '|'.join(projects) + '|\*|\>)}',
+        '{type:a}': '{type:(a|\*)}',
+        '{type:s}': '{type:(s|\*)}',
     }
 
 }

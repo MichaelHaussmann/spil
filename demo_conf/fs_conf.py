@@ -31,36 +31,36 @@ Maps file paths to Sid components.
 path_templates = OrderedDict([
 
     # ('project',                 r'/home/mh/Desktop/SID_DEMO/projects/{project}'),
-    ('project_root',            r'/home/mh/Desktop/SID_DEMO/projects/{project}'),
+    ('project_root',            r'/home/mh/Desktop/SID_DEMO/projects'),
 
     # type asset
-    ('asset__file',             r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:scenes}'),
-    ('asset__movie_file',       r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:movies}'),
+    ('asset__file',             r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:scenes}'),
+    ('asset__movie_file',       r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:movies}'),
 
-    ('asset__state',            r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}'),
-    # ('asset__version',            r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{}'),  # FIXME: should not exist as a folder
+    ('asset__state',            r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}'),
+    # ('asset__version',            r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{}'),  # FIXME: should not exist as a folder
 
-    ('asset__task',             r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}'),
-    ('asset__variant',          r'{@project_root}/{type:01_assets}/{cat_long}/{name}/{variant}'),
-    ('asset__name',             r'{@project_root}/{type:01_assets}/{cat_long}/{name}'),
-    ('asset__cat',              r'{@project_root}/{type:01_assets}/{cat_long}'),
+    ('asset__task',             r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}'),
+    ('asset__variant',          r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}'),
+    ('asset__name',             r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}'),
+    ('asset__cat',              r'{@project_root}/{project}/{type:01_assets}/{cat_long}'),
 
-    ('asset',                   r'{@project_root}/{type:01_assets}'),
+    ('asset',                   r'{@project_root}/{project}/{type:01_assets}'),
 
     # type shot
-    ('shot__file',             r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:scenes}'),
-    ('shot__movie_file',       r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:movies}'),
+    ('shot__file',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:scenes}'),
+    ('shot__movie_file',       r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:movies}'),
 
-    ('shot__state',            r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}'),
-    #  ('shot__version',             r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{}'),
-    ('shot__subtask',          r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}'),
-    ('shot__task',             r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}/{task}'),
-    ('shot__shot',             r'{@project_root}/{type:02_shots}/{seq}/{seq}_{shot}'),
-    ('shot__seq',              r'{@project_root}/{type:02_shots}/{seq}'),
-    ('shot',                   r'{@project_root}/{type:02_shots}'),
+    ('shot__state',            r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}'),
+    #  ('shot__version',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{}'),
+    ('shot__subtask',          r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}'),
+    ('shot__task',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}'),
+    ('shot__shot',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}'),
+    ('shot__seq',              r'{@project_root}/{project}/{type:02_shots}/{seq}'),
+    ('shot',                   r'{@project_root}/{project}/{type:02_shots}'),
 
     # type project
-    ('project',                r'{@project_root}'),
+    ('project',                r'{@project_root}/{project}'),
 
 ])
 
@@ -109,18 +109,18 @@ path_mapping = {  # TODO put into project_conf
     'state': {
         'work': 'w',
         'publish': 'p',
-        '*': '*',  # FIXME : needed for search
     },
     'type': {
         '01_assets': 'a',
         '02_shots': 's',
-        '*': '*',  # FIXME : needed for search
     },
 }
 
 search_path_mapping = {
     # '/3d/scenes/': '/*/scenes/',
 }
+
+project_path_names = list(path_mapping.get('project').keys())
 
 key_patterns = {
 
@@ -143,6 +143,11 @@ key_patterns = {
 
     'shot__': {
         '{task}': r'{task:(' + '|'.join(shot_tasks) + '|\*)}',
+    },
+    't': {  # everything
+        '{project}': r'{project:(' + '|'.join(project_path_names) + '|\*)}',
+        '{type:02_shots}': '{type:(02_shots|\*)}',
+        '{type:01_assets}': '{type:(01_assets|\*)}',
     }
 
 }

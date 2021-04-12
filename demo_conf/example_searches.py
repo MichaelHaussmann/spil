@@ -18,6 +18,8 @@ from collections import OrderedDict
 searches = OrderedDict()
 
 # star search
+searches['*'] = 'All projects'
+searches['raj/*'] = 'All types for project raj'
 searches['raj/s/sq001/*'] = 'All shots of Sequence sq001'
 
 # double star search
