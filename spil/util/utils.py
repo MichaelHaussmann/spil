@@ -38,7 +38,7 @@ def is_sequence(arg):
             hasattr(arg, "__iter__"))
 
 
-def uniqfy(seq):
+def uniqfy(seq, reverse=False):
     """
     Returns a list with unique items, preserving order.
     
@@ -53,7 +53,12 @@ def uniqfy(seq):
     # return list(dict.fromkeys(seq))  #  This will work in Python >=3.6 and preserve order
     seen = set()
     seen_add = seen.add
-    return [x for x in seq if not (x in seen or seen_add(x))]
+    if reverse:
+        result = []
+        [result.insert(0, x) for x in reversed(seq) if not (x in seen or seen_add(x))]
+        return result
+    else:
+        return [x for x in seq if not (x in seen or seen_add(x))]
 
 
 def get_key(adict, value, default=None):
