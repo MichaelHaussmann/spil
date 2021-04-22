@@ -209,7 +209,7 @@ class Sid(object):
         if key:
             kwargs[key] = value
         data_copy.update(kwargs)
-        return Sid(data=data_copy)
+        return Sid(data=data_copy) or Sid('/'.join(list(data_copy.values())))  # FIXME: test under py27
 
     @property
     def path(self):
@@ -222,6 +222,18 @@ class Sid(object):
         except SpilException as e:
             info('This Sid has no path. ({})'.format(e))
         return result
+
+    @property
+    def parent(self):  #YAGNI ?
+        """
+        Returns the parent Sid, or None if the Sid is not "defined", or an empty Sid if it is already the root. (#TODO: better define the root Sid)
+        """
+        if not self.data:
+            warn('[Sid][parent] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            return None
+        if len(self.data.keys()) == 1:
+            return Sid()
+        return self.get_as(list(self.data.keys())[-2])
 
     @property
     def basetype(self):
@@ -263,10 +275,13 @@ if __name__ == '__main__':
 
     # sid = Sid('raj/s/sq001/sh0020/**/avi')
 
-    sid = Sid('raj/a/char/juliet/low/design/v002/w/mp4')
+    sid = 'raj/a/char/juliet/low/design/v002/w/mp4'
+    # sid = 'FTOT/A/CHR/COCO/MOD/V002/WIP/ma'
+    sid = Sid(sid)
     print(sid)
+    print(sid.parent)
     #print( sid.get_last('state') )
 
-    sid.set(task='groom')
-    print(sid)
+
+    # print(sid)
 
