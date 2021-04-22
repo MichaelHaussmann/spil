@@ -172,8 +172,10 @@ For example to translate to an SQL, Shotgun or Ftrack query.
 # 
 ### Flexible and configurable
 
-The Sid is based on the [Lucidity](https://gitlab.com/4degrees/lucidity/) resolver, and is configurable.  
+Spil is a library, and not a framework.  
 It can easily integrate and connect onto existing pipelines.
+
+The Sid is based on the [Lucidity](https://gitlab.com/4degrees/lucidity/) resolver, and is configurable.  
 
 Sid config example:
 ```
@@ -187,7 +189,7 @@ File config example:
 ('asset__movie_file',       r'{@project_root}/movies/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:movies}'),
 ```
 
-Tested in Python 2.7 and 3.6
+Tested in Python 2.7 and 3.7
 
 #
 ### Concepts  
@@ -210,16 +212,18 @@ https://www.python.org/dev/peps/pep-0428
 #### Pipeline concepts
 
 - Unique Identifier & Resource Locator  
-Examples: SPREF (Sony Pictures), or the Pipeline Resource Identifier - PRI (Blue Sky)  
+Examples: "SPREF" (Sony Pictures), or the "Pipeline Resource Identifier - PRI" (Blue Sky)  
 https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432776da6ab
 
 - Resource description and "Context" (Shotgun Toolkit)  
 https://developer.shotgunsoftware.com/tk-core/core.html#context
 
+- the "TypedContext", an entity for hierarchical types in Ftrack
+
 - Template based path resolving  
 As implemented in Shotgun Toolkit:  
 https://github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml  
-Or in Ftrack: https://gitlab.com/4degrees/lucidity/
+Or by Lucidity : https://gitlab.com/4degrees/lucidity/
 
 - Asset Resolution - ArResolver - in USD  
 https://graphics.pixar.com/usd/docs/668045551.html#AssetResolution(Ar)2.0-AddURIResolvers 
