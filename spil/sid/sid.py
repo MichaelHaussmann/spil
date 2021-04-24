@@ -209,7 +209,7 @@ class Sid(object):
         if key:
             kwargs[key] = value
         data_copy.update(kwargs)
-        return Sid(data=data_copy)
+        return Sid(data=data_copy) or Sid('/'.join(list(data_copy.values())))  # FIXME: test under py27
 
     @property
     def path(self):
@@ -222,6 +222,18 @@ class Sid(object):
         except SpilException as e:
             info('This Sid has no path. ({})'.format(e))
         return result
+
+    @property
+    def parent(self):  #YAGNI ?
+        """
+        Returns the parent Sid, or None if the Sid is not "defined", or an empty Sid if it is already the root. (#TODO: better define the root Sid)
+        """
+        if not self.data:
+            warn('[Sid][parent] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            return None
+        if len(self.data.keys()) == 1:
+            return Sid()
+        return self.get_as(list(self.data.keys())[-2])
 
     @property
     def basetype(self):
@@ -264,16 +276,23 @@ if __name__ == '__main__':
 
     # sid = Sid('raj/s/sq001/sh0020/**/avi')
 
-    sid = Sid('raj/a/char/juliet/low/design/v002/w/mp4')
+    sid = 'raj/a/char/juliet/low/design/v002/w/mp4'
+    sid = Sid(sid)
     print(sid)
-    #print( sid.get_last('state') )
+    print(sid.get_last('version'))
+    print(sid.parent)
+    print(sid.parent.get_last('version'))
+    # print(sid.parent.get_last('version').path)
+    print()
 
-    print(sid.match('*/*/**/v002/w/movie'))
+    sids = ['raj/a/char/juliet/low/design/v002/w/mp4', 'raj/a/char/juliet/low/design/v002']
+    match_tests = ['*/*/**/v002/w/movie', '*/*/**/movie', '*/**/movie', 'raj/a,s/*/*/*/*/*']
 
-    print(sid.match('*/*/**/movie')) # this works
-    print(sid.match('*/**/movie')) # but this does not - bug
+    for sid in sids:
+        for against in match_tests:
+            print('{} U {} ? -> {}'.format(sid, against, Sid(sid).match(against)) )
+    print()
 
-    sid = Sid('raj/a/char/juliet/low/design/v002')
-    print( sid.match('raj/a,s/*/*/*/*/*') )
-    print(sid.match(sid)) # always True
+    print(Sid(sid).match(sid)) # Always True
+    print(Sid(against).match(against))  # Should also be always True (#FIXME: SearchSid resolve)
 

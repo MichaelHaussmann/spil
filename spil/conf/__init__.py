@@ -18,8 +18,12 @@ from spil.conf.global_conf import *
 from spil.conf.configio import ConfigIO
 # from spil.conf import pattern_replacing
 
-from spil.conf.sid_conf_load import *
-from spil.conf.fs_conf_load import *
+try:
+    from spil.conf.sid_conf_load import *
+    from spil.conf.fs_conf_load import *
+except Exception as e:
+    raise Exception('Unable to load the spil_conf files (sid_conf, fs_conf). \n'
+                    'Please check the files compatibility with the latest SPIL version.')
 
 
 # function to override config into user config

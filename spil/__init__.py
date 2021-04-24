@@ -13,7 +13,11 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-from spil.sid.sid import Sid
-from spil.sid.search.fs import FS
-from spil.sid.search.ls import LS
-from spil.util.exception import SpilException
+__version__ = '0.0.2'
+try:
+    from spil.sid.sid import Sid
+    from spil.sid.search.fs import FS
+    from spil.sid.search.ls import LS
+    from spil.util.exception import SpilException
+except Exception as e:
+    raise Exception('Spil is imported, but impossible to import spil packages. \n Please check compatibility of your sid_conf and fs_conf files.')
