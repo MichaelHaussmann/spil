@@ -238,13 +238,6 @@ class Sid(object):
             info('[sid][basetype] Unable to get basetype. Sid: {} ("{}")'.format(self, e))
         return result
 
-    """
-    def set(self, key=None, value=None, **kwargs):
-        if key:
-            kwargs[key] = value
-        self = self.get_with(**kwargs)
-    """
-
     def get_last(self, key):
         from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
         return FS().get_one(self.get_with(key=key, value='>'))
@@ -252,6 +245,14 @@ class Sid(object):
     def exists(self):
         from spil import FS  # FIXME: explicit delegation and dynamic import
         return FS().exists(self)
+
+    def match(self, search_sid):
+        """
+        Returns True if a given search_sid matches the current Sid.
+        """
+        from spil import LS
+        fs = LS([self.string])
+        return fs.get_one(search_sid, as_sid=False) == self.string
 
     # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
 
@@ -267,6 +268,12 @@ if __name__ == '__main__':
     print(sid)
     #print( sid.get_last('state') )
 
-    sid.set(task='groom')
-    print(sid)
+    print(sid.match('*/*/**/v002/w/movie'))
+
+    print(sid.match('*/*/**/movie')) # this works
+    print(sid.match('*/**/movie')) # but this does not - bug
+
+    sid = Sid('raj/a/char/juliet/low/design/v002')
+    print( sid.match('raj/a,s/*/*/*/*/*') )
+    print(sid.match(sid)) # always True
 
