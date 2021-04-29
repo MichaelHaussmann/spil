@@ -31,7 +31,7 @@ def test_parse_files():
 
     sid_file = sid_file_path().parent / 'sids.parsed.txt'
 
-    for project in projects:
+    for project in projects[:]:
 
         project_root = Path( Sid(project).path )
         print('Root path : {}'.format(project_root))
@@ -39,6 +39,8 @@ def test_parse_files():
         with open(str(sid_file), 'w') as f:
 
             for path in project_root.rglob('*'):
+                if path.name.startswith('.') or path.name.startswith('_'):
+                    continue
                 print(path)
                 sid = Sid(path=path)
                 if str(sid):
@@ -47,7 +49,7 @@ def test_parse_files():
 
 if __name__ == '__main__':
 
-    setLevel(INFO)
+    setLevel(INFO)  # Set to ERROR if file system contains a lot of non Sid translatable files.
 
     test_parse_files()
 

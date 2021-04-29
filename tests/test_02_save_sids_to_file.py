@@ -25,8 +25,8 @@ else:
 
 def sid_file_path():
 
-    projects_root = Path(Sid(projects[0]).path).parent
-    print('Root path : {}'.format(projects_root))
+    projects_root = Path(Sid(projects[0]).path)  # .parent
+    print('[sid_file_path] Root path : {}'.format(projects_root))
 
     sid_file = projects_root / 'sids.test.txt'
 

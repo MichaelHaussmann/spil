@@ -62,3 +62,7 @@ searches['raj/s/sq001/sh0050/animation/*/?/p/maya'] = 'Versions of shot 50 anima
 # currently not working - looks like sorted and double star do not work
 searches['raj/s/sq001/sh0020/**/>/p/avi'] = 'All last published (p) avi files of shot sq001/sh0020'
 searches['raj/s/sq001,sq002/sh0010/>/**/maya'] = 'Last task for ...'
+
+searches['raj/s/sq001/sh0010/*/*/*/*/*'] = 'Test for ext 1.'
+searches['raj/s/sq001/sh0010/**'] = 'Test for ext 2.'
+searches['raj/s/sq001/sh0010/**/maya,movie,hou'] = 'Test for ext 3.'
