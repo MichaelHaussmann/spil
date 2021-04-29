@@ -121,7 +121,7 @@ class LS(SidSearch):
         :param do_pre_sort:
         """
         if do_extrapolate:
-            self.searchlist = list(extrapolate(searchlist))  # TODO: keep as generator
+            self.searchlist = extrapolate(searchlist)
         else:
             self.searchlist = searchlist
 
