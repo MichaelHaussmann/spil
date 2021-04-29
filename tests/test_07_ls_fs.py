@@ -22,7 +22,7 @@ else:
 from tests import test_00_init  # needs to be before spil.conf import
 from spil import LS
 from spil import FS
-from spil.util.log import debug, setLevel, INFO, DEBUG, info
+from spil.util.log import debug, setLevel, INFO, DEBUG, info, WARN, ERROR
 from example_searches import searches
 
 from tests.test_02_save_sids_to_file import sid_file_path
