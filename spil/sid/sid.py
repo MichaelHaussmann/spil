@@ -250,12 +250,25 @@ class Sid(object):
             info('[sid][basetype] Unable to get basetype. Sid: {} ("{}")'.format(self, e))
         return result
 
+    @property
+    def keytype(self):
+        """
+        return the last key
+        """
+        if not self.data:
+            warn('[Sid][keytype] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            return None
+        return list(self.data.keys() or [None])[-1]
+
     """
     def set(self, key=None, value=None, **kwargs):
         if key:
             kwargs[key] = value
         self = self.get_with(**kwargs)
     """
+
+    def copy(self):
+        return self.get_with()
 
     def get_last(self, key):
         from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
@@ -265,7 +278,14 @@ class Sid(object):
         from spil import FS  # FIXME: explicit delegation and dynamic import
         return FS().exists(self)
 
+    def is_leaf(self):
+        return bool(self.get('ext'))
+        #FIXME: hard coded. Relying on the fact that a leaf has an extention, called "ext".
+        # Define "complete". Also in regard to a search Sid. For example Sids containing /** are "complete".
+
     # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
+    # define "complete / incomplete" sid.is_leaf ? (root / anchor / parent / parents /
+    # https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.parent
 
 
 if __name__ == '__main__':
