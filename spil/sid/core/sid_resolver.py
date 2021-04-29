@@ -120,7 +120,11 @@ def dict_to_sid(data, _type=None):
 
     if not template:
         raise SpilException('toe')
-    sid = template.format(data).rstrip(sip)
+    try:
+        sid = template.format(data).rstrip(sip)
+    except lucidity.error.FormatError as e:
+        debug('Lucidity could not format the Sid. Data: {} / type: {} (Message: "{}")'.format(data, _type, e))
+        return ''  # TODO: test this
 
     return sid
 
