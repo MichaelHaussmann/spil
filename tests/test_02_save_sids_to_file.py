@@ -40,6 +40,9 @@ def test_write_sids_file():
 
     sid_file = sid_file_path()
 
+    if sid_file.exists():
+        raise SpilException('The test file "{}" already exists. Skipped'.format(sid_file))
+
     from example_sids import sids  # generates the sids - potentially long loop
 
     with open(str(sid_file), 'w') as f:

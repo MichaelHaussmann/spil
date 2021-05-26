@@ -14,87 +14,76 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 import six
 
+from spil import Sid
 from tests import test_00_init  # import needed before spil.conf
 
 from spil.conf import sid_templates, path_templates
 from spil.util.log import info
 from warnings import warn
 
+from example_sids import sids  # generates the sids - potentially long loop
+from pprint import pprint
+
 print(test_00_init)
 
-def test_sid_duplicates():
 
-    info('Testing duplicates in sid_templates (sid_conf)')
+def test_sids(sids):
 
-    sid_keys = set(sid_templates.keys())
+    info('Testing if example sids match the Sid config')
 
-    if len(sid_keys) != len(sid_templates.keys()):
-        warn('Duplicate keys in sid_templates (sid_conf)')
-    else:
-        info('Keys OK in sid_templates (sid_conf)')
+    if not sids:
+        warn('No sids given, nothing to test.')
+        return
 
-    if len(set(sid_templates.values())) != len(sid_templates.values()):
-        warn('Duplicate values in sid_templates (sid_conf)')
-    else:
-        info('Values OK in sid_templates (sid_conf)')
+    for s in sids:
+        info('----------------')
+        info('Testing: "{}"'.format(s))
+        sid = Sid(s)
+        assert sid.string == s
 
+        if not sid.type:
+            warn('Sid "{}" not typed, skipping'.format(sid))
+            continue
 
-def test_fs_duplicates():
+        key = sid.keytype
+        parent_key = sid.parent.keytype
 
-    info('Testing duplicates in path_templates (fs_conf)')
+        assert sid.parent == sid.get_as(parent_key)
 
-    fs_keys = set(path_templates.keys())
+        if not sid.get_last(key):
+            warn('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
 
-    if len(fs_keys) != len(path_templates.keys()):
-        warn('Duplicate keys in path_templates (fs_conf)')
-    else:
-        info('Keys OK in path_templates (fs_conf)')
+        params = {'parent': sid.parent,
+                  'grand_parent': sid.parent.parent,
+                  'basetype': sid.basetype,
+                  'keytype': sid.keytype,
+                  'path': sid.path,
+                  'exists': sid.exists(),
+                  'is_leaf': sid.is_leaf(),
+                  'len': len(sid),
+                  'get_last': sid.get_last(key)
+                  }
 
-    if len(set(path_templates.values())) != len(path_templates.values()):
-        warn('Duplicate values in path_templates (fs_conf)')
-        for val in sorted(path_templates.values()):
-            print(val)
-    else:
-        info('Values OK in path_templates (fs_conf)')
-
-
-def test_missings():
-
-    info('Testing missings in sid_conf vs fs_conf')
-
-    sid_keys = set(sid_templates.keys())
-    fs_keys = set(path_templates.keys())
-
-    to_ignore = {'project_root'}
-
-    missing_in_fs_conf = sid_keys - fs_keys - to_ignore
-    if missing_in_fs_conf:
-        warn('Missing in fs_conf (path_templates) : {}'.format(missing_in_fs_conf))
-
-    missing_in_sid_conf = fs_keys - sid_keys - to_ignore
-    if missing_in_sid_conf:
-        warn('Undefined in sid_conf (sid_templates) : {}'.format(missing_in_sid_conf))
-    else:
-        info('')
+        pprint(params)
 
 
 if __name__ == '__main__':
 
     print()
-    print('Sid Templates: ')
-    for k, v in six.iteritems(sid_templates):
-        print('{} -> {}'.format(k, v))
+    print('Sid test starts')
 
-    print()
-    print('Path Templates: ')
-    for k, v in six.iteritems(path_templates):
-        print('{} -> {}'.format(k, v))
+    bad_sids = ['FTOT', 'FTOT/A/CHR/COCOi', 'FTOT/A/CHR/COCO-2', 'FTOT/A/CHR/COCO-32',  'FTOT/A/CHR/COCO25']
+    # test_sids(bad_sids)
 
-    print()
-    print('Tests: ')
-    test_sid_duplicates()
-    test_fs_duplicates()
-    test_missings()
+    # to test "get_last" on tasks, seq and shots
+    specific_sids = ['FTOT/A/CHR/TEST/MOD', 'FTOT/S/SQ0001/SH0010/LAY', 'FTOT/S/SQ0001/SH0010', 'FTOT/S/SQ0001']  # , 'FTOT/A/CHR/TEST/MOD/V001/WIP', 'FTOT/S/SQ0001/SH0020/LAY/V001']
+    test_sids(specific_sids)
+
+    # bugged "get_last" on versions / state
+    specific_sids = ['FTOT/A/CHR/TEST/MOD/V001/WIP', 'FTOT/S/SQ0001/SH0020/LAY/V001']
+    test_sids(specific_sids)
+
+    #test_sids(sids[:5000])
 
     print('Done')
 

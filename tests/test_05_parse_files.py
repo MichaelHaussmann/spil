@@ -16,7 +16,7 @@ import six
 from tests import test_00_init  # needs to be before spil.conf import
 
 from spil.util.log import debug, setLevel, INFO, DEBUG, info
-from spil import Sid
+from spil import Sid, SpilException
 from spil.conf import projects
 
 if six.PY2:
@@ -30,6 +30,9 @@ from tests.test_02_save_sids_to_file import sid_file_path
 def test_parse_files():
 
     sid_file = sid_file_path().parent / 'sids.parsed.txt'
+
+    if sid_file.exists():
+        raise SpilException('The parse file "{}" already exists. Skipped'.format(sid_file))
 
     for project in projects[:]:
 
