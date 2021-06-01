@@ -39,7 +39,8 @@ def test_sids(sids):
         info('----------------')
         info('Testing: "{}"'.format(s))
         sid = Sid(s)
-        assert sid.string == s
+        assert str(sid) == s
+        assert sid == eval(repr(sid))
 
         if not sid.type:
             warn('Sid "{}" not typed, skipping'.format(sid))
@@ -61,10 +62,12 @@ def test_sids(sids):
                   'exists': sid.exists(),
                   'is_leaf': sid.is_leaf(),
                   'len': len(sid),
-                  'get_last': sid.get_last(key)
+                  'get_last': sid.get_last(key),
+                  'type': sid.type
                   }
 
         pprint(params)
+        pprint(sid.data)
 
 
 if __name__ == '__main__':
@@ -72,7 +75,7 @@ if __name__ == '__main__':
     print()
     print('Sid test starts')
 
-    bad_sids = ['FTOT', 'FTOT/A/CHR/COCOi', 'FTOT/A/CHR/COCO-2', 'FTOT/A/CHR/COCO-32',  'FTOT/A/CHR/COCO25']
+    bad_sids = [ 'FTOT/A/CHR/COCOi', 'FTOT/A/CHR/COCO 2', 'FTOT/A/CHR/COCO_2', 'FTOT/A/CHR/COCO-32',  'FTOT/A/CHR/COCO25'] # 'FTOT',
     # test_sids(bad_sids)
 
     # to test "get_last" on tasks, seq and shots
@@ -81,9 +84,9 @@ if __name__ == '__main__':
 
     # bugged "get_last" on versions / state
     specific_sids = ['FTOT/A/CHR/TEST/MOD/V001/WIP', 'FTOT/S/SQ0001/SH0020/LAY/V001']
-    test_sids(specific_sids)
+    # test_sids(specific_sids)
 
-    #test_sids(sids[:5000])
+    test_sids(sids[:5000])
 
     print('Done')
 
