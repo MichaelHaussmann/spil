@@ -81,7 +81,9 @@ def path_to_dict(path, _type=None):
     for new_key, sid_mapping in six.iteritems(conf.extrakeys_to_sidkeys):
         if new_key in data:
             for key, _dict in six.iteritems(sid_mapping):
-                data[key] = _dict.get(data.get(new_key))
+                map_result = _dict.get(data.get(new_key))
+                if map_result:
+                    data[key] = map_result
 
     # Sorting the result data into an OrderedDict()
     sid_type = template.name.split(sidtype_keytype_sep)[0]
