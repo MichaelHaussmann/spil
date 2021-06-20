@@ -30,4 +30,5 @@ user_conf_file_name = 'conf.json'
 
 sip = '/'  # sid separator - changing this is untested.
 ors = ','   # "or" separator
+qms = '#'   # question mark search sign (previously '?', thus it's name)
 sidtype_keytype_sep = '__'

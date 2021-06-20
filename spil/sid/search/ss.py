@@ -19,6 +19,7 @@ from spil.sid.search.util import first
 from spil.sid.search.transformers import extensions, or_op, expand, transform
 from spil.sid.sid import Sid
 from sid_conf import sip
+from spil.conf import qms
 from spil.util.exception import SpilException
 from spil.util.log import debug, warn, info
 
@@ -55,7 +56,7 @@ class SidSearch(object):
         search_sids = transform(search_sid, list_search_transformers)
 
         # depending on input, select the right generator
-        is_qm_search = any([ssid.count('?') for ssid in search_sids])
+        is_qm_search = any([ssid.count(qms) for ssid in search_sids])
         is_sorted_search = any([ssid.count('>') for ssid in search_sids])
 
         if is_qm_search and is_sorted_search:
@@ -65,7 +66,7 @@ class SidSearch(object):
             generator = self.sorted_search(search_sids)
 
         elif is_qm_search:
-            if search_sids[0].endswith('?'):  # FIXME: check coherence
+            if search_sids[0].endswith(qms):  # FIXME: check coherence
                 generator = self.star_search(search_sids, as_sid=as_sid)
             else:
                 generator = self.qm_search(search_sids, as_sid=as_sid)
@@ -90,7 +91,7 @@ class SidSearch(object):
         """
         Question mark search.
 
-        We star-search all Sids that match up to the '?'.
+        We star-search all Sids that match up to the qms ("#").
         Then we check if at least one matches the complete search_sid pattern.
 
         This is faster than the full search, but fails to find results if the partial search is not implemented.
@@ -105,12 +106,12 @@ class SidSearch(object):
         done_add = done.add  # performance
 
         for search_sid in search_sids:
-            index = str(search_sid).split('/').index('?')
-            ssid = sip.join(str(search_sid).split('/')[0:index + 1]).replace('?', '*')
+            index = str(search_sid).split('/').index(qms)
+            ssid = sip.join(str(search_sid).split('/')[0:index + 1]).replace(qms, '*')
             search_roots = self.star_search([ssid], as_sid=False)
 
             for root in search_roots:
-                ssid = str(search_sid).replace('?', root.split(sip)[-1])
+                ssid = str(search_sid).replace(qms, root.split(sip)[-1])
                 if first(self.star_search([ssid], as_sid=False)):
                     done_add(root)
                     continue
@@ -133,8 +134,8 @@ class SidSearch(object):
         """
         Question mark search.
 
-        We star search all Sids that matches the search, and then keep only the part until the '?'
-        (This is slower than the other qm_search function and will be removed in the next commit)
+        We star search all Sids that matches the search, and then keep only the part until the qms ("#")
+        (This is slower than the other qm_search function, but is needed because in some cases the faster search does not work.)
 
         :param search_sids:
         :param as_sid:
@@ -143,12 +144,12 @@ class SidSearch(object):
         done = set()
         done_add = done.add  # performance
         for search_sid in search_sids:
-            ssid = str(search_sid).replace('?', '*')
+            ssid = str(search_sid).replace(qms, '*')
             debug('star search start on {}'.format(ssid))
             founds = self.star_search([ssid], as_sid=False)
             debug('star search done')
 
-            index = str(search_sid).split('/').index('?')
+            index = str(search_sid).split('/').index(qms)
             for f in founds:
                 sid = sip.join(f.split('/')[0:index + 1])
                 if sid not in done:
@@ -162,7 +163,9 @@ class SidSearch(object):
         """
         Operates a sorted search.
         A sorted search contains the ">" sign, standing for "last"
-        or the "<>" sign, standing for "first". (not yet implemented)
+        or the "<" sign, standing for "first". (not yet implemented)
+
+        TODO: "meanilful sort" (eg. LAY < ANI < RND), currently only alphanumerical search.
 
         :param search_sids:
         :param as_sid:
