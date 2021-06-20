@@ -16,11 +16,10 @@ If not, see <https://www.gnu.org/licenses/>.
 import itertools as it
 
 from spil.sid.search.util import first
-from spil.sid.search.transformers import extensions, or_op, expand, transform
+from spil.sid.search.transformers import extensions, or_op, expand, transform, uri_apply
 from spil.sid.sid import Sid
 from sid_conf import sip
 from spil.conf import qms
-from spil.util.exception import SpilException
 from spil.util.log import debug, warn, info
 
 
@@ -52,7 +51,7 @@ class SidSearch(object):
         :return:
         """
         # we start by transforming
-        list_search_transformers = [extensions, or_op, expand]
+        list_search_transformers = [extensions, or_op, expand, uri_apply]
         search_sids = transform(search_sid, list_search_transformers)
 
         # depending on input, select the right generator

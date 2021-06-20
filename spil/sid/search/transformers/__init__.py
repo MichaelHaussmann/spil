@@ -24,9 +24,10 @@ from spil.sid.search.transformers.expand import execute as expand
 from spil.sid.search.transformers.extensions import execute as extensions
 # from spil.sid.search.transformers.optional_key import execute as optional_key
 from spil.sid.search.transformers.or_op import execute as or_op
+from spil.sid.search.transformers.uri_apply import execute as uri_apply
 
 # transformers by execution order for existing searches
-list_search_transformers = [extensions, or_op, expand]
+list_search_transformers = [extensions, or_op, expand, uri_apply]
 
 
 def transform(sid, transformers):

@@ -20,7 +20,7 @@ import string
 import six
 
 from spil.util.exception import SpilException
-from spil.conf import sid_templates
+from spil.conf import sid_templates, sidtype_keytype_sep
 from spil.sid.core.sid_resolver import sid_to_dict
 from spil.sid.sid import Sid
 
@@ -51,6 +51,11 @@ def expand(sid):  # FIXME: this code is slow and cryptic.
     if sid.count('/**') > 1:
         raise SpilException('Can only expand once in a Sid.')
 
+    if sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
+        sid, uri = sid.split('?', 1)
+    else:
+        uri = ''
+
     root = sid.split('/**')[0]
     _type = Sid(root).basetype
     if not _type:
@@ -60,7 +65,7 @@ def expand(sid):  # FIXME: this code is slow and cryptic.
     #print (_type)
     found = []
     for key, template in six.iteritems(sid_templates):
-        if key.startswith(_type + '__'):
+        if key.startswith(_type + sidtype_keytype_sep):
             keys = list(string.Formatter().parse(template))
             if keys[-1][1] == 'ext':        # FIXME: hard coded
                 count = len(keys)-1
@@ -71,6 +76,8 @@ def expand(sid):  # FIXME: this code is slow and cryptic.
                 #print test
                 __type, data = sid_to_dict(test)
                 if data and (list(data)[-1] == 'ext'):  #
+                    if uri:
+                        test = '{}?{}'.format(test, uri)
                     found.append(test)
             else:
                 break
@@ -87,16 +94,22 @@ if __name__ == '__main__':
 
     setLevel(FATAL)
 
-    expandables = ['aral/s/*/**/ma', 'aral/i/**/p/*/exr', 'aral', 'aral/a/**',
-                   'aral/i/s010/p010/animation/**/exr',
-                   'aral/i/**/exr',
-                   'aral/i/s010/p010/**/exr']
+    expandables = ['FTOT/S/*/**/ma', 'FTOT/A/**/V002/*/ma', 'FTOT', 'FTOT/A/**',
+                   'FTOT/S/SQ0010/SH0010/ANI/**/abc',
+                   'FTOT/S/**/mov',
+                   'FTOT/S/SQ0010/SH0010/**/ma']
 
-    for sid in expandables:
+    expandables_with_uri = ['FTOT/S/*/**/ma?version=2', 'FTOT/A/**/V002/*/ma?whatever', 'FTOT', 'FTOT/A/**',
+                   'FTOT/S/SQ0010/SH0010/ANI/**/abc',
+                   'FTOT/S/**/mov',
+                   'FTOT/S/SQ0010/SH0010/**/ma?yes?yes']
+
+    for sid in expandables_with_uri:
         print(sid + '-->')
         results = expand(sid)
         for result in results:
             print(sid_to_dict(result))
+
         pprint(results)
 
         print('*'*10)
