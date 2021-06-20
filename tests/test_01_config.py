@@ -17,12 +17,14 @@ import six
 from spil import Sid
 from tests import test_00_init  # import needed before spil.conf
 
+from spil.util.log import debug, setLevel, INFO, DEBUG, info, ERROR
+
 from spil.conf import sid_templates, path_templates
 from spil.util.log import info
 from warnings import warn
 
 from example_sids import sids  # generates the sids - potentially long loop
-from pprint import pprint
+from pprint import pprint, pformat
 
 print(test_00_init)
 
@@ -35,9 +37,9 @@ def test_sids(sids):
         warn('No sids given, nothing to test.')
         return
 
-    for s in sids:
-        info('----------------')
-        info('Testing: "{}"'.format(s))
+    for i, s in enumerate(sids):
+        print('---------------- {}'.format(i))
+        print('Testing: "{}"'.format(s))
         sid = Sid(s)
         assert str(sid) == s
         assert sid == eval(repr(sid))
@@ -49,10 +51,19 @@ def test_sids(sids):
         key = sid.keytype
         parent_key = sid.parent.keytype
 
-        assert sid.parent == sid.get_as(parent_key)
+        if not sid.type == 'project':
+            if not sid.parent == sid.get_as(parent_key):
+                warn('Sid "{}" parent problem'.format(sid))
 
         if not sid.get_last(key):
-            warn('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
+            print('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
+
+        path = sid.path
+        if path:
+            assert sid == Sid(path=sid.path)
+            assert sid.path == Sid(path=sid.path).path
+        else:
+            print('Sid "{}" has no path.'.format(sid))
 
         params = {'parent': sid.parent,
                   'grand_parent': sid.parent.parent,
@@ -72,6 +83,8 @@ def test_sids(sids):
 
 if __name__ == '__main__':
 
+    setLevel(ERROR)
+
     print()
     print('Sid test starts')
 
@@ -80,7 +93,7 @@ if __name__ == '__main__':
 
     # to test "get_last" on tasks, seq and shots
     specific_sids = ['FTOT/A/CHR/TEST/MOD', 'FTOT/S/SQ0001/SH0010/LAY', 'FTOT/S/SQ0001/SH0010', 'FTOT/S/SQ0001']  # , 'FTOT/A/CHR/TEST/MOD/V001/WIP', 'FTOT/S/SQ0001/SH0020/LAY/V001']
-    test_sids(specific_sids)
+    #test_sids(specific_sids)
 
     # bugged "get_last" on versions / state
     specific_sids = ['FTOT/A/CHR/TEST/MOD/V001/WIP', 'FTOT/S/SQ0001/SH0020/LAY/V001']

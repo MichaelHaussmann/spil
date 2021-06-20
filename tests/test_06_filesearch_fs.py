@@ -21,11 +21,11 @@ else:
 
 from tests import test_00_init  # needs to be before spil.conf import
 from spil import FS
-from spil.util.log import debug, setLevel, INFO, DEBUG, info
+from spil.util.log import debug, setLevel, INFO, DEBUG, info, ERROR
 from example_searches import searches
 
 
-def test_fs():
+def test_fs(searches):
 
     do_doublon_check = True  # Set to false when testing performance
     as_sid = True
@@ -56,5 +56,8 @@ def test_fs():
 
 if __name__ == '__main__':
 
-    setLevel(INFO)
-    test_fs()
+    setLevel(ERROR)
+    searches = {}
+    searches['FTOT/S/**/abc'] = 'Shot abcs'
+    test_fs(searches)
+
