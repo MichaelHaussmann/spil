@@ -39,10 +39,12 @@ def test_parse_files():
         project_root = Path( Sid(project).path )
         print('Root path : {}'.format(project_root))
 
-        with open(str(sid_file), 'w') as f:
+        with open(str(sid_file), 'a') as f:
 
             for path in project_root.rglob('*'):
                 if path.name.startswith('.') or path.name.startswith('_'):
+                    continue
+                if path.suffix in ['.png', '.exr', '.jpg', '.raysync']:  # currently not supported - speed up parsing
                     continue
                 print(path)
                 sid = Sid(path=path)

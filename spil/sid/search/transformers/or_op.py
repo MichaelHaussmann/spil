@@ -28,11 +28,16 @@ def execute(sids):
 
     return result
 
-
+#TODO: "or" on URI part
 def or_op(sid):
 
     if not sid.count(ors):  # no "or" operators in sid.
         return [sid]
+
+    if sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
+        sid, uri = sid.split('?', 1)
+    else:
+        uri = ''
 
     _start = '--start--'
 
@@ -64,7 +69,7 @@ def or_op(sid):
     result = []
     for sid in found:
         if not sid in result:
-            result.append(sid.replace(_start + sip, ''))
+            result.append(sid.replace(_start + sip, '') + ('?' + uri if uri else ''))
 
     # no type check needed
     return result

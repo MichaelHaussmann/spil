@@ -72,5 +72,5 @@ def test_ls_fs():
 
 if __name__ == '__main__':
 
-    setLevel(INFO)
+    setLevel(ERROR)
     test_ls_fs()

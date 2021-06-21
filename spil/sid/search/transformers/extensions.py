@@ -13,7 +13,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-from spil.conf import extension_alias  # put into sid conf
+from spil.conf import extension_alias  # from sid conf
 from spil.conf import sip, ors
 
 
@@ -24,7 +24,7 @@ def execute(sids):
     Examples (with comma "," being the or-operator) :
          img -> jpg,exr,dpx
          hou -> hip, hipnc
-         may -> ma, mb
+         maya -> ma, mb
     """
     result = []
 
@@ -35,6 +35,11 @@ def execute(sids):
 
 
 def extensions(sid):
+
+    if sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
+        sid, uri = sid.split('?', 1)
+    else:
+        uri = ''
 
     parts = sid.split(sip)
 
@@ -56,7 +61,7 @@ def extensions(sid):
     sid = parts[:-1]
     sid.append(','.join(sorted(list(set(result)))))
 
-    return sip.join(sid)
+    return sip.join(sid) + ('?' + uri if uri else '')
 
 
 
@@ -71,9 +76,9 @@ if __name__ == '__main__':
     setLevel(FATAL)
 
     expandables = ['aral/s/*/hou',
-                   'aral/s/*/p/*/exr,img, hou',
+                   'aral/s/*/p/*/exr,img, hou?test',
                    'aral',
-                   'aral/a/*/img',
+                   'aral/a/*/img?test',
                    'aral/s/s010/p010/animation/*/v001/p/vdb',
                    'aral/s/*/movie',
                    'aral/s/s010/p010/**/exr']

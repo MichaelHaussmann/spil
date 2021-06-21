@@ -48,6 +48,11 @@ class Sid(object):
     A Search Sid can resolve to multiple types.
     It is a Typed Sid.
 
+    #IDEA: implement a class hierarchy
+    - BaseSid: any string. By default an empty string.
+    - MetaSid: string, may contain meta-characters that can resolve to multiple types
+    - TypedSid: has a type and a data dictionary, may contain meta-characters that can resolve to multiple Sids
+    - ConcreteSid: describes one single data, that can exist or not
     """
 
     def __str__(self):
@@ -175,7 +180,7 @@ class Sid(object):
     def get(self, key):
 
         if not self.data:
-            warn('[Sid][get] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            warn('[Sid][get] Asked for a Sid operation on an undefined Sid: "{}"'.format(self.string))
             return None
 
         return self.data.get(key)
@@ -183,7 +188,7 @@ class Sid(object):
     def get_as(self, key):
 
         if not self.data:
-            warn('[Sid][get_as] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            warn('[Sid][get_as] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
             return None
 
         data = OrderedDict()
@@ -195,6 +200,8 @@ class Sid(object):
     def get_with(self, key=None, value=None, **kwargs):
         """
         Returns a Sid with the given key(s) changed.
+        A key set to None will remove the key.
+        To empty a keys value, set it to an empty string "".
 
         Can be called with an key / value pair (if key is set)
         Or via **kwargs to set multiple keys
@@ -208,6 +215,10 @@ class Sid(object):
         data_copy = self.data.copy()
         if key:
             kwargs[key] = value
+        for key, value in six.iteritems(kwargs.copy()):  # removing a key if the value is None. Use '' for empty values.
+            if value is None:
+                data_copy.pop(key)
+                kwargs.pop(key)
         data_copy.update(kwargs)
         return Sid(data=data_copy) or Sid('/'.join(list(data_copy.values())))  # FIXME: test under py27
 
@@ -229,7 +240,7 @@ class Sid(object):
         Returns the parent Sid, or None if the Sid is not "defined", or an empty Sid if it is already the root. (#TODO: better define the root Sid)
         """
         if not self.data:
-            warn('[Sid][parent] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            warn('[Sid][parent] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
             return None
         if len(self.data.keys()) == 1:
             return Sid()
@@ -256,7 +267,7 @@ class Sid(object):
         return the last key
         """
         if not self.data:
-            warn('[Sid][keytype] Asked for a Sid operation on an undefined Sid ({})'.format(self.string))
+            warn('[Sid][keytype] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
             return None
         return list(self.data.keys() or [None])[-1]
 
@@ -268,7 +279,7 @@ class Sid(object):
     """
 
     def copy(self):
-        return self.get_with()
+        return Sid(str(self))  # self.get_with()
 
     def get_last(self, key):
         from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
@@ -292,6 +303,7 @@ class Sid(object):
         # Define "complete". Also in regard to a search Sid. For example Sids containing /** are "complete".
 
     # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
+    # implement URIs: Sid('FTOT').get_with(uri='type=A') <==> FTOT?type=A  ==>  FTOT/A
     # define "complete / incomplete" sid.is_leaf ? (root / anchor / parent / parents /
     # https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.parent
 
