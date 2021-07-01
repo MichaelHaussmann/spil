@@ -285,6 +285,14 @@ class Sid(object):
         from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
         return FS().get_one(self.get_with(key=key, value='>'))
 
+    def get_next(self, key):
+        if key != 'version':
+            raise NotImplementedError("get_next() support only 'version' key for the moment.")
+        version = self.get('version').split('V')[-1]
+        version = (int(version) + 1)
+        version = 'V' + str('%03d' % version)
+        return self.get_with(version=version)
+
     def exists(self):
         from spil import FS  # FIXME: explicit delegation and dynamic import
         return FS().exists(self)
@@ -319,6 +327,7 @@ if __name__ == '__main__':
     sid = Sid(sid)
     print(sid)
     print(sid.get_last('version'))
+    print(sid.get_next('version'))
     print(sid.parent)
     print(sid.parent.get_last('version'))
     # print(sid.parent.get_last('version').path)
