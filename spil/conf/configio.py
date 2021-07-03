@@ -38,12 +38,6 @@ def get_user_config_path():
     Returns a Path object.
     """
     home = Path.home()
-
-    # Special Windows problem
-    if platform.system() == 'Windows':
-        if not str(home).endswith('Documents') and (home / 'Documents').exists():
-            home = home / 'Documents'
-
     user_config_path = home / user_app_folder_name / user_conf_file_name
 
     return user_config_path

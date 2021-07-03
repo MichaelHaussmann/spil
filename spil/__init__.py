@@ -13,7 +13,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-__version__ = '0.0.2'
+from spil.conf.global_conf import __version__
 try:
     from spil.sid.sid import Sid
     from spil.sid.search.fs import FS

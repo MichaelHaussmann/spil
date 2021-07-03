@@ -205,7 +205,8 @@ https://medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575
 - File sytem path  
 https://www.python.org/dev/peps/pep-0428
 
-- URI / URL
+- URI / URL  
+  https://en.wikipedia.org/wiki/Uniform_Resource_Identifier
 - Node tree & hierarchy
 
 
@@ -291,11 +292,12 @@ Then, implement some important but missing core features and enhancements
 To take profit from the Sids universality, we then plan on building reusable open source bricks and pipeline tools.
 
 For example:
-- simple and universal Sid browser UI
+- simple and universal Sid browser UI (under active development)
 - connectors to Shotgun and Relational Databases
 - using the sid as a USD Asset Resolver / In a USD pipeline
 - protocol for pipeline actions  
 For example `sid://play?hamlet/s/sq030/*/>/>/p/movie`
+- REST Api
 - file system style navigation and context handling    
 For example `cd hamlet/s/sq010`
 
