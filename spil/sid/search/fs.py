@@ -60,19 +60,7 @@ class FS(SidSearch):
 
             debug('[fs_star_search] "{}"'.format(search_sid))
 
-            search = Sid(search_sid)
-
-            # filling intermediate values with *
-
-            """
-            print('Search expanded : {}'.format(search_sids))
-            for sid in search_sids:
-                data = Sid(sid).data
-                print(data)
-                types = dict_to_type(data, all=True)
-                print(types)
-                print(Sid(sid).type)
-            """
+            search = search_sid  # TODO: handle also strings ?
 
             debug('Search : ' + str(search))
             debug('PATH : {}'.format(search.path))
@@ -95,19 +83,6 @@ class FS(SidSearch):
             debug('pattern : ' + str(pattern))
             debug('project_path : ' + str(project_path))
 
-            """
-            if str(pattern) == str(project_path):
-                warn('No valid search pattern')
-                return
-            """
-
-            """
-            found = []
-            for ext in pattern.split('.')[-1].split(','):
-                new_pattern = pattern.split('.')[0] + '.' + ext
-                found.extend(glob.glob(os.path.join(project_path, new_pattern)))
-            """
-
             found = glob.glob(os.path.join(project_path, pattern))
             debug('found')
             debug(found)
@@ -123,13 +98,7 @@ class FS(SidSearch):
                     warn('Path did not generate sid : {}'.format(path))
                     continue
 
-                if as_sid:
-                    yield sid
-                else:
-                    item = str(sid)
-                    yield item
-
-                """
+                item = str(sid)
                 if item not in done:
                     done_add(item)
                     if as_sid:
@@ -137,8 +106,8 @@ class FS(SidSearch):
                     else:
                         yield item
                 else:
-                    warn('{} was already found, skipped. '.format(item))
-                """
+                    debug('{} was already found, skipped. '.format(item))
+
 
 if __name__ == '__main__':
 

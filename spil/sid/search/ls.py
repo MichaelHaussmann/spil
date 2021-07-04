@@ -152,6 +152,9 @@ class LS(SidSearch):
         :param do_sort:
         :return:
         """
+        done = set()
+        done_add = done.add  # performance
+
         for search_sid in search_sids:
 
             pattern = glob2re(str(search_sid))
@@ -160,10 +163,14 @@ class LS(SidSearch):
             for item in self.get_searchlist(do_sort=do_sort):
                 if re.match(pattern, item):
                     # debug('match : {}'.format(item))
-                    if as_sid:
-                        yield Sid(item)
+                    if item not in done:
+                        done_add(item)
+                        if as_sid:
+                            yield Sid(item)
+                        else:
+                            yield item
                     else:
-                        yield item
+                        debug('{} was already found, skipped. '.format(item))
 
 
 if __name__ == '__main__':
