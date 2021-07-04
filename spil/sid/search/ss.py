@@ -55,20 +55,10 @@ class SidSearch(object):
         search_sids = transform(str(search_sid), list_search_transformers)
 
         # depending on input, select the right generator
-        is_qm_search = any([ssid.string.count(qms) for ssid in search_sids])
         is_sorted_search = any([ssid.string.count('>') for ssid in search_sids])
-
-        if is_qm_search and is_sorted_search:
-            raise NotImplementedError('Currently no multi search implemented.')
 
         if is_sorted_search:
             generator = self.sorted_search(search_sids)
-
-        elif is_qm_search:
-            if search_sids[0].endswith(qms):  # FIXME: check coherence
-                generator = self.star_search(search_sids, as_sid=as_sid)
-            else:
-                generator = self.qm_search(search_sids, as_sid=as_sid)
         else:
             generator = self.star_search(search_sids, as_sid=as_sid)
 
@@ -85,78 +75,6 @@ class SidSearch(object):
 
     def exists(self, search_sid):
         return bool(first(self.star_search([search_sid], as_sid=False)))
-
-    def qm_search(self, search_sids, as_sid=False):
-        """
-        Question mark search.
-
-        We star-search all Sids that match up to the qms ("#").
-        Then we check if at least one matches the complete search_sid pattern.
-
-        This is faster than the full search, but fails to find results if the partial search is not implemented.
-        In this case we invoque qm_search_full.
-
-        :param search_sids:
-        :param as_sid:
-        :param do_sort:
-        :return:
-        """
-        done = set()
-        done_add = done.add  # performance
-
-        for search_sid in search_sids:
-            index = str(search_sid).split('/').index(qms)
-            ssid = sip.join(str(search_sid).split('/')[0:index + 1]).replace(qms, '*')
-            search_roots = self.star_search([ssid], as_sid=False)
-
-            for root in search_roots:
-                ssid = str(search_sid).replace(qms, root.split(sip)[-1])
-                if first(self.star_search([ssid], as_sid=False)):
-                    done_add(root)
-                    continue
-
-        if done:
-            done = sorted(list(done))
-
-            for sid in done:
-                if as_sid:
-                    yield Sid(sid)
-                else:
-                    yield sid
-
-        else:
-            info('qm_search did not find any result, invoking qm_search_full.')
-            for i in self.qm_search_full(search_sids, as_sid=as_sid):
-                yield i
-
-    def qm_search_full(self, search_sids, as_sid=False):
-        """
-        Question mark search.
-
-        We star search all Sids that matches the search, and then keep only the part until the qms ("#")
-        (This is slower than the other qm_search function, but is needed because in some cases the faster search does not work.)
-
-        :param search_sids:
-        :param as_sid:
-        :return:
-        """
-        done = set()  #FIXME: this is currently untested
-        done_add = done.add  # performance
-        for search_sid in search_sids:
-            ssid = search_sid.full_string.replace(qms, '*')
-            debug('star search start on {}'.format(ssid))
-            founds = self.star_search([Sid(ssid)], as_sid=False)
-            debug('star search done')
-
-            index = str(search_sid).split('/').index(qms)
-            for f in founds:
-                sid = sip.join(f.split('/')[0:index + 1])
-                if sid not in done:
-                    done_add(sid)
-                    if as_sid:
-                        yield Sid(sid)
-                    else:
-                        yield sid
 
     def sorted_search(self, search_sids, as_sid=False):
         """
