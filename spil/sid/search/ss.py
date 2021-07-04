@@ -18,8 +18,6 @@ import itertools as it
 from spil.sid.search.util import first
 from spil.sid.search.transformers import extensions, or_op, expand, transform
 from spil.sid.sid import Sid
-from sid_conf import sip
-from spil.conf import qms
 from spil.util.log import debug, warn, info
 
 
@@ -28,7 +26,6 @@ class SidSearch(object):
     def __init__(self):
         """
         #TODO
-
         - more iterators where possible
         - better control over string / Sid
         - better algorithms
@@ -54,10 +51,18 @@ class SidSearch(object):
         list_search_transformers = [extensions, or_op, expand]  # uri_apply is removed, because uri is automatically applied bu Sid()
         search_sids = transform(str(search_sid), list_search_transformers)
 
+        for ssid in search_sids[:]:  # make this a search transformer?
+            if ssid.string.count('?'):
+                warn('SearchSid "{}" has un-applied URI and cannot be searched. Skipped'.format(ssid))
+                search_sids.remove(ssid)
+
         # depending on input, select the right generator
         is_sorted_search = any([ssid.string.count('>') for ssid in search_sids])
 
-        if is_sorted_search:
+        if not search_sids:
+            warn('Nothing Searchable. ')
+            generator = ()
+        elif is_sorted_search:
             generator = self.sorted_search(search_sids)
         else:
             generator = self.star_search(search_sids, as_sid=as_sid)
