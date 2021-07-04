@@ -13,8 +13,10 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from collections import OrderedDict
+from functools import total_ordering
 
 from spil.sid.core import sid_resolver, fs_resolver
+from spil.sid.core import uri_helper
 from spil.util.log import info, warn, debug
 
 from spil.sid.core.string_resolver import string_to_dict
@@ -30,6 +32,7 @@ if six.PY3:
     #    OrderedDict = dict
 
 
+@total_ordering
 class Sid(object):
     """
     A Sid contains 3 values.
@@ -59,32 +62,49 @@ class Sid(object):
         return self.string
 
     def __repr__(self):
-        return 'Sid("{0}")'.format(str(self))
+        return 'Sid("{0}")'.format(self.full_string)
 
     def __hash__(self, *args, **kwargs):
         return hash(repr(self))
 
     def __eq__(self, other):
-        return unicode(other) == unicode(self)
+        return unicode(other.full_string) == unicode(self.full_string)
+
+    def __lt__(self, other):
+        return unicode(self) < unicode(other)
 
     def __len__(self):
         return len(self.data)
+
+    @property
+    def full_string(self):
+        return '{}{}'.format(self.type + ':' if self.type else '', self.string)
 
     def __define_by_sid(self, sid, do_check=False):
 
         self.string = str(sid)
 
+        if self.string.count('?'):  # sid contains URI ending. We put it aside, and later append it back
+            string, uri = self.string.split('?', 1)
+        else:
+            string = self.string
+            uri = ''
+
         # resolving
-        _type, data = sid_resolver.sid_to_dict(self.string)
+        if string.count(':'):
+            _type, string = string.split(':')
+            _type, data = sid_resolver.sid_to_dict(string, _type)
+        else:
+            _type, data = sid_resolver.sid_to_dict(string)
 
         if not data:
-            info('[Sid] Sid "{}" did not resolve to valid Sid data.'.format(sid))
+            info('[Sid] Sid "{}" / {} / {} did not resolve to valid Sid data.'.format(sid, self.string, string))
             return
 
         if do_check:
             # check if resolves back
             resolved_sid = sid_resolver.dict_to_sid(data, _type)
-            if self.string != resolved_sid:
+            if string != resolved_sid:
                 warn('[Sid] Sid "{}" resolved to valid Sid data, but resolved back to "{}"'.format(sid, resolved_sid))
                 return
 
@@ -97,6 +117,31 @@ class Sid(object):
                 return
 
         self.type = _type
+
+        # integrating the uri, and updating the type
+        if not uri:
+            self.string = string  # string without type, without uri
+        else:
+            data = self.data
+            data.update(**uri_helper.to_dict(uri))
+            _type = sid_resolver.dict_to_type(data, all=True)
+            if not _type:
+                warn('[Sid] After URI apply, Sid "{}" has no type. URI will not be applied.'.format(self.string))
+                self.string = '{}?{}'.format(string, uri)
+                return
+            if len(_type) > 1:
+                if self.type not in _type:
+                    warn('[Sid] After URI apply, Sid "{}" matches different types: {}. URI will not be applied.'.format(self.string, _type))
+                    self.string = '{}?{}'.format(string, uri)
+                    return
+                else:  # URI apply still matches previously given type
+                    _type = [self.type]
+            # updated data is OK
+            string = sid_resolver.dict_to_sid(data, _type[0])
+            if string:
+                self.data = data
+                self.type = _type[0]
+                self.string = string
 
     def __define_by_data(self, data, do_check=False):  #TODO: make a fast version when the data comes from an internal trusted and already typed call.
 
@@ -147,8 +192,13 @@ class Sid(object):
         :param data: a data dictionary
         :param path: a path for a Sid
 
-        TODO: proper kwargs implementation, grabbing custom ad-hoc configs, and also possible sid keys.
-        TODO: add type to arguments, to be able to build Sids that keep their type if possible.
+        #TODO:
+        - create a factory method to simplify Sid constructor
+          (allowing simplifications like new_sid.get_with(**to_dict(uri)))
+        - streamline URI and type implementation (type and uri arguments, enable "sid = Sid(sid)"
+        - proper kwargs implementation for "string_resolve", grabbing custom ad-hoc configs, and also possible sid keys.
+        - add getters that traverse formatting mappings, eg get('project', 'longname') / get('project', 'foldername')
+
         :return:
         """
         self.string = ''
@@ -189,7 +239,7 @@ class Sid(object):
 
         if not self.data:
             warn('[Sid][get_as] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
-            return None
+            return Sid()  #TODO: empty Sid() or None ?
 
         data = OrderedDict()
         for k, v in self.data.items():
@@ -241,7 +291,7 @@ class Sid(object):
         """
         if not self.data:
             warn('[Sid][parent] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
-            return None
+            return Sid()  #TODO: empty Sid() or None ?
         if len(self.data.keys()) == 1:
             return Sid()
         return self.get_as(list(self.data.keys())[-2])
@@ -249,7 +299,8 @@ class Sid(object):
     @property
     def basetype(self):
         """
-        return the first part of the type
+        The basetype is the first part of the type.
+        Example: basetype = "shot" for type "shot__file"
         """
         result = None
         if not self.type:
@@ -283,7 +334,10 @@ class Sid(object):
 
     def get_last(self, key):
         from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
-        return FS().get_one(self.get_with(key=key, value='>'))
+        return FS().get_one(self.get_with(key=key, value='>'), as_sid=True)
+
+    def get_uri(self):
+        return uri_helper.to_string(self.data)
 
     def exists(self):
         from spil import FS  # FIXME: explicit delegation and dynamic import
@@ -313,15 +367,10 @@ if __name__ == '__main__':
     from spil.util.log import debug, setLevel, INFO, DEBUG, info
     setLevel(INFO)
 
-    # sid = Sid('raj/s/sq001/sh0020/**/avi')
-
-    sid = 'raj/a/char/juliet/low/design/v002/w/mp4'
-    sid = Sid(sid)
-    print(sid)
-    print(sid.get_last('version'))
-    print(sid.parent)
-    print(sid.parent.get_last('version'))
-    # print(sid.parent.get_last('version').path)
+    sid = 'FTOT?type=A'
+    sid = 'FTOT?project=FTOT&type=A'
+    sid = Sid('FTOT?project=FTOT&type=A')
+    assert sid == Sid(sid.get('project') + '?' + sid.get_uri())
     print()
 
     sids = ['raj/a/char/juliet/low/design/v002/w/mp4', 'raj/a/char/juliet/low/design/v002']

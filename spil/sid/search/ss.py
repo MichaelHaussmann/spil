@@ -16,7 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 import itertools as it
 
 from spil.sid.search.util import first
-from spil.sid.search.transformers import extensions, or_op, expand, transform, uri_apply
+from spil.sid.search.transformers import extensions, or_op, expand, transform
 from spil.sid.sid import Sid
 from sid_conf import sip
 from spil.conf import qms
@@ -51,12 +51,12 @@ class SidSearch(object):
         :return:
         """
         # we start by transforming
-        list_search_transformers = [extensions, or_op, expand, uri_apply]
-        search_sids = transform(search_sid, list_search_transformers)
+        list_search_transformers = [extensions, or_op, expand]  # uri_apply is removed, because uri is automatically applied bu Sid()
+        search_sids = transform(str(search_sid), list_search_transformers)
 
         # depending on input, select the right generator
-        is_qm_search = any([ssid.count(qms) for ssid in search_sids])
-        is_sorted_search = any([ssid.count('>') for ssid in search_sids])
+        is_qm_search = any([ssid.string.count(qms) for ssid in search_sids])
+        is_sorted_search = any([ssid.string.count('>') for ssid in search_sids])
 
         if is_qm_search and is_sorted_search:
             raise NotImplementedError('Currently no multi search implemented.')
@@ -140,12 +140,12 @@ class SidSearch(object):
         :param as_sid:
         :return:
         """
-        done = set()
+        done = set()  #FIXME: this is currently untested
         done_add = done.add  # performance
         for search_sid in search_sids:
-            ssid = str(search_sid).replace(qms, '*')
+            ssid = search_sid.full_string.replace(qms, '*')
             debug('star search start on {}'.format(ssid))
-            founds = self.star_search([ssid], as_sid=False)
+            founds = self.star_search([Sid(ssid)], as_sid=False)
             debug('star search done')
 
             index = str(search_sid).split('/').index(qms)
@@ -164,22 +164,30 @@ class SidSearch(object):
         A sorted search contains the ">" sign, standing for "last"
         or the "<" sign, standing for "first". (not yet implemented)
 
-        TODO: "meanilful sort" (eg. LAY < ANI < RND), currently only alphanumerical search.
+        TODO: "meaningful sort" (eg. LAY < ANI < RND), currently only alphanumerical sort.
 
         :param search_sids:
         :param as_sid:
         :return:
         """
-        # FIXME: check if index is coherent in all search_sids
+        # index is coherent in all search_sids, which is a bit strange
         index = str(search_sids[0]).split('/').index('>')
+
+        """
+        indices = []
+        for ss in search_sids:
+            indices.append(str(ss).split('/').index('>'))
+        print('ind' + str(indices))
+        indices = list(set(indices))
+        """
         # indices = [i for i, x in enumerate(str(search_sid).split('/')) if x == '>']
         # debug index, indices
 
         founds = list()
         for search_sid in search_sids:
-            ssid = str(search_sid).replace('>', '*')
+            ssid = search_sid.full_string.replace('>', '*')
             debug('star search start on {}'.format(ssid))
-            founds.extend(self.star_search([ssid], as_sid=False))
+            founds.extend(self.star_search([Sid(ssid)], as_sid=False))
             debug('star search done')
 
         founds = sorted(list(set(founds)), reverse=True)
@@ -187,6 +195,7 @@ class SidSearch(object):
         #pprint(founds)
         debug('found {} matches'.format(len(founds)))
 
+        #for index in indices:
         # works with > in any position, but does not use sort by row, and no delegate sorting, and no special sorting
         for key, grp in it.groupby(founds, key=lambda x: x.split('/')[0:index]):
             result = list(grp)
@@ -215,3 +224,13 @@ class SidSearch(object):
                 result = list(grp)
                 debug('{}: "{}" {}'.format(key, result[0].split('/')[index], result))
         """
+
+
+    """
+    Problem:
+
+    FTOT/S/SQ0001/SH0020/**/cache,maya?state=WIP&version=>
+    Doesn't return FTOT/S/SQ0001/SH0020/ANI/V019/WIP/CAM/abc
+    See tests/filesearch.
+
+    """
