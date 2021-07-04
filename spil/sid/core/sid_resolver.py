@@ -50,6 +50,9 @@ def sid_to_dict(sid, _type=None):
     Returns a tuple with the type and the parsed data in an OrderedDict.
     If the parsing failed (no template matching) returns a None, None tuple.
 
+    This function parses all templates in one go, so data from the first matching template is returned.
+    This is the normal usage (as opposed to sid_to_dicts)
+
     :param sid:
     :param _type:
     :return:
@@ -89,6 +92,53 @@ def sid_to_dict(sid, _type=None):
         ordered[key] = data.get(key)
 
     return template.name, ordered
+
+
+def sid_to_dicts(sid):
+    """
+    Parses a given "sid" using the existing sid_config templates.
+    Returns a dict with the types and the parsed data.
+
+    This function parses all templates separately, so data from all matching templates are returned.
+    This usage is not standard (as opposed to sid_to_dict).
+    It makes sense only for broad search sids (including /**) where we want to catch-all types.
+
+    :param sid:
+    :return:
+    """
+    results = {}
+
+    # instantiating lucidity Templates
+    for name, pattern in six.iteritems(sid_templates):
+        template = Template(name, pattern,
+                            anchor=lucidity.Template.ANCHOR_BOTH,
+                            default_placeholder_expression='[^/]*',  # allows for empty keys // should it be '[^|]*' ?
+                            duplicate_placeholder_mode=lucidity.Template.STRICT)
+        # template.template_resolver = resolvers
+
+        # try template parse
+        try:
+            data, template = lucidity.parse(str(sid), [template])
+        except lucidity.ParseError as e:
+            # ParseErrors are normal, we force the parsing of all the templates, and not just the first that matches, as usually
+            continue
+
+        if not data:
+            continue
+
+        # Sorting the result data into an OrderedDict()
+        sid_type = template.name.split(sidtype_keytype_sep)[0]
+        keys = key_types.get(sid_type)  # using template to get sorted keys
+        keys = filter(lambda x: x in template.keys(), keys)  # template.keys() is a set
+
+        data = data.copy()
+        ordered = OrderedDict()
+        for key in keys:
+            ordered[key] = data.get(key)
+
+        results[template.name] = ordered
+
+    return results
 
 
 def dict_to_sid(data, _type=None):
