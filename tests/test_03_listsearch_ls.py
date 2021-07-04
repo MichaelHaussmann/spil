@@ -21,13 +21,13 @@ else:
 
 from tests import test_00_init  # needs to be before spil.conf import
 from spil import LS
-from spil.util.log import debug, setLevel, INFO, DEBUG, info
+from spil.util.log import info
 from example_searches import searches
 
 from tests.test_02_save_sids_to_file import sid_file_path
 
 
-def test_ls():
+def test_ls(searches):
 
     do_doublon_check = True  # Set to false when testing performance
     as_sid = True
@@ -49,20 +49,24 @@ def test_ls():
 
         ls_timer = Timer(name="search_sid")
         ls_timer.start()
+        count = 0
         for i in ls.get(search_sid, as_sid=as_sid):
             print(i)
+            count += 1
             if do_doublon_check:
                 if i in double_check:
                     print('--------------------------------------> Doublon {}'.format(i))
                 double_check.add(i)
             # sid = Sid(i)
             # print sid.path
+        print('Total: ' + str(count))
         ls_timer.stop()
     global_timer.stop()
 
 
 if __name__ == '__main__':
 
-    setLevel(INFO)
+    from spil.util.log import setLevel, ERROR, DEBUG
+    setLevel(DEBUG)
 
-    test_ls()
+    test_ls(searches)

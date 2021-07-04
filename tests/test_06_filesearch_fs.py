@@ -21,7 +21,7 @@ else:
 
 from tests import test_00_init  # needs to be before spil.conf import
 from spil import FS
-from spil.util.log import debug, setLevel, INFO, DEBUG, info, ERROR
+from spil.util.log import info
 from example_searches import searches
 
 
@@ -42,22 +42,35 @@ def test_fs(searches):
 
         ls_timer = Timer(name="search_sid")
         ls_timer.start()
+        count = 0
         for i in ls.get(search_sid, as_sid=as_sid):
             print(i)
+            count += 1
             if do_doublon_check:
                 if i in double_check:
                     print('--------------------------------------> Doublon {}'.format(i))
                 double_check.add(i)
             # sid = Sid(i)
             # print sid.path
+        print('Total: ' + str(count))
         ls_timer.stop()
     global_timer.stop()
 
 
 if __name__ == '__main__':
 
-    setLevel(ERROR)
-    searches = {}
-    searches['FTOT/S/**/abc'] = 'Shot abcs'
+    from spil.util.log import setLevel, ERROR, DEBUG
+    setLevel(DEBUG)
     test_fs(searches)
 
+    """
+    Problem:
+    
+    FTOT/S/SQ0001/SH0020/**/cache,maya?state=WIP&version=>
+    Doesn't return FTOT/S/SQ0001/SH0020/ANI/V019/WIP/CAM/abc
+    Reason: General "sort by / group by" problem.
+    Missing a "sort by row".
+    Now just makes an overall sort and group by the previous to ">" field.
+    So it is the "last" version, but across all states, extensions, etc. Not what we would expect if we do a broad search.
+
+    """
