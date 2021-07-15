@@ -51,6 +51,12 @@ def to_string(uri_dict):
     def encode(x, *args, **kwargs):
         return x.replace(' ', '')
 
+    if six.PY2:
+        l = []
+        for k, v in six.iteritems(uri_dict):
+            l.append(encode(k) + '=' + encode(v))
+        return '&'.join(sorted(l))
+
     return urlencode(uri_dict, quote_via=encode)
 
 
@@ -58,6 +64,8 @@ if __name__ == '__main__':
     """
     Test block.
     Launches doc test (test in the doc).
+    
+    In PY2 the test does not pass, because the dict is not sorted by default.
     """
     from spil.util.log import info, setLevel, INFO
 
