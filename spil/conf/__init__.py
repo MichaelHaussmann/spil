@@ -56,7 +56,7 @@ globals().update(user_conf.read())
 
 if __name__ == '__main__':
 
-    # This will create a cofniguration file and folder in the user path.
+    # This will create a configuration file and folder in the user path.
 
     from pprint import pprint
 

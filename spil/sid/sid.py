@@ -339,6 +339,14 @@ class Sid(object):
     def get_uri(self):
         return uri_helper.to_string(self.data)
 
+    def get_next(self, key):  # FIXME: delegate to Data framework
+        if key != 'version':
+            raise NotImplementedError("get_next() support only 'version' key for the moment.")
+        version = self.get('version').split('V')[-1]
+        version = (int(version) + 1)
+        version = 'V' + str('%03d' % version)
+        return self.get_with(version=version)
+
     def exists(self):
         from spil import FS  # FIXME: explicit delegation and dynamic import
         return FS().exists(self)
@@ -371,6 +379,18 @@ if __name__ == '__main__':
     sid = 'FTOT?project=FTOT&type=A'
     sid = Sid('FTOT?project=FTOT&type=A')
     assert sid == Sid(sid.get('project') + '?' + sid.get_uri())
+
+    # sid = Sid('raj/s/sq001/sh0020/**/avi')
+
+    sid = 'raj/a/char/juliet/low/design/v002/w/mp4'
+    sid = Sid(sid)
+    print(sid)
+    print(sid.get_last('version'))
+    # print(sid.get_next('version'))
+    print(sid.parent)
+    print(sid.parent.get_last('version'))
+    # print(sid.parent.get_last('version').path)
+
     print()
 
     sids = ['raj/a/char/juliet/low/design/v002/w/mp4', 'raj/a/char/juliet/low/design/v002']
