@@ -19,5 +19,8 @@ try:
     from spil.sid.search.fs import FS
     from spil.sid.search.ls import LS
     from spil.util.exception import SpilException
+    from spil.util import log
+    from spil.util.log import setLevel, ERROR
+    setLevel(ERROR)
 except Exception as e:
     raise Exception('Spil is imported, but impossible to import spil packages. \n Please check compatibility of your sid_conf and fs_conf files.')
