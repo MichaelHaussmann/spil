@@ -66,7 +66,7 @@ if __name__ == '__main__':
     """
     Problem:
     
-    FTOT/S/SQ0001/SH0020/**/cache,maya?state=WIP&version=>
+    FTOT/S/SQ0001/SH0020/ANI/**/cache,maya?state=WIP&version=>
     Doesn't return FTOT/S/SQ0001/SH0020/ANI/V019/WIP/CAM/abc
     Reason: General "sort by / group by" problem.
     Missing a "sort by row".
