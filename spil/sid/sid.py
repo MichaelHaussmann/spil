@@ -239,7 +239,7 @@ class Sid(object):
 
         if not self.data:
             warn('[Sid][get_as] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
-            return Sid()  #TODO: empty Sid() or None ?
+            return Sid()  # Return type is always Sid.
 
         data = OrderedDict()
         for k, v in self.data.items():
@@ -250,7 +250,7 @@ class Sid(object):
     def get_with(self, key=None, value=None, **kwargs):
         """
         Returns a Sid with the given key(s) changed.
-        A key set to None will remove the key.
+        A key set to None will remove the key - thus potentially changing the type.
         To empty a keys value, set it to an empty string "".
 
         Can be called with an key / value pair (if key is set)
@@ -262,6 +262,10 @@ class Sid(object):
         :param kwargs: a key/value dictionary
         :return:
         """
+        if not self.data:
+            warn('[Sid][get_with] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
+            return Sid()  # Return type is always Sid.
+
         data_copy = self.data.copy()
         if key:
             kwargs[key] = value
@@ -333,25 +337,59 @@ class Sid(object):
         return Sid(str(self))  # self.get_with()
 
     def get_last(self, key):
+        # FIXME: asking for "FTOT/A/SET/GARDEN/SHD/WIP/ma" returns "TEST"
         from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
-        return FS().get_one(self.get_with(key=key, value='>'), as_sid=True)
+        found = FS().get_one(self.get_with(key=key, value='>'), as_sid=True)
+        if found.get(key):  # little failsafe. #SMELL
+            return found
+        else:
+            return Sid()
 
     def get_uri(self):
         return uri_helper.to_string(self.data)
 
     def get_next(self, key):  # FIXME: delegate to Data framework
+        """
+        Returns self with version incremented, or first version if there is no version.
+        If version is '*', returns "new" version (next of last)
+        """
         if key != 'version':
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
-        version = self.get('version').split('V')[-1]
+        current = self.get('version')
+        if current:
+            if current in ['*', '>']:  #FIXME: point to "searcher signs" config
+                version = (self.get_last('version').get('version') or 'V000').split('V')[-1] or 0
+            else:
+                version = self.get('version').split('V')[-1]
+        else:
+            version = 0  # allow non existing version #RULE: starts with V001 (#FIXME)
         version = (int(version) + 1)
         version = 'V' + str('%03d' % version)
         return self.get_with(version=version)
+
+    def get_new(self, key):  # FIXME: delegate to Data framework
+        """
+        Returns self with next of last version, or first version if there is no version.
+        """
+        if key != 'version':
+            raise NotImplementedError("get_new() support only 'version' key for the moment.")
+        if self.get('version'):
+            if self.get_last('version'):
+                return self.get_last('version').get_next('version')
+            else:
+                return self.get_next('version')  # Returns a first version
+        else:
+            with_added_version = self.get_with(version='*').get_last('version')
+            if with_added_version:
+                return with_added_version.get_next('version')
+            else:
+                return self.get_next('version')  # Returns a first version
 
     def exists(self):
         from spil import FS  # FIXME: explicit delegation and dynamic import
         return FS().exists(self)
 
-    def match(self, search_sid):
+    def match(self, search_sid):  #IDEA: match_as(search_sid, key) for example, do the "seq" of both sids match
         """
         Returns True if a given search_sid matches the current Sid.
         """
@@ -374,6 +412,14 @@ if __name__ == '__main__':
 
     from spil.util.log import debug, setLevel, INFO, DEBUG, info
     setLevel(INFO)
+
+    # Test get_new('version')
+    sid = 'FFM/S/SQ0001/SH0040/HFXout-MOCCO'
+    sid = Sid(sid)
+    new_scene = sid.get_with(version='*', state='WIP', ext='ma')
+    print(new_scene.type)
+    print(new_scene.get_new())
+
 
     sid = 'FTOT?type=A'
     sid = 'FTOT?project=FTOT&type=A'
