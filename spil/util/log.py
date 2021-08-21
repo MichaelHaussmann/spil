@@ -58,7 +58,8 @@ Code shortcuts
 """
 debug = logger.debug
 info = logger.info
-warn = logger.warn
+warn = logger.warning  # warn is deprecated
+warning = logger.warning
 error = logger.error
 critical = logger.critical
 
