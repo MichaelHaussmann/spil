@@ -32,6 +32,8 @@ if six.PY3:
 import lucidity
 from lucidity import Template
 
+from spil.vendor.py2_lru import lru_cache as cache
+
 from spil.util import utils
 from spil.util.exception import SpilException
 from spil.util.log import debug, warn, info
@@ -42,7 +44,7 @@ from spil.conf import sidtype_keytype_sep, key_types
 
 resolvers = {path_templates_reference: Template(path_templates_reference, path_templates.get(path_templates_reference))}
 
-
+@cache
 def path_to_dict(path, _type=None):
 
     path = str(path)

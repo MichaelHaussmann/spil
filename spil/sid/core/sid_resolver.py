@@ -34,6 +34,8 @@ import lucidity
 from lucidity import Template
 import string
 
+from spil.vendor.py2_lru import lru_cache as cache
+
 from spil.util.log import debug, info
 from spil.util.exception import SpilException
 
@@ -41,7 +43,7 @@ from spil.util.exception import SpilException
 from spil.conf import sip, key_types, sidtype_keytype_sep
 from spil.conf import sid_templates  # , meta_items # sid_filters
 
-
+@cache
 def sid_to_dict(sid, _type=None):
     """
     Parses a given "sid" string using the existing sid_config templates.
@@ -93,7 +95,7 @@ def sid_to_dict(sid, _type=None):
 
     return template.name, ordered
 
-
+@cache
 def sid_to_dicts(sid):
     """
     Parses a given "sid" using the existing sid_config templates.
