@@ -13,7 +13,7 @@ Note that the cache size needs to be high enough.
 
 from functools import wraps
 
-_max_size = 4096
+_max_size = 4096*2*2  # approx 40 Mo
 
 
 def lru_cache(user_function):
@@ -27,7 +27,8 @@ def lru_cache(user_function):
             if len(cache) >= _max_size:
                 # Delete an item in the dict:
                 # print('lru_cache over size')
-                cache.popitem()
+                cache.popitem()  # does not make sens in PY2
+                # cache.clear()
             cache[key] = user_function(*args)
         return cache[key]
     return wrapper

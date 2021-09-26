@@ -1,57 +1,68 @@
-from data_conf import implementations, data_sources
+from spil import Sid
+from spil.sid.search.ss import SidSearch
+
+from spil.util.log import debug, warning, error
+from spil.conf import get_data_source as data_source
+from spil.vendor.py2_lru import lru_cache as cache
 
 
-class Data(object):
+@cache
+def get_data_source(sid):
+    """
+    For a given Sid, looks up the Sid type and the matching data_source, as defined in config.
+    Return value from the config is an instance.
+    """
+    _sid = Sid(sid)
+    if not str(_sid) == str(sid):
+        error('Sid could not be created, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
+    source = data_source(_sid)
+    if source:
+        debug('Getting source for "{}": -> {}'.format(sid, source))
+        return source
+    else:
+        warning('Data Source not found for Sid "{}" ({})'.format(sid, _sid.type))
+        return None
+
+
+class Data(SidSearch):
     """
     Data abstraction Layer.
 
     On top of the built-in FS, and delegating data access to other custom Data sources.
     """
 
-    def get_data_implementation(self, sid, attribute):
-        return implementations.get(attribute, {}).get(sid.type)
-
-    def get_data_source(self, sid):
-        return data_sources.get(sid.type, {}) or data_sources.get('default', {})
-
-    def get_data(self, sid, attribute):
-
-        func = self.get_data_implementation(sid, attribute)
-        if func:
-            return func(sid)
-        else:
-            print('Data Source implementation not found for Sid "{}" ({}) and attribute "{}"'.format(sid, sid.type, attribute))
-            return None
-
-    def get(self, sid, as_sid=True):
-
-        source = self.get_data_source(sid)
+    def get(self, search_sid, as_sid=True):
+        source = get_data_source(search_sid)
         if source:
-            print('Using source: {}'.format(source))
-            return source().get(sid, as_sid=as_sid)
-        else:
-            print('Data Source not found for Sid "{}" ({})'.format(sid, sid.type))
-            return None
+            return source.get(search_sid, as_sid=as_sid)
+
+    def get_one(self, search_sid, as_sid=True):
+        source = get_data_source(search_sid)
+        if source:
+            return source.get_one(search_sid, as_sid=as_sid)
+
+    def exists(self, search_sid):
+        source = get_data_source(search_sid)
+        if source:
+            return source.exists(search_sid)
 
 
 if __name__ == '__main__':
 
-    from spil import Sid
-    sid = 'raj/a/char/juliet/low/design/v002/w/mp4'
-    sid = Sid(sid)
-    got = Data().get_data(sid, 'comment')
-    print(got)
+    from spil.util.log import setLevel, DEBUG, ERROR
 
-    sid = 'raj/a/char/juliet/low/design/**'
-    sid = Sid(sid)
-    print(sid)
-    got = Data().get(sid)
-    for i in got:
-        print(i)
+    setLevel(ERROR)
 
-    sid = 'raj/*'
-    sid = Sid(sid)
-    print(sid)
-    got = Data().get(sid)
-    for i in got:
-        print(i)
+    def test(sid, limit=5):
+        sid = Sid(sid)
+        print(sid)
+        got = Data().get(sid)
+        if limit:
+            print(list(got)[:limit])
+        else:
+            for i in got:
+                print('"{}"'.format(i))
+
+    sids = ['CBM/*', 'CBM/*', 'CBM/A/*', 'FTOT/A/PRP/*']
+    for sid in sids:
+        test(sid)

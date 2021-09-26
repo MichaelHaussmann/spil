@@ -18,6 +18,7 @@ try:
     from spil.sid.sid import Sid
     from spil.sid.search.fs import FS
     from spil.sid.search.ls import LS
+    from spil.data.data import Data
     from spil.util.exception import SpilException
     from spil.util import log
     from spil.util.log import setLevel, ERROR

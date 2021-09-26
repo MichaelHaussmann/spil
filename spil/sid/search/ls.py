@@ -112,13 +112,16 @@ class LS(SidSearch):
     Still experimental.
 
     """
-    def __init__(self, searchlist, do_extrapolate=False, do_pre_sort=False):
+    def __init__(self, searchlist, do_extrapolate=False, do_pre_sort=False, do_strip=False):
         """
         Sets the search list, a list of sid strings.
+
+        Note: searchlist can be a generator, but it will be exhausted after a single function call.
 
         :param searchlist:
         :param do_extrapolate:
         :param do_pre_sort:
+        :param do_strip: if the returned items should be strip() (typically if coming from file input)
         """
         if do_extrapolate:
             self.searchlist = extrapolate(searchlist)
@@ -129,6 +132,8 @@ class LS(SidSearch):
 
         if do_pre_sort:
             self.sort_searchlist()
+
+        self.do_strip = do_strip
 
     def sort_searchlist(self):
         self.searchlist = sorted(list(set(self.searchlist)))
@@ -155,16 +160,20 @@ class LS(SidSearch):
         done = set()
         done_add = done.add  # performance
 
+        search_list = self.get_searchlist(do_sort=do_sort)
+
         for search_sid in search_sids:
 
             pattern = glob2re(str(search_sid))
-            debug('[star_search] "{}" in {} (...)'.format(search_sid, []))
+            debug('[star_search] "{}"'.format(search_sid))
 
-            for item in self.get_searchlist(do_sort=do_sort):
+            for item in search_list:
                 if re.match(pattern, item):
                     # debug('match : {}'.format(item))
                     if item not in done:
                         done_add(item)
+                        if self.do_strip:
+                            item = item.strip()
                         if as_sid:
                             yield Sid(item)
                         else:

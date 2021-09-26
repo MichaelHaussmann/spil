@@ -20,7 +20,8 @@ class Singleton(object):
 
     def __new__(cls, *args, **kwargs):
         if Singleton.instances.get(cls) is None:
-            Singleton.instances[cls] = object.__new__(cls, *args, **kwargs)
+            # Singleton.instances[cls] = object.__new__(cls, *args, **kwargs)
+            Singleton.instances[cls] = object.__new__(cls)
         return Singleton.instances[cls]
 
 
