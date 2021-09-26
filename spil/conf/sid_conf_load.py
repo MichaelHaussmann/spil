@@ -36,16 +36,16 @@ except ModuleNotFoundError as e:
     problem = """
     -------------------------------------------------------------------------------------------------------------
     CONFIGURATION PROBLEM: 
-    
+
     The configuration module "sid_conf" was not found.
     
     Ensure to either include "demo_conf" in your python path, 
     or create your own "sid_conf" and add its folder to the python path.    
-    
+
     (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
-    
+
     Please see installation and configuration documentation.
-    
+
     -------------------------------------------------------------------------------------------------------------
     """
     print(problem)
@@ -67,4 +67,3 @@ if __name__ == '__main__':
     from pprint import pprint
 
     pprint(globals())
-
