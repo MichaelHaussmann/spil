@@ -336,9 +336,11 @@ class Sid(object):
     def copy(self):
         return Sid(str(self))  # self.get_with()
 
-    def get_last(self, key):
+    def get_last(self, key=None):
+        if not key:
+            key = self.keytype
         # FIXME: asking for "FTOT/A/SET/GARDEN/SHD/WIP/ma" returns "TEST"
-        from spil import FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
+        from spil import Data as FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
         found = FS().get_one(self.get_with(key=key, value='>'), as_sid=True)
         if found.get(key):  # little failsafe. #SMELL
             return found
@@ -386,7 +388,7 @@ class Sid(object):
                 return self.get_next('version')  # Returns a first version
 
     def exists(self):
-        from spil import FS  # FIXME: explicit delegation and dynamic import
+        from spil import Data as FS  # FIXME: explicit delegation and dynamic import
         return FS().exists(self)
 
     def match(self, search_sid):  #IDEA: match_as(search_sid, key) for example, do the "seq" of both sids match
@@ -418,7 +420,7 @@ if __name__ == '__main__':
     sid = Sid(sid)
     new_scene = sid.get_with(version='*', state='WIP', ext='ma')
     print(new_scene.type)
-    print(new_scene.get_new())
+    # print(new_scene.get_new('version'))
 
 
     sid = 'FTOT?type=A'
