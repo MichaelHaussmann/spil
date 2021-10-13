@@ -62,12 +62,8 @@ if __name__ == '__main__':
     from spil.util.log import setLevel, ERROR, DEBUG
     setLevel(ERROR)
 
-    searches = {}
-    searches['*'] = 'All projects'
-    searches['FFM/*'] = 'All types for project FFM'
-    searches['FFM/R/SQ0001/SH0999/*'] = 'Render Tasks'
-    searches['FFM/R/SQ0001/SH0999/**'] = 'Renders'
     test_data(searches)
+    # test_data(searches)
 
     """
     Problem:

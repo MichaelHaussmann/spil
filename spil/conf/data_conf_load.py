@@ -22,6 +22,7 @@ if six.PY2:
 
 # stubs that are replaced by imports
 get_data_source = None
+get_attribute_source = None
 
 try:
     module = importlib.import_module('data_conf')
@@ -30,10 +31,10 @@ except ModuleNotFoundError as e:
     -------------------------------------------------------------------------------------------------------------
     CONFIGURATION PROBLEM: 
 
-    The configuration module "fs_conf" was not found.
+    The configuration module "data_conf" was not found.
     
     Ensure to either include "demo_conf" in your python path, 
-    or create your own "fs_conf" and add its folder to the python path.    
+    or create your own "data_conf" and add its folder to the python path.    
 
     (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
 

@@ -235,6 +235,13 @@ class Sid(object):
 
         return self.data.get(key)
 
+    def get_attr(self, attribute):
+
+        from spil.data.data import get
+        value = get(self, attribute)
+        if value:
+            return value
+
     def get_as(self, key):
 
         if not self.data:
