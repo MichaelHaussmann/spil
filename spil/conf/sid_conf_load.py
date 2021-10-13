@@ -29,6 +29,7 @@ key_types = {}
 extrapolate_types = {}
 key_patterns = {}
 extension_alias = {}
+projects = []
 
 try:
     module = importlib.import_module('sid_conf')
