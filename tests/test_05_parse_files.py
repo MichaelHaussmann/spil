@@ -15,7 +15,7 @@ If not, see <https://www.gnu.org/licenses/>.
 import six
 from tests import test_00_init  # needs to be before spil.conf import
 
-from spil.util.log import debug, setLevel, INFO, DEBUG, info
+from spil.util.log import debug, setLevel, INFO, DEBUG, info, ERROR
 from spil import Sid, SpilException
 from spil.conf import projects
 
@@ -27,9 +27,32 @@ else:
 from tests.test_02_save_sids_to_file import sid_file_path
 
 
+def is_ok(path):
+    """
+    Quick filter function to speed up parsing.
+    """
+    if not (str(path).count('3_PROD') or str(path).count('4_POSTPROD')):
+        return False
+    if path.name.startswith('.') or path.name.startswith('_') or path.suffix.endswith('~'):
+        return False
+    if path.suffix in ['.png', '.exr', '.jpg', '.raysync', '.swatches', '.comment']:  # currently not supported - speed up parsing
+        if not (str(path).count('.0100.') or str(path).count('.0101.')):  # we keep first frames only
+            return False
+    if str(path).count(r'\.') or str(path).count(r'\_'):
+        return False
+    return True
+
+
 def test_parse_files():
+    """
+    Recursively traverses a directory, and fetches all compatible Sids into a file.
+
+
+    """
 
     sid_file = sid_file_path().parent / 'sids.parsed.txt'
+
+    print('Sids will be written to : {}'.format(sid_file))
 
     if sid_file.exists():
         raise SpilException('The parse file "{}" already exists. Skipped'.format(sid_file))
@@ -42,9 +65,7 @@ def test_parse_files():
         with open(str(sid_file), 'a') as f:
 
             for path in project_root.rglob('*'):
-                if path.name.startswith('.') or path.name.startswith('_'):
-                    continue
-                if path.suffix in ['.png', '.exr', '.jpg', '.raysync']:  # currently not supported - speed up parsing
+                if not is_ok(path):
                     continue
                 print(path)
                 sid = Sid(path=path)
@@ -54,7 +75,7 @@ def test_parse_files():
 
 if __name__ == '__main__':
 
-    setLevel(INFO)  # Set to ERROR if file system contains a lot of non Sid translatable files.
+    setLevel(ERROR)  # Set to ERROR if file system contains a lot of non Sid translatable files.
 
     test_parse_files()
 

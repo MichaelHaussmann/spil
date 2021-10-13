@@ -48,18 +48,21 @@ def test_sids(sids, reraise=True):
         assert sid == eval(repr(sid))
 
         try:
-            assert sid == Sid(sid.get('project') + '?' + sid.get_uri())
-
             if not sid.type:
                 warn('Sid "{}" not typed, skipping'.format(sid))
                 continue
+
+            assert sid == Sid(sid.get('project') + '?' + sid.get_uri())
 
             key = sid.keytype
             parent_key = sid.parent.keytype
 
             if not sid.type == 'project':
-                if not sid.parent == sid.get_as(parent_key):
-                    warn('Sid "{}" parent problem'.format(sid))
+                if sid.parent and sid.get_as(parent_key):
+                    if not sid.parent == sid.get_as(parent_key):
+                        warn('Sid "{}" parent problem'.format(sid))
+                else:
+                    warn('Sid "{}" has not parent ?'.format(sid))
 
             if not sid.get_last(key):
                 print('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
@@ -79,7 +82,8 @@ def test_sids(sids, reraise=True):
                       'exists': sid.exists(),
                       'is_leaf': sid.is_leaf(),
                       'len': len(sid),
-                      'get_last': sid.get_last(key),
+                      'get_last': sid.get_last(),
+                      'get_last (version)': sid.get_last('version'),
                       'get_next': sid.get_next('version'),
                       'get_new': sid.get_new('version'),
                       'type': sid.type,
@@ -130,8 +134,6 @@ if __name__ == '__main__':
     #test_sids(working_uri)
     # test_sids(failing_uri)
 
-    test_sids(sids[:5000])
-
     new_tasks = ['FTOT/S/SQ0001/SH0020/FX-*', 'FTOT/S/SQ0001/SH0020/*', 'FTOT/S/SQ0001/SH0020/FX', 'FTOT/S/SQ0001/SH0020/FX-MOCCO']
     # test_sids(new_tasks)
 
@@ -139,10 +141,25 @@ if __name__ == '__main__':
     # test_sids(bad_tasks, reraise=False)
 
     new_tasks = ['FTOT/A/CHR/MOCCO/CFXin', 'FTOT/A/CHR/MOCCO/CFXsim', 'FTOT/A/CHR/MOCCO/CFXsim-HAT',]
-    test_sids(new_tasks)
+    # test_sids(new_tasks)
 
     bad_tasks = ['FTOT/S/SQ0001/SH0020/F', 'FTOT/S/SQ0001/SH0020/FXMOCCO', 'FTOT/S/SQ0001/SH0020/RND-']
     # test_sids(bad_tasks, reraise=False)
+
+    marv_sids = ['FTOT/S/SQ0001/SH0020/LAY/V001/WIP/zprj']
+    # test_sids(marv_sids, reraise=True)
+
+    render_sids = ['FTOT/R', 'FTOT/R/SQ0001', 'FTOT/R/SQ0001/SH0020', 'FTOT/R/SQ0001/SH0020/RND',
+                   'FTOT/R/SQ0001/SH0020/RND/V001', 'FTOT/R/SQ0001/SH0020/RND/V001/WIP',
+                   'FTOT/R/SQ0001/SH0020/RND/V001/WIP/BEAUTY_ALL',
+                   'FTOT/R/SQ0001/SH0020/RND/V032/WIP/BEAUTY_TEST/0101',
+                   'FTOT/R/SQ0001/SH0020/RND/V001/WIP/BEAUTY_ALL/*/exr',
+                   'FTOT/R/SQ0001/SH0020/RND/V032/WIP/BEAUTY_TEST/0101/png',
+                   ]  # SQ0001_SH0020_RND_WIP_V032 is Layer
+    # test_sids(render_sids, reraise=True)
+
+    # All sids test
+    test_sids(sids[:5000])
 
     print('Done')
 
