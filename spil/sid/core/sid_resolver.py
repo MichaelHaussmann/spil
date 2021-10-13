@@ -34,7 +34,7 @@ import lucidity
 from lucidity import Template
 import string
 
-from spil.vendor.py2_lru import lru_cache as cache
+from spil.util.caching import lru_cache as cache
 
 from spil.util.log import debug, info
 from spil.util.exception import SpilException

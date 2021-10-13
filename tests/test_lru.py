@@ -1,4 +1,4 @@
-from spil.vendor.py2_lru import lru_cache
+from spil.util.caching import lru_cache
 
 
 def fib(n):
