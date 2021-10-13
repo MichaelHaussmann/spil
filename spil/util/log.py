@@ -30,7 +30,7 @@ TODO: complete code clean.
 #__logFormat = '[%(asctime)s] %(levelname)8s| %(message)s (%(filename)s:%(funcName)s:%(lineno)d)'
 
 __logFormat = '[%(asctime)s] %(levelname)-6s| [%(module)s.%(funcName)s] %(message)-80s (%(lineno)d)'
-
+__logFormat_colored = '%(color)s[%(asctime)s] %(levelname)-6s| [%(module)s.%(funcName)s] %(message)-80s (%(lineno)d)%(end_color)s'
 #logging.basicConfig(format=__logFormat, level=conf.loglevel) # ??
 
 # The following is needed to override the Maya logging configuration, the "basicConfig" does not work
@@ -52,6 +52,14 @@ logzero.formatter(logging.Formatter(fmt=__logFormat))
 logger.setLevel(logging.INFO)  # FIXME: config (depending on deploy dir)
 
 
+def get_logger(name, color=True):
+    new_logger = logzero.setup_logger(name=name)
+    if color:
+        new_logger.handlers[0].setFormatter(logzero.LogFormatter(fmt=__logFormat_colored, color=True))
+    else:
+        new_logger.handlers = []  # if we keep the handler, all logs are red.
+        new_logger.addHandler(handler)
+    return new_logger
 
 """
 Code shortcuts
@@ -74,6 +82,16 @@ ERROR = logging.ERROR
 
 if __name__ == '__main__':
 
+    # specific logger (recommended)
+    log_one = get_logger('one')
+    # log_one = get_logger('one', color=False)
+    log_one.debug('debug one')
+    log_one.info('info one')
+    log_one.setLevel(ERROR)
+    log_one.debug('debug one')
+    log_one.error('error one')
+
+    # default logger
     setLevel(INFO)
     debug('titi')
 

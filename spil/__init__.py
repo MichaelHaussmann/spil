@@ -21,6 +21,7 @@ try:
     from spil.data.data import Data
     from spil.util.exception import SpilException
     from spil.util import log
+    from spil.util import log as logging  # to use as standard logging and create custom loggers
     from spil.util.log import setLevel, ERROR
     setLevel(ERROR)
 except Exception as e:
