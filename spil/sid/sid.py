@@ -122,8 +122,7 @@ class Sid(object):
         if not uri:
             self.string = string  # string without type, without uri
         else:
-            data = self.data.copy()
-            data.update(**uri_helper.to_dict(uri))
+            data = uri_helper.update(self.data, uri)
             _type = sid_resolver.dict_to_type(data, all=True)
             if not _type:
                 warn('[Sid] After URI apply, Sid "{}" has no type. URI will not be applied.'.format(self.string))

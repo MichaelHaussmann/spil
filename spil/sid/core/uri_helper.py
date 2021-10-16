@@ -60,6 +60,45 @@ def to_string(uri_dict):
     return urlencode(uri_dict, quote_via=encode)
 
 
+def update(data, uri, option_prefix='~'):
+    """
+    Updates given dict with given uri into a new dict.
+
+    If the URI value starts with option_prefix, it is only updated (if the key exists), not added.
+
+    Option_prefix are removed from values, unless set to None.
+    Keys and values are supposed to be strings.
+
+    Examples:
+    >>> update({'keyA': 'valueA', 'keyB': 'valueB'}, 'keyB=~replaceB&keyC=~skip this&keyD=keep this')
+    {'keyA': 'valueA', 'keyB': 'replaceB', 'keyD': 'keep this'}
+
+    >>> update({'keyA': 'valueA'}, 'keyB=~valueB', option_prefix=None)
+    {'keyA': 'valueA', 'keyB': '~valueB'}
+
+    >>> update({'keyA': 'valueA'}, 'keyB=valueB')
+    {'keyA': 'valueA', 'keyB': 'valueB'}
+    """
+    data = data.copy()
+    new_data = to_dict(uri)
+
+    for key, value in six.iteritems(new_data):
+
+        if option_prefix:
+            if str(value).startswith(str(option_prefix)):
+                value = str(value).replace(option_prefix, '')
+                is_value_optional = True
+            else:
+                is_value_optional = False
+        else:
+            is_value_optional = False
+
+        if key in data.keys() or (not is_value_optional):
+            data[key] = value
+
+    return data
+
+
 if __name__ == '__main__':
     """
     Test block.
