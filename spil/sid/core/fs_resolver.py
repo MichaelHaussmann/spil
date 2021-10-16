@@ -120,8 +120,12 @@ def dict_to_path(data, _type=None):
     # reverse path mapping
     for key, value in six.iteritems(data):
         if value and path_mapping.get(key):
-            mapping = path_mapping.get(key)
+            mapping = path_mapping.get(key)  # global mapping
             data[key] = utils.get_key(mapping, value, value)
+
+            mapping = path_mapping.get((key, _type))  # type specific mapping
+            if mapping:
+                data[key] = utils.get_key(mapping, value, value)
 
     debug('sidtype: {}'.format(_type))
 
