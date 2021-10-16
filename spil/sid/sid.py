@@ -253,6 +253,9 @@ class Sid(object):
             if k == key:
                 return Sid(data=data)
 
+        warn('[Sid][get_as] Key "{}" not found in Data "{}"'.format(key, self.data))
+        return Sid()
+
     def get_with(self, key=None, value=None, **kwargs):
         """
         Returns a Sid with the given key(s) changed.
