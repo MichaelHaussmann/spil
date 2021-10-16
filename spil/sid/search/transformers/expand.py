@@ -24,6 +24,7 @@ from spil.util.exception import SpilException
 from spil.conf import sid_templates, sidtype_keytype_sep
 from spil.sid.core.sid_resolver import sid_to_dicts
 from spil.sid.sid import Sid
+from spil.util.caching import lru_cache as cache
 
 
 def execute(sids):
@@ -41,7 +42,7 @@ def execute(sids):
 
     return result
 
-
+@cache
 def expand(sid, do_extrapolate=False):
     """
     This expects a string and converts to Sid (#SMELL)
@@ -77,7 +78,8 @@ def expand(sid, do_extrapolate=False):
     sid = str(sid)
 
     if not sid.count('/**'):  # nothing to expand
-        r = set([Sid(sid)])
+        # r = set([Sid(sid)])
+        r = simple_typing(sid)
         debug('Nothing to expand for {}. Just casting to Sid set {}'.format(sid, r))
         return r
 
@@ -142,6 +144,34 @@ def expand(sid, do_extrapolate=False):
         print(list(set(result)))
     """
     return list(set(result))
+
+@cache
+def simple_typing(sid):
+
+    if sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
+        sid, uri = sid.split('?', 1)
+    else:
+        uri = ''
+
+    root = sid.split('/*')[0]
+    basetype = Sid(root).basetype
+    if not basetype:  # not typed, returning as is
+        return set([Sid(sid)])
+        # raise SpilException('The Search Sids "{}" root "{}" cannot be typed, so it cannot be expanded. This is probably a configuration error.'.format(sid, root))
+
+    result = []
+    matching = sid_to_dicts(sid)
+    debug('Got {}'.format(matching))
+    for __type, data in six.iteritems(matching):
+        debug('found :' + __type)
+        if uri:
+            new_sid = Sid('{}:{}?{}'.format(__type, sid, uri))
+        else:
+            new_sid = Sid(__type + ':' + sid)
+        debug('appending: {}'.format(new_sid.full_string))
+        result.append(new_sid)
+
+    return list(set(result)) or set([Sid(sid)])
 
 
 if __name__ == '__main__':
