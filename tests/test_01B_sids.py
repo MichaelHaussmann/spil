@@ -69,7 +69,7 @@ def test_sids(sids, reraise=True):
 
             path = sid.path
             if path:
-                assert sid == Sid(path=sid.path)
+                assert sid == Sid(path=sid.path), 'Sid has no path ' + sid.path
                 assert sid.path == Sid(path=sid.path).path
             else:
                 print('Sid "{}" has no path.'.format(sid))
@@ -157,6 +157,12 @@ if __name__ == '__main__':
                    'FTOT/R/SQ0001/SH0020/RND/V032/WIP/BEAUTY_TEST/0101/png',
                    ]  # SQ0001_SH0020_RND_WIP_V032 is Layer
     # test_sids(render_sids, reraise=True)
+
+    comp_sids = ['CBM/S/SQ0001/SH0020/COMPO/v001/nk']  # SQ0001_SH0020_RND_WIP_V032 is Layer
+    # test_sids(comp_sids, reraise=True)
+
+    unsids = ['CBM/S/SQ0001/SH0010/CASTING', 'CBM/S/SQ0001/SH0010/FRAMERANGE']
+    # test_sids(unsids, reraise=True)
 
     # All sids test
     test_sids(sids[:5000])

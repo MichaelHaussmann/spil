@@ -60,7 +60,19 @@ def test_fs(searches):
 if __name__ == '__main__':
 
     from spil.util.log import setLevel, ERROR, DEBUG
-    setLevel(DEBUG)
+    setLevel(ERROR)
+
+    # searches = {}
+    # searches['CBM/*'] = ''
+    # searches['CBM/S/*'] = ''
+    # searches['CBM/S/SQ0001/*'] = ''
+    searches['FTOT/S/SQ0001/SH0010/*'] = ''
+    #searches['CBM/S/SQ0001/SH0020/**'] = ''
+    #searches['CBM/S/SQ0001/SH0020/**/nk'] = ''
+    # searches['CBM/S/SQ0001/SH0020/COMPO/*/nk'] = ''
+    # searches['CBM/S/SQ0001/SH0020/*/*/nk'] = ''
+    #searches['CBM/S/SQ0001/SH0020/COMPO/v001/nk'] = ''
+
     test_fs(searches)
 
     """

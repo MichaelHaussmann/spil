@@ -62,6 +62,17 @@ if __name__ == '__main__':
     from spil.util.log import setLevel, ERROR, DEBUG
     setLevel(ERROR)
 
+    searches = {}
+    # searches['CBM/S/SQ0001/SH0020/*'] = 'Data - has problems ?'
+    # searches['CBM/S/SQ0001/SH0020/**'] = ''
+    # searches['CBM/S/SQ0001/SH0020/**/nk'] = ''
+    searches['CBM/S/SQ0001/SH0010/*'] = ''
+
+
+    # searches['CBM/S/SQ0001/SH0020/COMPO/*/nk'] = ''
+    # searches['CBM/S/SQ0001/SH0020/*/*/nk'] = ''
+    # searches['CBM/S/SQ0001/SH0020/COMPO/v001/nk'] = ''
+
     test_data(searches)
     # test_data(searches)
 
