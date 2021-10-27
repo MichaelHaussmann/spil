@@ -70,16 +70,17 @@ Spil offers a simple API to work with Sids.
 
 ```
 current_shot = Sid("hamlet/s/sq030/sh0010") 
-current_shot.get("project")                 # "hamlet" 
-current_shot.get_as("sequence")             # "hamlet/s/sq030" 
-current_shot.get_with(task="animation")     # "hamlet/s/sq030/sh0010/animation"  
-current_shot.data                           #  { 'project': 'hamlet', 'type': 's', 'sequence': 'sq030', 'shot': 'sh0010' }
+current_shot.get("project")           # "hamlet" 
+current_shot.get_as("sequence")       # "hamlet/s/sq030" 
+current_shot.get_with(task="render")  # "hamlet/s/sq030/sh0010/render"  
 ```
-  
-Since the types make sense in a pipeline, Sids can be sorted.  
-For example, "animation" comes before "render", and "v002" before "v005".
+
+Data can be accessed in multiple ways, dictionary, string or URI
 ```
-"hamlet/s/sq030/sh0010/animation" < "hamlet/s/sq030/sh0010/render" < "hamlet/s/sq030/sh0010/comp"
+current_shot = Sid("hamlet/s/sq030/sh0010") 
+current_shot.data            #  { 'project': 'hamlet', 'type': 's', 'sequence': 'sq030', 'shot': 'sh0010' }
+current_shot.get_uri()       # "project=hamlet&type=s&seq=sq030&shot=sh0010"
+current_shot.fullstring      # "shot__shot:hamlet/s/sq030/sh0010" 
 ```
 
 #
@@ -101,7 +102,21 @@ current.get('version')                # "v002"
 
 - The Sid could be resolved from an ftrack "link" string, or a cgwire json, or any datasource, after implementation of a mapping or translation.
 
-This makes the Sid a versatile and lightweight data source abstraction layer.
+Common requests are delegated from the Sid to a configurable Data Source
+```
+task_sid = Sid("hamlet/s/sq030/sh0010/layout") 
+task_sid.exists()                 # True
+task_sid.get_last('version')      # "hamlet/s/sq030/sh0010/layout/v003"
+```
+
+Sids can be chained to easily express common pipeline needs 
+```
+task_sid = Sid("hamlet/s/sq030/sh0010/layout") 
+if task_sid.exists():
+  print( task_sid.get_last('version').get_attr('comment') )     # "Changed camera angle."
+```
+
+This all makes the Sid a versatile and lightweight data source abstraction layer.
 
 
 #
@@ -129,44 +144,68 @@ sg.find('Shot',
 Building on top of these ideas, and considering the Sid as a middleware, 
 it can be used as a simple, intuitive, and unified search syntax.
 
+The search syntax is string based, and uses operators:
+- \*   : star search
+- **  : recursive star search
+- \>   : last
+- \,   : or
+  
+#### Search Examples
 - "All the Shots of sequence sq030" ?
 ```
 "hamlet/s/sq030/*"
-```
-Finds:
-```
-"hamlet/s/sq030/sh0010"
-"hamlet/s/sq030/sh0020"
-"hamlet/s/sq030/sh0030"
 ```
 
 - "All the published maya files of Ophelias modeling" ?
 ```
 "hamlet/a/chars/ophelia/modeling/*/p/mb"
 ```
-Finds:
+- "Last published maya file of Ophelias modeling" ?
 ```
-"hamlet/a/chars/ophelia/modeling/v001/p/mb"
-"hamlet/a/chars/ophelia/modeling/v004/p/mb"
+"hamlet/a/chars/ophelia/modeling/>/p/maya"
 ```
 
-- "Movie file (alias for mp4,mov) for last published version of last task, for all shots of hamlet's sequence 30" ?
+- "Last published render Movie files for the project hamlet" ?
 ```
-"hamlet/s/sq030/*/>/>/p/movie"
+"hamlet/s/**/render/>/p/movie"
 ```
-Finds:
+
+- "All cache files for hamlet's sequence 30, shot 10" ?
 ```
-"hamlet/s/sq030/sh0010/render/v001/p/mp4"
-"hamlet/s/sq030/sh0020/animation/v006/p/mp4"
-"hamlet/s/sq030/sh0030/comp/v003/p/mp4"
+"hamlet/s/sq030/sh010/**/cache"
 ```
+
+#### URI in search 
+
+URI Syntax can be used to add search filters on yet untyped searches
+
+- "All published Movie files for hamlet's sequence 30" ?
+```
+"hamlet/s/sq030/**/movie?state=p"
+```
+
+- "All published hip files for hamlet's sequence 30, animation or layout" ?
+```
+"hamlet/s/sq030/**/hip?state=p&task=animation,layout"
+```
+
+  
+#### Implementation
 
 This search syntax is currently implemented:
 - to search the file system
-- to search in a list of Sids, for example a list of cached query results.
+- to search in a list of Sids, for example a list of cached query results
 
 It is possible (and planned) to implement this search as a front to other query methods.
 For example to translate to an SQL, Shotgun or Ftrack query. 
+
+# 
+### UI
+
+Spil can be used with the spil_ui.browser.
+
+The browser allows to run sid searches and to navigate through the results.
+spil_ui is a separate repository.
 
 
 # 
@@ -189,7 +228,24 @@ File config example:
 ('asset__movie_file',       r'{@project_root}/movies/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:movies}'),
 ```
 
-Tested in Python 2.7 and 3.7
+The Data Source is configurable depending on the given Sid or Sid type.
+```
+get_data_source(sid)  # may return a SidCache or FS() (File system Search), or custom
+get_attribute_source(sid, attribute)  # returns custom callables 
+```
+
+Spil works in Python 2.7 and 3.7
+
+# 
+### Performance
+
+Spil thrives to be used interactively. 
+It's performance depends on the data sources that are used.
+
+- Spil ships with a configurable SidCache to handle data that changes rarely (projects, sequences, asset categories). 
+- String / Sid Resolves are internally stored in a lru_cache
+- searches use generators
+- Python 3 is globally faster that python 2
 
 #
 ### Concepts  
@@ -236,20 +292,21 @@ The Sid has been used in general and fx pipelines for over 10 years, in various 
 ### Philosophy
 
 Spil aims to be : flexible, pragmatic, simple - and reliable. 
-
+####
 - flexible  
-Spil can be plugged to existing pipelines. It easily blends in, to be used only where it is needed.    
+Spil is a library, and not a framework.  
+It can be plugged to existing pipelines. It easily blends in, to be used only where it is needed.
 It can also be planned at a pipelines core - and be a central part of it.
-
+####
 - pragmatic  
 It all starts as files. So does Spil.  
-YAGNI meets WYSIWYG.
-
+YAGNI meets WYSIWYG.  
+####
 - simple  
 One of the ideas of Spil is to build upon implicit information, to simplify how we see our datas.  
 For example, it is obvious that "hamlet/a/chars" is an asset category, and "hamlet/a/chars/ophelia/modeling" is a modeling task.  
 The Sid's string representation is a dictionary where the keys are implicit. Intuitive for the human user. 
-
+####
 - reliable  
 This part is yet to prove.  
 "In the face of ambiguity, refuse the temptation to guess."  
@@ -259,20 +316,21 @@ But who are you to have read this far anyway?
 # 
 ### Main limitations
 
-- Alpha stage  
+- Beta stage  
 The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.  
-But this version of "Spil" is a complete rewrite, which is still in Alpha stage.   
-Rollouts in production are planned, but many parts of this code are still Proof-of-Concept stage.  
-It lacks basic code testing and profiling tools.
+But this version of "Spil" is a complete rewrite. It is currently used in production, but is still young.
+It lacks automated code testing and profiling.
 
 - The configuration is tricky  
 For complex projects, creating the config is not simple, and is lacking tools to help.
-Sometimes, the configuration can create overlapping types, and errors that can go undetected and are hard to find. 
+Sometimes, the configuration can create overlapping or ambiguous types, and errors that can go undetected and are hard to find. 
 
 - Complex configurations do not work out of the box
 
 - Needs optimisation  
 Core parts will need a C++ implementation.
+Searches returning big result sets can be relatively slow.  
+File sequence support (eg. image sequences using fileseq) is still very slow. 
 
 
 # 
@@ -280,23 +338,21 @@ Core parts will need a C++ implementation.
 
 The priority is to make the current feature set more robust and efficient.  
 Adding tests and documentation.
-Optimization through generators, caches, better algorithms.
 
 Then, implement some important but missing core features and enhancements
-- add support for file sequences (integration of pyseq or fileseq, or similar)
+- better support for file sequences (fileseq)
 - allow optional fields in the config (as the bracket syntax in SGTK yaml)
 - move the config to a universal format (yaml) 
 - adding a C++ implementation to make the resolve faster
 - tools to help create and verify the configuration files
 
-To take profit from the Sids universality, we then plan on building reusable open source bricks and pipeline tools.
+To take profit from the Sids universality, we plan on building reusable open source bricks and pipeline tools.
 
 For example:
-- simple and universal Sid browser UI (under active development)
-- connectors to Shotgun and Relational Databases
+- connectors to Shotgun, CGWire, Ftrack and Relational Databases
 - using the sid as a USD Asset Resolver / In a USD pipeline
 - protocol for pipeline actions  
-For example `sid://play?hamlet/s/sq030/*/>/>/p/movie`
+For example `sid://play?hamlet/s/sq030/**/>/p/movie`
 - REST Api
 - file system style navigation and context handling    
 For example `cd hamlet/s/sq010`
