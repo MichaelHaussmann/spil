@@ -18,7 +18,7 @@ def get_data_source(sid):
     """
     _sid = Sid(sid)
     if not str(_sid) == str(sid):
-        error('Sid could not be created, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
+        warning('Sid could not be created, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
     source = data_source(_sid)
     if source:
         debug('Getting data source for "{}": -> {}'.format(sid, source))
