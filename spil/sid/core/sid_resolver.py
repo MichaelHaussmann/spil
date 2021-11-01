@@ -108,7 +108,7 @@ def sid_to_dicts(sid):
     :param sid:
     :return:
     """
-    results = {}
+    results = {}  # OrderedDict() TODO: check behaviour py2 != py3
 
     # instantiating lucidity Templates
     for name, pattern in six.iteritems(sid_templates):
