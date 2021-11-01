@@ -371,7 +371,7 @@ class Sid(object):
             if current in ['*', '>']:  #FIXME: point to "searcher signs" config
                 version = (self.get_last('version').get('version') or 'V000').split('V')[-1] or 0
             else:
-                version = self.get('version').split('V')[-1]
+                version = self.get('version').upper().split('V')[-1]  # temporary workaround for "v001" FIXME
         else:
             version = 0  # allow non existing version #RULE: starts with V001 (#FIXME)
         version = (int(version) + 1)
