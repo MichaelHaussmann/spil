@@ -17,50 +17,61 @@ import six
 from tests import test_00_init  # import needed before spil.conf
 
 from spil.conf import sid_templates, path_templates
-from spil.util.log import info
-from warnings import warn
 
 print(test_00_init)
 
+
+def get_duplicates(items):
+    unique = set()
+    duplicate = set()
+    for item in items:
+        if item not in duplicate:
+            unique.add(item)
+        else:
+            duplicate.add(item)
+    return duplicate
+
+
 def test_sid_duplicates():
 
-    info('Testing duplicates in sid_templates (sid_conf)')
+    print('- Testing duplicates in sid_templates (sid_conf)...')
 
-    sid_keys = set(sid_templates.keys())
-
-    if len(sid_keys) != len(sid_templates.keys()):
-        warn('Duplicate keys in sid_templates (sid_conf)')
+    duplicate_keys = get_duplicates(sid_templates.keys())
+    if duplicate_keys:
+        print('\tFAILED: Duplicate keys in sid_templates (sid_conf): {}'.format(duplicate_keys))
     else:
-        info('Keys OK in sid_templates (sid_conf)')
+        print('\tOK: No duplicate in sid_template keys (sid_conf).')
 
-    if len(set(sid_templates.values())) != len(sid_templates.values()):
-        warn('Duplicate values in sid_templates (sid_conf)')
+    duplicate_values = get_duplicates(sid_templates.values())
+    if duplicate_values:
+        print('\tFAILED: Duplicate values in sid_templates (sid_conf): {}'.format(duplicate_values))
     else:
-        info('Values OK in sid_templates (sid_conf)')
+        print('\tOK: No duplicate in sid_templates values (sid_conf).')
+
+    print()
 
 
 def test_fs_duplicates():
 
-    info('Testing duplicates in path_templates (fs_conf)')
+    print('- Testing duplicates in path_templates (fs_conf)...')
 
-    fs_keys = set(path_templates.keys())
-
-    if len(fs_keys) != len(path_templates.keys()):
-        warn('Duplicate keys in path_templates (fs_conf)')
+    duplicate_keys = get_duplicates(path_templates.keys())
+    if duplicate_keys:
+        print('\tFAILED: Duplicate keys in path_templates (fs_conf): {}'.format(duplicate_keys))
     else:
-        info('Keys OK in path_templates (fs_conf)')
+        print('\tOK: No duplicate in path_templates keys (fs_conf).')
 
-    if len(set(path_templates.values())) != len(path_templates.values()):
-        warn('Duplicate values in path_templates (fs_conf)')
-        for val in sorted(path_templates.values()):
-            print(val)
+    duplicate_values = get_duplicates(path_templates.values())
+    if duplicate_values:
+        print('\tFAILED: Duplicate values in path_templates (fs_conf): {}'.format(duplicate_values))
     else:
-        info('Values OK in path_templates (fs_conf)')
+        print('\tOK: No duplicate in path_templates values (fs_conf).')
 
+    print()
 
-def test_missings():
+def test_missing():
 
-    info('Testing missings in sid_conf vs fs_conf')
+    print('- Testing missing in sid_conf vs fs_conf...')
 
     sid_keys = set(sid_templates.keys())
     fs_keys = set(path_templates.keys())
@@ -69,13 +80,17 @@ def test_missings():
 
     missing_in_fs_conf = sid_keys - fs_keys - to_ignore
     if missing_in_fs_conf:
-        warn('Missing in fs_conf (path_templates) : {}'.format(missing_in_fs_conf))
+        print('\tFAILED: Missing sid_conf keys in FS keys: {}'.format(missing_in_fs_conf))
+    else:
+        print('\tOK: all sid_conf keys are in FS keys.')
 
     missing_in_sid_conf = fs_keys - sid_keys - to_ignore
     if missing_in_sid_conf:
-        warn('Undefined in sid_conf (sid_templates) : {}'.format(missing_in_sid_conf))
+        print('\tFAILED: Missing FS keys in sid_conf keys: {}'.format(missing_in_sid_conf))
     else:
-        info('')
+        print('\tOK: All FS keys are in sid_conf keys.')
+
+    print()
 
 
 if __name__ == '__main__':
@@ -91,12 +106,9 @@ if __name__ == '__main__':
         print('{} -> {}'.format(k, v))
 
     print()
-    print('Tests: ')
+    print('Tests:')
     test_sid_duplicates()
     test_fs_duplicates()
-    test_missings()
+    test_missing()
 
     print('Done')
-
-
-
