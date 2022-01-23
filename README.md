@@ -129,7 +129,7 @@ If the Sid is planned into the pipeline, it is a handy database field.
 SELECT * FROM Entities WHERE sid = "hamlet/a/chars/ophelia"
 ```
 
-- Shotgun query example 
+- Shotgrid query example 
 ```
 sg.find('Shot', 
         ['sg_sid', 'is', 'hamlet/s/sq030/sh0010'],
@@ -197,7 +197,7 @@ This search syntax is currently implemented:
 - to search in a list of Sids, for example a list of cached query results
 
 It is possible (and planned) to implement this search as a front to other query methods.
-For example to translate to an SQL, Shotgun or Ftrack query. 
+For example to translate to an SQL, Shotgrid or Ftrack query. 
 
 # 
 ### UI
@@ -272,21 +272,24 @@ https://www.python.org/dev/peps/pep-0428
 Examples: "SPREF" (Sony Pictures), or the "Pipeline Resource Identifier - PRI" (Blue Sky)  
 https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432776da6ab
 
-- Resource description and "Context" (Shotgun Toolkit)  
-https://developer.shotgunsoftware.com/tk-core/core.html#context
+- Resource description and "Context" (Shotgrid Toolkit)  
+  https://developer.shotgridsoftware.com/tk-core/core.html#context
 
 - the "TypedContext", an entity for hierarchical types in Ftrack
 
 - Template based path resolving  
-As implemented in Shotgun Toolkit:  
-https://github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml  
-Or by Lucidity : https://gitlab.com/4degrees/lucidity/
+  As implemented in Shotgrid Toolkit:  
+  https://github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml  
+  Or by Lucidity : https://gitlab.com/4degrees/lucidity/
 
-- Asset Resolution - ArResolver - in USD  
-https://graphics.pixar.com/usd/docs/668045551.html#AssetResolution(Ar)2.0-AddURIResolvers 
+- Middleware between Asset consumers or producers, "OpenAssetIO"  
+  https://github.com/TheFoundryVisionmongers/OpenAssetIO  
 
-- The Sid itself  
-The Sid has been used in general and fx pipelines for over 10 years, in various forms and at various degrees.  
+- Asset Resolution - ArResolver - in USD    
+  https://graphics.pixar.com/usd/release/wp_ar2.html  
+  
+- The Sid itself    
+  The Sid has been used in general and fx pipelines for over 10 years, in various implementations and at various degrees.  
  
 #
 ### Philosophy
@@ -323,9 +326,7 @@ It lacks automated code testing and profiling.
 
 - The configuration is tricky  
 For complex projects, creating the config is not simple, and is lacking tools to help.
-Sometimes, the configuration can create overlapping or ambiguous types, and errors that can go undetected and are hard to find. 
-
-- Complex configurations do not work out of the box
+Complex configurations do not work out of the box  
 
 - Needs optimisation  
 Core parts will need a C++ implementation.
@@ -337,25 +338,29 @@ File sequence support (eg. image sequences using fileseq) is still very slow.
 ### Plans and ongoing development
 
 The priority is to make the current feature set more robust and efficient.  
-Adding tests and documentation.
+Adding tests, documentation and quickstart.
 
-Then, implement some important but missing core features and enhancements
-- better support for file sequences (fileseq)
-- allow optional fields in the config (as the bracket syntax in SGTK yaml)
-- move the config to a universal format (yaml) 
-- adding a C++ implementation to make the resolve faster
+Then, implement some important core features and enhancements
 - tools to help create and verify the configuration files
+- simplify the Sid's core implementation and make it extendable
+- adding a C++ implementation to make the resolve faster
 
 To take profit from the Sids universality, we plan on building reusable open source bricks and pipeline tools.
 
 For example:
-- connectors to Shotgun, CGWire, Ftrack and Relational Databases
+- connectors to Shotgrid, CGWire, Ftrack and Relational Databases
 - using the sid as a USD Asset Resolver / In a USD pipeline
 - protocol for pipeline actions  
 For example `sid://play?hamlet/s/sq030/**/>/p/movie`
-- REST Api
+- REST API
+- GraphQL API  
 - file system style navigation and context handling    
 For example `cd hamlet/s/sq010`
+  
+Some under the hood development is under evaluation
+- faster support for file sequences (fileseq)
+- allow optional fields in the config (as the bracket syntax in SGTK yaml)
+- move the config to a universal format (yaml) 
 
 
 Yeah, and we need a quickstart video... 
