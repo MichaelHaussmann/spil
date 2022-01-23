@@ -12,10 +12,17 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+
+"""
+Reads the list saved in sid_file_path, and generates a dummy file system hierarchy, according to the config.
+
+Important: uses the actual project paths, as in config. Be careful !!
+
+"""
 import os
 import six
 
-from tests import test_00_init  # needs to be before spil.conf import
+from spil_tests.utils import init  # needs to be before spil.conf import
 
 from spil import Sid, SpilException
 from spil.util.utils import is_filename
@@ -26,7 +33,7 @@ if six.PY2:
 else:
     from pathlib import Path
 
-from tests.test_02_save_sids_to_file import sid_file_path
+from spil_tests.utils.save_sid_list_to_file import sid_file_path
 
 
 def test_generate_files(max_amount=10):

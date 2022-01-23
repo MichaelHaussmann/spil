@@ -13,7 +13,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 import six
-from tests import test_00_init  # needs to be before spil.conf import
+from spil_tests.utils import init  # needs to be before spil.conf import
 
 from spil.util.log import debug, setLevel, INFO, DEBUG, info, ERROR
 from spil import Sid, SpilException
@@ -23,8 +23,6 @@ if six.PY2:
     from pathlib2 import Path
 else:
     from pathlib import Path
-
-from tests.test_02_save_sids_to_file import sid_file_path
 
 
 def is_ok(path):
@@ -43,16 +41,20 @@ def is_ok(path):
     return True
 
 
-def test_parse_files():
+def test_parse_files(sid_file, is_ok_callback=None):
     """
-    Recursively traverses a directory, and fetches all compatible Sids into a file.
+    Recursively traverses the project directories, and fetches all compatible Sids into a file.
 
-
+    is_ok_callback is a function to filter out paths that do not need to be Sid tested.
     """
-
-    sid_file = sid_file_path().parent / 'sids.parsed.txt'
 
     print('Sids will be written to : {}'.format(sid_file))
+
+    if is_ok_callback:
+        is_ok = is_ok_callback
+    else:
+        def is_ok(path):
+            return True
 
     if sid_file.exists():
         raise SpilException('The parse file "{}" already exists. Skipped'.format(sid_file))
@@ -76,6 +78,8 @@ def test_parse_files():
 if __name__ == '__main__':
 
     setLevel(ERROR)  # Set to ERROR if file system contains a lot of non Sid translatable files.
+    from spil_tests.utils.save_sid_list_to_file import sid_file_path
 
-    test_parse_files()
+    sid_file = sid_file_path().parent / 'sids.parsed.txt'
+    test_parse_files(sid_file)
 
