@@ -17,15 +17,15 @@ import six
 if six.PY3:  #TODO: add Timer in package for PY3 (they have a great package setup) - Also add tox.
     from codetiming import Timer
 else:
-    from tests.mock_timer import Timer
+    from spil_tests.mock_timer import Timer
 
-from tests import test_00_init  # needs to be before spil.conf import
-from spil import Data
+from spil_tests import test_00_init  # needs to be before spil.conf import
+from spil import FS
 from spil.util.log import info
 from example_searches import searches
 
 
-def test_data(searches):
+def test_fs(searches):
 
     do_doublon_check = True  # Set to false when testing performance
     as_sid = True
@@ -33,7 +33,7 @@ def test_data(searches):
     global_timer = Timer(name="global")
     global_timer.start()
 
-    ls = Data()
+    ls = FS()
     for search_sid, comment in six.iteritems(searches):
 
         print('*' * 10)
@@ -62,19 +62,19 @@ if __name__ == '__main__':
     from spil.util.log import setLevel, ERROR, DEBUG
     setLevel(ERROR)
 
-    searches = {}
-    # searches['CBM/S/SQ0001/SH0020/*'] = 'Data - has problems ?'
-    # searches['CBM/S/SQ0001/SH0020/**'] = ''
-    # searches['CBM/S/SQ0001/SH0020/**/nk'] = ''
-    searches['CBM/S/SQ0001/SH0010/*'] = ''
-
-
+    #searches = {}
+    # searches['CBM/*'] = ''
+    # searches['CBM/S/*'] = ''
+    # searches['CBM/S/SQ0001/*'] = ''
+    searches['FTOT/S/SQ0001/SH0010/*'] = ''
+    # searches['FTOT/S/SQ0001/SH0020/COMPO/**'] = ''
+    #searches['CBM/S/SQ0001/SH0020/**'] = ''
+    #searches['CBM/S/SQ0001/SH0020/**/nk'] = ''
     # searches['CBM/S/SQ0001/SH0020/COMPO/*/nk'] = ''
     # searches['CBM/S/SQ0001/SH0020/*/*/nk'] = ''
-    # searches['CBM/S/SQ0001/SH0020/COMPO/v001/nk'] = ''
+    #searches['CBM/S/SQ0001/SH0020/COMPO/v001/nk'] = ''
 
-    test_data(searches)
-    # test_data(searches)
+    test_fs(searches)
 
     """
     Problem:
