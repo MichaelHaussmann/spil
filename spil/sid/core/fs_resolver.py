@@ -75,9 +75,14 @@ def path_to_dict(path, _type=None):
 
     # path mapping
     for key, value in six.iteritems(data):
+        # debug('{}, {}, {}'.format(key, value, template.name))
         if path_mapping.get(key):
             value = path_mapping.get(key).get(value, value)
             data[key] = value
+
+            mapping = path_mapping.get((key, template.name))  # type specific mapping
+            if mapping:
+                data[key] = mapping.get(value, value)
 
     # mapping from extra keys
     for new_key, sid_mapping in six.iteritems(conf.extrakeys_to_sidkeys):
