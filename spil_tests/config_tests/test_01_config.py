@@ -24,6 +24,10 @@ from spil_tests.utils import init  # import needed before spil.conf
 
 from spil.conf import sid_templates, path_templates
 
+from spil.util.log import DEBUG, ERROR, get_logger
+log = get_logger('spil_tests')
+log.setLevel(DEBUG)
+
 
 def get_duplicates(items):
     unique = set()
@@ -38,45 +42,45 @@ def get_duplicates(items):
 
 def test_sid_duplicates():
 
-    print('- Testing duplicates in sid_templates (sid_conf)...')
+    log.debug('- Testing duplicates in sid_templates (sid_conf)...')
 
     duplicate_keys = get_duplicates(sid_templates.keys())
     if duplicate_keys:
-        print('\tFAILED: Duplicate keys in sid_templates (sid_conf): {}'.format(duplicate_keys))
+        log.warning('\tFAILED: Duplicate keys in sid_templates (sid_conf): {}'.format(duplicate_keys))
     else:
-        print('\tOK: No duplicate in sid_template keys (sid_conf).')
+        log.info('\tOK: No duplicate in sid_template keys (sid_conf).')
 
     duplicate_values = get_duplicates(sid_templates.values())
     if duplicate_values:
-        print('\tFAILED: Duplicate values in sid_templates (sid_conf): {}'.format(duplicate_values))
+        log.warning('\tFAILED: Duplicate values in sid_templates (sid_conf): {}'.format(duplicate_values))
     else:
-        print('\tOK: No duplicate in sid_templates values (sid_conf).')
+        log.info('\tOK: No duplicate in sid_templates values (sid_conf).')
 
-    print()
+    log.debug('done')
 
 
 def test_fs_duplicates():
 
-    print('- Testing duplicates in path_templates (fs_conf)...')
+    log.debug('- Testing duplicates in path_templates (fs_conf)...')
 
     duplicate_keys = get_duplicates(path_templates.keys())
     if duplicate_keys:
-        print('\tFAILED: Duplicate keys in path_templates (fs_conf): {}'.format(duplicate_keys))
+        log.warning('\tFAILED: Duplicate keys in path_templates (fs_conf): {}'.format(duplicate_keys))
     else:
-        print('\tOK: No duplicate in path_templates keys (fs_conf).')
+        log.info('\tOK: No duplicate in path_templates keys (fs_conf).')
 
     duplicate_values = get_duplicates(path_templates.values())
     if duplicate_values:
-        print('\tFAILED: Duplicate values in path_templates (fs_conf): {}'.format(duplicate_values))
+        log.warning('\tFAILED: Duplicate values in path_templates (fs_conf): {}'.format(duplicate_values))
     else:
-        print('\tOK: No duplicate in path_templates values (fs_conf).')
+        log.info('\tOK: No duplicate in path_templates values (fs_conf).')
 
-    print()
+    log.debug('done')
 
 
 def test_missing():
 
-    print('- Testing missing in sid_conf vs fs_conf...')
+    log.debug('- Testing missing in sid_conf vs fs_conf...')
 
     sid_keys = set(sid_templates.keys())
     fs_keys = set(path_templates.keys())
@@ -85,35 +89,35 @@ def test_missing():
 
     missing_in_fs_conf = sid_keys - fs_keys - to_ignore
     if missing_in_fs_conf:
-        print('\tFAILED: Missing sid_conf keys in FS keys: {}'.format(missing_in_fs_conf))
+        log.warning('\tFAILED: Missing sid_conf keys in FS keys: {}'.format(missing_in_fs_conf))
     else:
-        print('\tOK: all sid_conf keys are in FS keys.')
+        log.info('\tOK: all sid_conf keys are in FS keys.')
 
     missing_in_sid_conf = fs_keys - sid_keys - to_ignore
     if missing_in_sid_conf:
-        print('\tFAILED: Missing FS keys in sid_conf keys: {}'.format(missing_in_sid_conf))
+        log.warning('\tFAILED: Missing FS keys in sid_conf keys: {}'.format(missing_in_sid_conf))
     else:
-        print('\tOK: All FS keys are in sid_conf keys.')
+        log.info('\tOK: All FS keys are in sid_conf keys.')
 
-    print()
+    log.debug('done')
 
 
 if __name__ == '__main__':
 
-    print()
-    print('Sid Templates: ')
+    log.debug('Starting')
+    log.debug('Sid Templates: ')
     for k, v in six.iteritems(sid_templates):
-        print('{} -> {}'.format(k, v))
+        log.info('{} -> {}'.format(k, v))
 
-    print()
-    print('Path Templates: ')
+    log.debug('')
+    log.debug('Path Templates: ')
     for k, v in six.iteritems(path_templates):
-        print('{} -> {}'.format(k, v))
+        log.info('{} -> {}'.format(k, v))
 
-    print()
-    print('Tests:')
+    log.debug('')
+    log.debug('Tests:')
     test_sid_duplicates()
     test_fs_duplicates()
     test_missing()
 
-    print('Done')
+    log.debug('Done')

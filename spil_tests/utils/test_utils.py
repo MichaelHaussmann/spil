@@ -40,12 +40,12 @@ def test_sid(s, reraise=True):
         if not sid.type == 'project':
             if sid.parent and sid.get_as(parent_key):
                 if not sid.parent == sid.get_as(parent_key):
-                    log.warn('Sid "{}" parent problem'.format(sid))
+                    log.warning('Sid "{}" parent problem'.format(sid))
             else:
-                log.warn('Sid "{}" has not parent ?'.format(sid))
+                log.warning('Sid "{}" has not parent ?'.format(sid))
 
         if not sid.get_last(key):
-            log.warn('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
+            log.warning('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
 
         path = sid.path
         if path:
@@ -55,7 +55,7 @@ def test_sid(s, reraise=True):
             except AssertionError:
                 msg = 'Sid path is ambiguous.\nsid: {}\nsid.path: {}\nSid(path=sid.path): {}\n'.format(sid, sid.path,
                                                                                                        Sid(path=sid.path))
-                log.warn(msg)
+                log.warning(msg)
             try:
                 assert sid.path == Sid(path=sid.path).path
                 log.info('Passed : sid.path == Sid(path=sid.path).path ')
@@ -65,7 +65,7 @@ def test_sid(s, reraise=True):
                     sid.path,
                     Sid(path=sid.path),
                     Sid(path=sid.path).path)
-                log.warn(msg)
+                log.warning(msg)
         else:
             log.error('Sid "{}" has no path.'.format(sid))
 
@@ -109,7 +109,7 @@ def test_sids(sids, reraise=True):
     log.info('Testing if example sids match the Sid config')
 
     if not sids:
-        log.warn('No sids given, nothing to test.')
+        log.warning('No sids given, nothing to test.')
         return
 
     for i, s in enumerate(sids):
