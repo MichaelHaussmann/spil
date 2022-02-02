@@ -88,8 +88,11 @@ class Sid(object):
     def __hash__(self, *args, **kwargs):
         return hash(repr(self))
 
-    def __eq__(self, other):  # isinstance(other, Sid): return unicode(other.full_string) == unicode(self.full_string)
-        return unicode(other.full_string) == unicode(self.full_string)
+    def __eq__(self, other):
+        if isinstance(other, Sid):
+            return unicode(other.full_string) == unicode(self.full_string)
+        else:
+            return unicode(other) == unicode(self)
 
     def __lt__(self, other):
         return unicode(self) < unicode(other)
