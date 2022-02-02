@@ -18,7 +18,7 @@ def get_data_source(sid):
     """
     _sid = Sid(sid)
     if not str(_sid) == str(sid):
-        warning('Sid could not be created, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
+        warning('Sid could not be instanced, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
     source = data_source(_sid)
     if source:
         debug('Getting data source for "{}": -> {}'.format(sid, source))
@@ -26,6 +26,10 @@ def get_data_source(sid):
     else:
         warning('Data Source not found for Sid "{}" ({})'.format(sid, _sid.type))
         return None
+
+
+def get_data_destination(sid):  # TODO: implement separate source and destination objects.
+    return get_data_source(sid)
 
 
 def get_attribute_source(sid, attribute):
@@ -85,6 +89,11 @@ class Data(SidSearch):
         source = get_data_source(search_sid)
         if source:
             return source.exists(search_sid)
+
+    def create(self, sid):
+        destination = get_data_destination(sid)
+        if destination:  #  and hasattr(destination, 'create'):
+            return destination.create(sid)
 
 
 if __name__ == '__main__':
