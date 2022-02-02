@@ -36,6 +36,7 @@ def test_fs(searches):
 
     do_doublon_check = True  # Set to false when testing performance
     as_sid = True
+    do_attributes = True
 
     global_timer = Timer(name="global")
     global_timer.start()
@@ -58,6 +59,10 @@ def test_fs(searches):
                     print('--------------------------------------> Doublon {}'.format(i))
                 double_check.add(i)
             # sid = Sid(i)
+            if do_attributes:
+                for d in ['comment', 'size', 'time']:
+                    print(i.get_attr(d) or '')
+                print('#' if i.get_with(state='OK').exists() else None)
             # print sid.path
         print('Total: ' + str(count))
         ls_timer.stop()
