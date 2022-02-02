@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -35,7 +35,22 @@ if six.PY3:
 @total_ordering
 class Sid(object):
     """
-    A Sid contains 3 values.
+    A Sid is first and foremost:
+    An immutable string, looking like a path, and representing hierarchical data.
+
+    Examples:
+        (for a movie called Romeo & Juliette, "roju")
+         'roju/s/sq0030/sh0100/animation'
+         'roju/s/sq0030/sh0100/rendering'
+         'roju/s/sq0030/sh0100'
+         'roju/a/chars/romeo/modeling/v001/w/ma'
+         'roju/a/chars'
+         'roju'
+
+    At Sid creation time, the string is "resolved", matched against a config.
+    This defines its internal type, and store its data in a dictionary.
+
+    Finally, a Sid contains 3 values.
 
     1) A string
     This is the bare minimum for a Sid to exist. By default it is an empty string.
@@ -47,15 +62,21 @@ class Sid(object):
     3) A type
     The matching pattern gives the Sid its type.
     The type is of form basetype__subtype.
-    If the Sid contains meta-characters, it is considered a "search Sid".
+    If the Sid contains meta-characters (eg. *, **, <, >) it is considered a "search Sid".
     A Search Sid can resolve to multiple types.
     It is a Typed Sid.
+
+    Notes:
+    The Sid's interface is inspired by the pathlib
+    https://www.python.org/dev/peps/pep-0428
 
     #IDEA: implement a class hierarchy
     - BaseSid: any string. By default an empty string.
     - MetaSid: string, may contain meta-characters that can resolve to multiple types
     - TypedSid: has a type and a data dictionary, may contain meta-characters that can resolve to multiple Sids
     - ConcreteSid: describes one single data, that can exist or not
+    - DataSid: a sid that may call data sources internally
+    - Nice idea >>> Sid('roju', 'a', 'props') -> Sid('roju/a/props')
     """
 
     def __str__(self):
@@ -67,7 +88,7 @@ class Sid(object):
     def __hash__(self, *args, **kwargs):
         return hash(repr(self))
 
-    def __eq__(self, other):
+    def __eq__(self, other):  # isinstance(other, Sid): return unicode(other.full_string) == unicode(self.full_string)
         return unicode(other.full_string) == unicode(self.full_string)
 
     def __lt__(self, other):
@@ -78,6 +99,17 @@ class Sid(object):
 
     @property
     def full_string(self):
+        """
+        Returns the long string representation of a Sid.
+        The form is "type:string" if typed, else just the sid string.
+
+        Example:
+        >>> Sid('roju/s/sq0030/sh0100/animation').full_string
+        "shot__task:roju/s/sq0030/sh0100/animation"
+
+        >>> Sid('blablabla').full_string
+        "blablabla"
+        """
         return '{}{}'.format(self.type + ':' if self.type else '', self.string)
 
     def __define_by_sid(self, sid, do_check=False):
@@ -227,6 +259,14 @@ class Sid(object):
                 # self.__define_by(data=data, _type=_type)
 
     def get(self, key):
+        """
+        Returns the value of given key.
+        As defined in the internal "data" dictionary.
+
+        Example:
+        >>> Sid('roju/s/sq0030/sh0100/animation').get('shot')
+        "sh0100"
+        """
 
         if not self.data:
             warn('[Sid][get] Asked for a Sid operation on an undefined Sid: "{}"'.format(self.string))
@@ -235,13 +275,28 @@ class Sid(object):
         return self.data.get(key)
 
     def get_attr(self, attribute):
+        """
+        Returns an attribute for the current sid as defined in data_conf.
 
+        Shortcut to data.get(sid, attribute), which is called internally.
+
+        Example:
+        >>> Sid('roju/a/chars/romeo/modeling/v001/w/ma').get_attr('comment')
+        "first version"
+        """
         from spil.data.data import get
         value = get(self, attribute)
         if value:
             return value
 
     def get_as(self, key):
+        """
+        Returns a new Sid built of the data until (and including) the given key.
+
+        Example:
+        >>> Sid('roju/a/chars/romeo/modeling/v001/w/ma').get_as('task')
+        Sid('roju/a/chars/romeo/modeling')
+        """
 
         if not self.data:
             warn('[Sid][get_as] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
@@ -258,13 +313,17 @@ class Sid(object):
 
     def get_with(self, key=None, value=None, **kwargs):
         """
-        Returns a Sid with the given key(s) changed.
-        A key set to None will remove the key - thus potentially changing the type.
+        Returns a new Sid with the given key(s) changed.
+        A key set to None will be removed - thus potentially changing the type.
         To empty a keys value, set it to an empty string "".
 
         Can be called with an key / value pair (if key is set)
         Or via **kwargs to set multiple keys
         Or both.
+
+        Example:
+        >>> Sid('roju/s/sq0030/sh0100/animation').get_with(task='rendering')
+        Sid('roju/s/sq0030/sh0100/rendering')
 
         :param key: a key name
         :param value: a value for attribute
@@ -288,7 +347,14 @@ class Sid(object):
     @property
     def path(self):
         """
-        return the sid as a path
+        Returns the file path for the current Sid, as a string.
+        Returns None if the Sid has no path, or if it cannot be resolved.
+
+        Example:
+        >>> Sid('roju/a/chars/romeo/modeling/v001/w/ma').path
+        "/productions/romeo_juliette/assets/characters/romeo/3d/modeling/works/romeo_v001.ma"
+
+        #TODO: return a Path object? return '' instead of None?
         """
         result = None
         try:
@@ -298,22 +364,34 @@ class Sid(object):
         return result
 
     @property
-    def parent(self):  #YAGNI ?
+    def parent(self):
         """
-        Returns the parent Sid, or None if the Sid is not "defined", or an empty Sid if it is already the root. (#TODO: better define the root Sid)
+        Returns the parent Sid.
+        Returns an empty Sid, if the Sid is not "defined", or self if the Sid is already the root (has no parent).
+
+        Example:
+        >>> Sid('roju/s/sq0030/sh0100').parent
+        Sid('roju/s/sq0030')
         """
         if not self.data:
             warn('[Sid][parent] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
-            return Sid()  #TODO: empty Sid() or None ?
-        if len(self.data.keys()) == 1:
             return Sid()
+        if len(self.data.keys()) == 1:
+            return self
         return self.get_as(list(self.data.keys())[-2])
 
     @property
     def basetype(self):
         """
         The basetype is the first part of the type.
-        Example: basetype = "shot" for type "shot__file"
+        Example:
+            for type "shot__file"  -> basetype = "shot"
+
+        Example:
+        >>> Sid('roju/s/sq0030/sh0100/animation').basetype
+        "shot"
+
+        :return: string basetype
         """
         result = None
         if not self.type:
@@ -328,41 +406,90 @@ class Sid(object):
     @property
     def keytype(self):
         """
-        return the last key
+        Returns the last key of the data dictionary.
+
+        Examples:
+        >>>Sid('roju/a/chars/romeo/modeling').keytype
+        "task"
+
+        >>>Sid('roju/a/chars/romeo')
+        "name"
+
+        :return: string keytype
         """
         if not self.data:
             warn('[Sid][keytype] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
             return None
         return list(self.data.keys() or [None])[-1]
 
-    """
-    def set(self, key=None, value=None, **kwargs):
-        if key:
-            kwargs[key] = value
-        self = self.get_with(**kwargs)
-    """
-
     def copy(self):
+        """
+        Returns a copy of the current Sid.
+
+        (implementation is experimental, to be improved)
+        #TODO: check implementation, to ensure equality.
+
+        >>>Sid('roju/a/chars/romeo/modeling')
+        Sid('roju/a/chars/romeo/modeling')
+
+        :return: Sid
+        """
         return Sid(str(self))  # self.get_with()
 
     def get_last(self, key=None):
+        """
+        Returns a new Sid object, with the same data as self, and the last existing match for given key.
+        If key is not given, the keytype is used.
+
+        Examples:
+            >>>Sid('roju/a/chars/romeo/modeling/v001/w/ma').get_last('version')
+            Sid('roju/a/chars/romeo/modeling/v008/w/ma')
+
+            >>>Sid('roju/a/chars/romeo/modeling').get_last()
+            Sid('roju/a/chars/romeo/shading')
+
+        This method calls Data internally, and is a shortcut to:
+            Data().get_one(self.get_with(key=key, value='>'), as_sid=True)
+
+        Note: Sid sorting is currently limited to string values, which usually works with versions.
+        A meaningful sorting (eg. "render" after "animation") is planned.
+
+        (implementation is experimental)
+
+        :return: Sid
+        """
         if not key:
             key = self.keytype
-        # FIXME: asking for "FTOT/A/SET/GARDEN/SHD/WIP/ma" returns "TEST"
-        from spil import Data as FS  # FIXME: explicit delegation and dynamic import, and proper delegated sid sorting
-        found = FS().get_one(self.get_with(key=key, value='>'), as_sid=True)
+        from spil import Data as DS  # FIXME: proper delegated sid sorting
+        found = DS().get_one(self.get_with(key=key, value='>'), as_sid=True)
         if found.get(key):  # little failsafe. #SMELL
             return found
         else:
             return Sid()
 
-    def get_uri(self):
+    def get_uri(self):  # TODO: unify string, data, uri, fullstring accesses. sid.get_uri returns the uri part, not the sid as_uri
+        """
+        Returns the data as a key value string, as in an URI.
+
+        Usage still experimental.
+        #TODO: (method name to be improved)
+
+        Example:
+        >>>Sid('roju/a/chars/romeo/modeling').get_uri()
+        "project=roju&type=a&cat=chars&name=romeo&task=modeling"
+
+        :return: string uri
+        """
         return uri_helper.to_string(self.data)
 
     def get_next(self, key):  # FIXME: delegate to Data framework
         """
+        This method is experimental. Do not use.
+
         Returns self with version incremented, or first version if there is no version.
         If version is '*', returns "new" version (next of last)
+
+        :return: Sid
         """
         if key != 'version':
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
@@ -380,7 +507,11 @@ class Sid(object):
 
     def get_new(self, key):  # FIXME: delegate to Data framework
         """
+        This method is experimental.
+
         Returns self with next of last version, or first version if there is no version.
+
+        :return: Sid
         """
         if key != 'version':
             raise NotImplementedError("get_new() support only 'version' key for the moment.")
@@ -397,21 +528,47 @@ class Sid(object):
                 return self.get_next('version')  # Returns a first version
 
     def exists(self):
-        from spil import Data as FS  # FIXME: explicit delegation and dynamic import
-        return FS().exists(self)
+        """
+        Returns True if the current Sid exists in a datasource.
+
+        Shortcut to Data().exists(sid), which is called internally.
+
+        :return: bool
+        """
+        from spil import Data as DS
+        return DS().exists(self)
 
     def match(self, search_sid):  #IDEA: match_as(search_sid, key) for example, do the "seq" of both sids match
         """
         Returns True if a given search_sid matches the current Sid.
+        Else False.
+
+        This method is useful to create filters matching groups of Sids, more precise than types.
+
+        Example:
+        >>>Sid('roju/a/chars/romeo/modeling').match('roju/a/*/*/modeling')
+        True
+        >>>Sid('roju/s/sq0030/sh0100/animation').match('roju/s/*/*/*')
+        True
+
+        :return: bool
         """
         from spil import LS
         fs = LS([self.string])
         return fs.get_one(search_sid, as_sid=False) == self.string
 
     def is_leaf(self):
+        """
+        Returns True if the current Sid is a leaf node.
+
+        This method is experimental. Implementation and concept to be clarified.
+
+        :return: bool
+        """
         return bool(self.get('ext'))
         #FIXME: hard coded. Relying on the fact that a leaf has an extention, called "ext".
         # Define "complete". Also in regard to a search Sid. For example Sids containing /** are "complete".
+        # or if a Sid has no children, it is leaf.
 
     # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
     # implement URIs: Sid('FTOT').get_with(uri='type=A') <==> FTOT?type=A  ==>  FTOT/A
