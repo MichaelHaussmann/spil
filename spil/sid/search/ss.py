@@ -63,7 +63,7 @@ class SidSearch(object):
             warn('Nothing Searchable. ')
             generator = ()
         elif is_sorted_search:
-            generator = self.sorted_search(search_sids)
+            generator = self.sorted_search(search_sids, as_sid=as_sid)
         else:
             generator = self.star_search(search_sids, as_sid=as_sid)
 
