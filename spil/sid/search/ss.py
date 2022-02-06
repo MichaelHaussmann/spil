@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -22,6 +22,12 @@ from spil.util.log import debug, warn, info, error
 
 
 class SidSearch(object):
+    """
+    Interface for Sid Search sources.
+
+    Implements common public Sid Search methods "get", "get_one", and "exists"
+
+    """
 
     def __init__(self):
         """
@@ -43,11 +49,17 @@ class SidSearch(object):
 
     def get(self, search_sid, as_sid=True, is_unfolded=False):
         """
-        Search dispatcher.
+        gets the Sids found using the given search_sid.
+        Returns a generator over Sids, if as_sid is True (default), or over Sid strings.
 
-        :param search_sid:
+        The search process is as follows:
+        - the search sid string is "transformed" into a list of typed search Sids.
+        - depending on the types of searches, defined by the search symbols ('>', ...), the search is delegated to a search function.
+        (currently either "sorted_search" or "star_search").
+
+        :param search_sid: string
         :param as_sid:
-        :return:
+        :return: Sid or string
         """
 
         # we start by transforming
@@ -78,6 +90,17 @@ class SidSearch(object):
             yield i
 
     def get_one(self, search_sid, as_sid=True):
+        """
+        Returns the first Sid found using the given search_sid.
+
+        Returns a Sid, if as_sid is True (default), or a Sid strings.
+
+        Internally calls "first" on "get".
+
+        :param search_sid: string
+        :param as_sid:
+        :return: Sid or string
+        """
 
         found = first(self.get(search_sid, as_sid=False))  # search is faster if as_sid is False
         if as_sid:
@@ -86,6 +109,15 @@ class SidSearch(object):
             return found
 
     def exists(self, search_sid):
+        """
+        Returns True if the given search_sid returns a result.
+        Else False.
+
+        Internally calls "bool" on "first" on "star_search".
+
+        :param search_sid: string
+        :return: True or False
+        """
         return bool(first(self.star_search([search_sid], as_sid=False)))
 
     def sorted_search(self, search_sids, as_sid=False):

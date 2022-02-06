@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -51,15 +51,15 @@ def expand(sid, do_extrapolate=False):
     This allows for simpler searches on multiple types.
 
     Example:
-        To find all movie files from a shot, we need to search for: FTOT/S/SQ0001/SH0020/*/*/*/mov
-        FTOT/S/SQ0001/SH0020/**/mov is a simpler form.
+        To find all movie files from a shot, we need to search for: roju/s/sq0001/sh0020/*/*/*/mov
+        roju/s/sq0001/sh0020/**/mov is a simpler form.
 
 
     By default, expand only returns leaf types (do_extrapolate=False)
-    FTOT/S/SQ0001/SH0020/** will be expanded to files, eg FTOT/S/SQ0001/SH0020/*/*/*/* and FTOT/S/SQ0001/SH0020/*/*/*/*/*
+    roju/s/sq0001/sh0020/** will be expanded to files, eg roju/s/sq0001/sh0020/*/*/*/* and roju/s/sq0001/sh0020/*/*/*/*/*
 
     If do_extrapolate is True, expand will return all possible intermediate types.
-    Eg. FTOT/S/SQ0001/SH0020/** will also be expanded to FTOT/S/SQ0001/SH0020 (shot), and FTOT/S/SQ0001/SH0020/* (task), etc.
+    Eg. roju/s/sq0001/sh0020/** will also be expanded to roju/s/sq0001/sh0020 (shot), and roju/s/sq0001/sh0020/* (task), etc.
     This is not the default behaviour.
 
 
@@ -184,19 +184,19 @@ if __name__ == '__main__':
 
     setLevel(INFO)
 
-    expandables = ['FTOT/S/*/**/ma', 'FTOT/A/**/V002/*/ma', 'FTOT', 'FTOT/A/**',
-                   'FTOT/S/SQ0010/SH0010/ANI/**/abc',
-                   'FTOT/S/**/mov',
-                   'FTOT/S/SQ0010/SH0010/**/ma']
+    expandables = ['roju/s/*/**/ma', 'roju/a/**/V002/*/ma', 'roju', 'roju/a/**',
+                   'roju/s/sq0010/sh0010/anim/**/abc',
+                   'roju/s/**/mov',
+                   'roju/s/sq0010/sh0010/**/ma']
 
-    expandables_with_uri = ['FTOT/S/*/**/ma?version=2', 'FTOT/S/*/**/ma?version=V002', 'FTOT/A/**/V002/*/ma?whatever', 'FTOT', 'FTOT/A/**',
-                   'FTOT/S/SQ0010/SH0010/ANI/**/abc',
-                   'FTOT/S/**/mov',
-                   'FTOT/S/SQ0010/SH0010/**/ma?yes?yes']
+    expandables_with_uri = ['roju/s/*/**/ma?version=2', 'roju/s/*/**/ma?version=V002', 'roju/a/**/V002/*/ma?whatever', 'roju', 'roju/a/**',
+                   'roju/s/sq0010/sh0010/anim/**/abc',
+                   'roju/s/**/mov',
+                   'roju/s/sq0010/sh0010/**/ma?yes?yes']
 
-    expandables_with_uri = ['FTOT/S/SQ0001/SH0020/**']
+    expandables_with_uri = ['roju/s/sq0001/sh0020/**']
 
-    # expandables_with_uri = ['FTOT/S/SQ0001/SH0020/**?state=WIP&version=>']
+    # expandables_with_uri = ['roju/s/sq0001/sh0020/**?state=WIP&version=>']
 
     for sid in expandables_with_uri:
         print(sid + ' -->')
