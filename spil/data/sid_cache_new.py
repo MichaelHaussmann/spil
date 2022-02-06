@@ -1,22 +1,18 @@
 import time
 import os
-from time import sleep
 
-from spil import Sid
-from spil.util.pool import Pooled
+from spil.util.caching import lru_kw_cache as cache
 
-from spil.util.log import debug
-from spil.sid.search.ls import LS, extrapolate
+from spil.sid.search.ls import extrapolate
 from spil.sid.search.ss import SidSearch
 from spil.sid.search.util import first
-
-from spil_tests.utils import Timer  #FIXME: proper timer
 
 import six
 if six.PY2: from pathlib2 import Path   # noqa
 else: from pathlib import Path          # noqa
 
-from spil import logging
+from spil import logging, Data, LS
+
 log = logging.get_logger(name="sid_cache")
 log.setLevel(logging.ERROR)
 
@@ -28,7 +24,16 @@ def now():
     return int(time.time())
 
 
-class SidCache(SidSearch, Pooled):
+# @lru_cache
+@cache
+def get_sidcache(sid_cache_file, data_search, data_source=None):
+    """
+    Factory to build pooled SidCache objects.
+    """
+    return SidCache(sid_cache_file, data_search, data_source=data_source)
+
+
+class SidCache(SidSearch):
     """
     Simple Sid cache implementation, using LS ListSearch with a file.
 
@@ -81,7 +86,7 @@ class SidCache(SidSearch, Pooled):
 
         # starting
         self._check()
-        log.debug('Init of SidCache with file {}'.format(self.cache_path))
+        log.info('Init of SidCache with file {}'.format(self.cache_path))
 
     def get(self, search_sid, as_sid=True):
         self._check()
@@ -113,10 +118,6 @@ class SidCache(SidSearch, Pooled):
         """
         Inits the cache from the data source, from scratch.
         """
-
-        ls_timer = Timer(name="fill")
-        ls_timer.start()
-
         temp_path = self.cache_path.with_stem('temp_{}'.format(time.time()))
         temp_list = []
         with open(temp_path, 'a') as f:
@@ -130,7 +131,6 @@ class SidCache(SidSearch, Pooled):
 
         self.last_read_time = now()
         self.last_check_time = now()
-        ls_timer.stop()
 
     def _read(self):
         if not self.cache_path.exists():
@@ -138,7 +138,10 @@ class SidCache(SidSearch, Pooled):
             self.init()  # cold start
             return
         log.debug('reading file into memory')
-        self.cache_list = [l.rstrip() for l in open(self.cache_path, 'r')]
+        if six.PY2:
+            self.cache_list = [l.rstrip() for l in open(str(self.cache_path), 'r')]  # TODO: check if file gets closed in PY2.
+        else:
+            self.cache_list = [l.rstrip() for l in open(self.cache_path, 'r')]
         self.ls = LS(searchlist=self.cache_list)  # we hope the reference will stay after update of self.cache_list TODO: test
         self.last_read_time = now()
 
@@ -146,9 +149,9 @@ class SidCache(SidSearch, Pooled):
         log.debug('check')
         if now() > self.last_check_time + 30:
             log.debug('file date check is due')
-            self.last_check_time = now()
             try:
                 file_time = os.path.getmtime(str(self.cache_path))
+                self.last_check_time = now()
             except FileNotFoundError:
                 self.init()
                 return
@@ -158,101 +161,32 @@ class SidCache(SidSearch, Pooled):
 
 if __name__ == '__main__':
 
-    """
-    Idea: a "Cache Crawler"
-    from a given Sid, crawls and fills the cache with neighbours, or related, or potentially nearly called Sids.
-    
-    It does so in an async process (if the cache is on disk, or in a thread (memcache).
-    while the user is busy doing something else, or either time or CPU are iddle.
-    It would be a non-blocking low priority process.
-    """
-
     from spil_tests.utils import stop
     import os
 
     log.setLevel(logging.DEBUG)
 
-    sid_cache_file = 'V:/TESTPREMIERE/cache_test.txt'
-    sd = SidCache(sid_cache_file, 'CBM/A/**')
-    # '*/A/*/*/*'
+    sc = get_sidcache('V:/TESTPREMIERE/sdc.sids.txt', 'CBM/*')
 
-    for i in range(100):
-        sleep(3)
-        print(sd.get_one('CBM/A/CHR'))
+    sc2 = get_sidcache('V:/TESTPREMIERE/bla.sids.txt', 'CBM/*')
 
-    stop()
+    sc3 = get_sidcache('V:/TESTPREMIERE/sdc.sids.txt', 'CBM/*')
 
-    """
-    In the Data config, a Sidcache is associated to 
-    - a file
-    - a datasource to init the cache from
-    
-    then the cache maintains multiple levels: 
-    - memory
-    - the file 
-    - the read only reference data source
-    
-    The cache is not used to write to the data source.
-    The cache can be written to, to avoid a total reset.
-    
-    There are some delays: 
-    - interval between the file date is checked
-    - if updated (file date), the file is read again in memory
-    - interval for needed file update
-    
-    When do we read from the reference data source ?
-    """
+    assert sc == sc3
 
-    from spil.util.log import setLevel, DEBUG, INFO, ERROR
+    get_sidcache.cache_info()
+    # get_sidcache.cache_clear()
 
-    setLevel(ERROR)
+    print(list(Data().get('CBM/*')))
 
-    sid_cache_file = 'V:/TESTPREMIERE/cache_test.txt'
+    print(list(Data().get('CBM/*')))
 
-    sd = SidCache(sid_cache_file)
-    # sd.fill()
+    print(list(Data().get('ARM/*')))
 
-    print(sd.get_one('CBM/A/CHR'))
-
-    ls_timer = Timer(name="fill")
-    ls_timer.start()
-    for i in sd.get('CBM/A/CHR/*'):  #
-        print(i)
-    ls_timer.stop()
-
-    import time
-    for i in range(1000):
-        print(time.time())
-
-    stop()
-
-    for i in sd.get('*/*/*'):  #
+    # print(list(Data().get('FFM/A,S/*/*/*')))
+    for i in Data().get('FFM/A,S/*/*/*'):
         print(i)
 
-    sd2 = SidCache(sid_cache_file)
-    print(sd2.get_one('CBM/A/CHR'))
-    print(sd2.exists('TEdfsST'))
-    print(sd2.exists('CBM/A'))
+    sc4 = get_sidcache('V:/TESTPREMIERE/sdc.sids.txt', 'CBM/*')
 
-    sid = Sid('CBM')
-    print(sid)
-    # print(sid.get_last())
-
-    """
-    TODO: (in order of importance)
-    
-    - build from datasource, from scratch
-    That makes the cache usable.
-    Instead of editing it, we reread all X intervalls, or if 
-    
-    - data query, check-time, and read-time
-    
-    when data is asked from the cache, it looks at the last file check time (check-time).
-    if check time is older than xxx, we re-check: checks if the file was changed since last read (using file date).
-    check-time gets updated to now.
-    
-    if the update time is newer than last read time (read-time), we re-read.
-    read-time gets updated to now.
-    
-    - Ensure the SidCache instances are pooled 
-    """
+    get_sidcache.cache_info()
