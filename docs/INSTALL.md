@@ -1,5 +1,10 @@
 # Installation
 
+----
+--- *Work in progress* --- 
+
+----
+
 Install via 
 ```
 pip install spil
