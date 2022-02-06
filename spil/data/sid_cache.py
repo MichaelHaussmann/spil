@@ -1,3 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+
+This file is part of SPIL, The Simple Pipeline Lib.
+
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+
+SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with SPIL.
+If not, see <https://www.gnu.org/licenses/>.
+
+"""
 from spil import Sid
 from spil.util.singleton import Singleton
 
@@ -49,16 +64,16 @@ class SidCache(SidSearch, Singleton):
 
 if __name__ == '__main__':
 
-    sid_cache_file = 'V:/TESTPREMIERE/sids.test.txt'
+    sid_cache_file = '..../sids.test.txt'
 
     sd = SidCache(sid_cache_file)
     for i in sd.get('*/*/*'):  #
         print(i)
 
-    print(sd.get_one('CBM/A/CHR'))
+    print(sd.get_one('roju/a/props'))
     print(sd.exists('TEdfsST'))
-    print(sd.exists('CBM/A'))
+    print(sd.exists('roju/a/'))
 
-    sid = Sid('CBM')
+    sid = Sid('roju')
     print(sid)
     print(sid.get_last())

@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -30,13 +30,15 @@ except:
     fileseq = None
     error('fileseq could not be imported. File sequence search will not work.')
 
+
 class FS(SidSearch):
     """
     File search.
 
     Searches for sids in a File System.
+    Mainly uses the glob search.
 
-    Still experimental.
+    Still Alpha.
 
     """
 
@@ -47,7 +49,8 @@ class FS(SidSearch):
         """
         Star search main function.
 
-        Delegates to star_search_simple, or to star_search_framed to handle file sequences, if "frame=*" is in the search
+        Delegates to "star_search_simple" by default,
+        or to "star_search_framed" to handle file sequences, if "frame=*" is in the search
 
         :param search_sids:
         :param as_sid:

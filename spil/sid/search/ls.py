@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -108,8 +108,18 @@ class LS(SidSearch):
     List search.
 
     Searches for sids from a Sid string list.
+    The search list is given during object instantiation.
 
-    Still experimental.
+    The search list can optionnaly be extrapolated
+
+    Implements a glob like "star_search".
+    This loops through the list and accumulates the matching results.
+
+
+
+    Note: searchlist can be a generator, but it will be exhausted after a single function call.
+
+    Still alpha.
 
     """
     def __init__(self, searchlist, do_extrapolate=False, do_pre_sort=False, do_strip=False):

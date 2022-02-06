@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -46,6 +46,17 @@ resolvers = {path_templates_reference: Template(path_templates_reference, path_t
 
 @cache
 def path_to_dict(path, _type=None):
+    """
+    Resolves the given path into the matching data dictionary.
+    Uses the _type, if given, else looks up all templates and uses the first matching one.
+
+    Uses the Lucidity template mechanism,
+    then applies configured mappings.
+
+    Returns a tuple with the type and the parsed data in an OrderedDict.
+    If the parsing failed (no template matching) returns a None, None tuple.
+
+    """
 
     path = str(path)
     # path = os.path.normcase(path)
@@ -106,6 +117,15 @@ def path_to_dict(path, _type=None):
 
 
 def dict_to_path(data, _type=None):
+    """
+    Resolves the given data dictionary into a path.
+    Uses the _type, if given, else calls dict_to_type to find matching type.
+
+    Uses the Lucidity template mechanism.
+    Applies configured mappings and defaults before template formatting.
+
+    Returns path string.
+    """
 
     if not data:
         raise SpilException('[dict_to_path] Data is empty')
