@@ -7,7 +7,7 @@
 
 Install via 
 ```
-pip install spil
+pip install spil  # currently outdated. 
 ```
 
 
