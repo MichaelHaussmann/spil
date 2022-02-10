@@ -118,27 +118,6 @@ if task_sid.exists():
 
 This all makes the Sid a versatile and lightweight data source abstraction layer.
 
-
-#
-### Database Identifier
-
-If the Sid is planned into the pipeline, it is a handy database field.
-
-- SQL Query example
-```
-SELECT * FROM Entities WHERE sid = "hamlet/a/chars/ophelia"
-```
-
-- Shotgrid query example 
-```
-sg.find('Shot', 
-        ['sg_sid', 'is', 'hamlet/s/sq030/sh0010'],
-        ['code', 'sg_sid', 'sg_cut_in', 'sg_cut_out', 'sg_ep_in',
-        'sg_ep_out', 'sg_editing_status'])
-```
-
-
-
 #
 ### Intuitive Search Syntax 
 Building on top of these ideas, and considering the Sid as a middleware, 
@@ -236,6 +215,25 @@ get_attribute_source(sid, attribute)  # returns custom callables
 
 Spil works in Python 2.7 and 3.7
 
+
+#
+### Database Identifier
+
+If the Sid is planned into the pipeline, it is a handy database field.
+
+- SQL Query example
+```
+SELECT * FROM Entities WHERE sid = "hamlet/a/chars/ophelia"
+```
+
+- Shotgrid query example 
+```
+sg.find('Shot', 
+        ['sg_sid', 'is', 'hamlet/s/sq030/sh0010'],
+        ['code', 'sg_sid', 'sg_cut_in', 'sg_cut_out', 'sg_ep_in',
+        'sg_ep_out', 'sg_editing_status'])
+```
+
 # 
 ### Performance
 
@@ -246,6 +244,7 @@ It's performance depends on the data sources that are used.
 - String / Sid Resolves are internally stored in a lru_cache
 - searches use generators
 - Python 3 is globally faster that python 2
+
 
 #
 ### Concepts  
