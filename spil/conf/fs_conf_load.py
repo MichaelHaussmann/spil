@@ -54,7 +54,6 @@ except ModuleNotFoundError as e:
     print(problem)
     raise Exception(problem)
 
-
 __all__ = []
 for name, value in inspect.getmembers(module):
     if name.startswith('__'):
@@ -66,6 +65,7 @@ for name, value in inspect.getmembers(module):
 pattern_replacing(path_templates, key_patterns)
 
 if __name__ == '__main__':
+
     from pprint import pprint
 
     pprint(globals())

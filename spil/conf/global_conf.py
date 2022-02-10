@@ -16,7 +16,7 @@ import os
 
 pysep = '/'  # python path separator
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 application_codename = 'Kumquat'
 application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(__version__, application_codename)
 
@@ -25,9 +25,10 @@ application_repo_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.
 # automatic replacement to INFO and WARN in BETA and PROD
 loglevel = 80
 
-user_app_folder_name = 'spil'
-user_conf_file_name = 'conf.json'
+user_app_folder_name = 'pikko/conf'
+user_conf_file_name = 'user_conf.json'
 
 sip = '/'  # sid separator - changing this is untested.
 ors = ','   # "or" separator
+qms = '#'   # question mark search sign (previously '?', thus it's name)
 sidtype_keytype_sep = '__'

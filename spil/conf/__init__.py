@@ -16,13 +16,13 @@ from spil.conf.global_conf import *
 
 # user config
 from spil.conf.configio import ConfigIO
-# from spil.conf import pattern_replacing
 
 try:
     from spil.conf.sid_conf_load import *
     from spil.conf.fs_conf_load import *
+    from spil.conf.data_conf_load import *
 except Exception as e:
-    raise Exception('Unable to load the spil_conf files (sid_conf, fs_conf). \n'
+    raise Exception('Unable to import the spil_conf files (sid_conf, fs_conf, data_conf). \n'
                     'Please check the files compatibility with the latest SPIL version.')
 
 
@@ -56,7 +56,7 @@ globals().update(user_conf.read())
 
 if __name__ == '__main__':
 
-    # This will create a cofniguration file and folder in the user path.
+    # This will create a configuration file and folder in the user path.
 
     from pprint import pprint
 

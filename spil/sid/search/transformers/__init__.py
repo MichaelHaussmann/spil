@@ -22,7 +22,6 @@ Each transformer takes a list of search sids strings, and returns a list of sear
 
 from spil.sid.search.transformers.expand import execute as expand
 from spil.sid.search.transformers.extensions import execute as extensions
-# from spil.sid.search.transformers.optional_key import execute as optional_key
 from spil.sid.search.transformers.or_op import execute as or_op
 
 # transformers by execution order for existing searches
@@ -31,10 +30,10 @@ list_search_transformers = [extensions, or_op, expand]
 
 def transform(sid, transformers):
     """
-    Takes the given sid string, executes transformers and returns a list of sid strings.
+    Takes the given sid, executes transformers and returns a list of unique sids.
     :return:
     """
-    previous = [str(sid)]
+    previous = [sid]
     for function in transformers:
         done = function(previous)
         previous = done

@@ -12,10 +12,17 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+
+"""
+Reads the list saved in sid_file_path, and generates a dummy file system hierarchy, according to the config.
+
+Important: uses the actual project paths, as in config. Be careful !!
+
+"""
 import os
 import six
 
-from tests import test_00_init  # needs to be before spil.conf import
+from spil_tests.utils import init  # needs to be before spil.conf import
 
 from spil import Sid, SpilException
 from spil.util.utils import is_filename
@@ -26,17 +33,17 @@ if six.PY2:
 else:
     from pathlib import Path
 
-from tests.test_02_save_sids_to_file import sid_file_path
+from spil_tests.utils.save_sid_list_to_file import sid_file_path
 
 
-def test_generate_files(max_amount=100000):
+def test_generate_files(max_amount=10):
 
     projects_root = Path(Sid(projects[0]).path).parent
     print('Root path : {}'.format(projects_root))
 
     if len(list(projects_root.iterdir())) > 1:
         raise SpilException(
-            'The root directory for Sids ({}) contains data. This test will fill the directory with test data. By security measure it must only contain the sids test file.'.format(projects_root))
+            'The root directory for Sids ({}) contains data. This test will fill the directory with test data. \nBy security measure it must only contain the sids test file.\nThis test is skipped.'.format(projects_root))
 
     test_paths = []
 
@@ -90,5 +97,6 @@ if __name__ == '__main__':
 
     print('*' * 60)
 
-    test_generate_files(100000)
+    # test_generate_files(100000)
+    test_generate_files(0)
 

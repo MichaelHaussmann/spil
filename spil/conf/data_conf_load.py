@@ -16,32 +16,25 @@ If not, see <https://www.gnu.org/licenses/>.
 import importlib
 import inspect
 
-from spil.conf.util import extrapolate, pattern_replacing
-
 import six
 if six.PY2:
     ModuleNotFoundError = ImportError
 
 # stubs that are replaced by imports
-sid_templates = {}
-to_extrapolate = []
-key_types = {}
-extrapolate_types = {}
-key_patterns = {}
-extension_alias = {}
-projects = []
+get_data_source = None
+get_attribute_source = None
 
 try:
-    module = importlib.import_module('sid_conf')
+    module = importlib.import_module('data_conf')
 except ModuleNotFoundError as e:
     problem = """
     -------------------------------------------------------------------------------------------------------------
     CONFIGURATION PROBLEM: 
 
-    The configuration module "sid_conf" was not found.
+    The configuration module "data_conf" was not found.
     
     Ensure to either include "demo_conf" in your python path, 
-    or create your own "sid_conf" and add its folder to the python path.    
+    or create your own "data_conf" and add its folder to the python path.    
 
     (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
 
@@ -60,8 +53,6 @@ for name, value in inspect.getmembers(module):
     globals()[name] = value
     __all__.append(name)
 
-sid_templates = extrapolate(sid_templates, extrapolate_types, to_extrapolate)
-pattern_replacing(sid_templates, key_patterns)
 
 if __name__ == '__main__':
 

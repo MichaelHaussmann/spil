@@ -13,8 +13,9 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-from spil.conf import extension_alias  # put into sid conf
+from spil.conf import extension_alias  # from sid conf
 from spil.conf import sip, ors
+from spil.sid.core import uri_helper
 
 
 def execute(sids):
@@ -24,7 +25,7 @@ def execute(sids):
     Examples (with comma "," being the or-operator) :
          img -> jpg,exr,dpx
          hou -> hip, hipnc
-         may -> ma, mb
+         maya -> ma, mb
     """
     result = []
 
@@ -34,51 +35,97 @@ def execute(sids):
     return result
 
 
-def extensions(sid):
+def handle_extension(extension_string=''):
+    """
+    Updates the string representing the extension, by replacing the aliases by the actual extensions.
 
-    parts = sid.split(sip)
+    Examples:
+    >>> handle_extension('maya')
+    'ma,mb'
 
-    extension_part = parts[-1]
-    # print 'extension_part', extension_part
-    if extension_part.count(ors):
-        extension_part = [x.strip() for x in extension_part.split(ors)]
+    >>> handle_extension('maya, mov, mb')
+    'ma,mb,mov'
+
+    >>> handle_extension()
+    ''
+    """
+    if not extension_string:
+        return ''
+
+    if extension_string.count(ors):
+        extension_string = [x.strip() for x in extension_string.split(ors)]
     else:
-        extension_part = [extension_part]
+        extension_string = [extension_string]
 
-    #print 'extension_part', extension_part
+    # print('extention_string', extention_string)
 
     result = []
-    for ext in extension_part:
+    for ext in extension_string:
         ext = extension_alias.get(ext, [ext])
         result.extend(ext)
 
-    #print 'result', result
-    sid = parts[:-1]
-    sid.append(','.join(sorted(list(set(result)))))
-
-    return sip.join(sid)
+    return ','.join(sorted(list(set(result))))
 
 
+def extensions(sid):
+    """
+    Replaces extension aliases in the given string.
+    Does replacement on the main string, and on an optional uri.
+
+    Examples
+    >>> extensions('bla/s/bla/bla/**/hou')
+    'bla/s/bla/bla/**/hip,hipnc'
+
+    >>> extensions('bla/s/bla/bla/**/exr?ext=maya, mov')
+    'bla/s/bla/bla/**/exr?ext=ma,mb,mov'
+
+    >>> extensions('bla/s/bla/bla/**/movie, ma?ext=maya, mov')
+    'bla/s/bla/bla/**/avi,ma,mov,mp4?ext=ma,mb,mov'
+
+    #FIXME: "ext" is hard coded.
+    """
+
+    sid = str(sid)
+
+    if sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
+        sid, uri = sid.split('?', 1)
+    else:
+        uri = ''
+
+    # main sid
+    parts = sid.split(sip)
+    newsid = parts[:-1]  # SMELL: this might not be an extension at all. Still works.
+    newsid.append(handle_extension(parts[-1]))
+
+    # uri part
+    if uri:
+        uri_dict = uri_helper.to_dict(uri)
+        if uri_dict.get('ext'):  #FIXME: "ext" is hard coded.
+            uri_dict['ext'] = handle_extension(uri_dict.get('ext'))
+        uri = uri_helper.to_string(uri_dict)
+
+    return sip.join(newsid) + ('?' + uri if uri else '')
 
 
 if __name__ == '__main__':
 
+    import doctest
+    doctest.testmod()
+
+    """
     from spil.util.log import setLevel, info
     from logging import FATAL
-
     info('Tests start')
-
     setLevel(FATAL)
-
     expandables = ['aral/s/*/hou',
-                   'aral/s/*/p/*/exr,img, hou',
+                   'aral/s/*/p/*/exr,img, hou?test',
                    'aral',
-                   'aral/a/*/img',
+                   'aral/a/*/img?test',
                    'aral/s/s010/p010/animation/*/v001/p/vdb',
                    'aral/s/*/movie',
-                   'aral/s/s010/p010/**/exr']
+                   'aral/s/s010/p010/**/exr?ext=maya, mov']
 
     for sid in expandables:
         print(sid + '-->' + str(extensions(sid)))
-
         print('*'*10)
+    """

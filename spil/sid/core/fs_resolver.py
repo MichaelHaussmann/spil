@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -32,6 +32,8 @@ if six.PY3:
 import lucidity
 from lucidity import Template
 
+from spil.util.caching import lru_cache as cache
+
 from spil.util import utils
 from spil.util.exception import SpilException
 from spil.util.log import debug, warn, info
@@ -42,8 +44,19 @@ from spil.conf import sidtype_keytype_sep, key_types
 
 resolvers = {path_templates_reference: Template(path_templates_reference, path_templates.get(path_templates_reference))}
 
-
+@cache
 def path_to_dict(path, _type=None):
+    """
+    Resolves the given path into the matching data dictionary.
+    Uses the _type, if given, else looks up all templates and uses the first matching one.
+
+    Uses the Lucidity template mechanism,
+    then applies configured mappings.
+
+    Returns a tuple with the type and the parsed data in an OrderedDict.
+    If the parsing failed (no template matching) returns a None, None tuple.
+
+    """
 
     path = str(path)
     # path = os.path.normcase(path)
@@ -73,15 +86,22 @@ def path_to_dict(path, _type=None):
 
     # path mapping
     for key, value in six.iteritems(data):
+        # debug('{}, {}, {}'.format(key, value, template.name))
         if path_mapping.get(key):
             value = path_mapping.get(key).get(value, value)
             data[key] = value
+
+            mapping = path_mapping.get((key, template.name))  # type specific mapping
+            if mapping:
+                data[key] = mapping.get(value, value)
 
     # mapping from extra keys
     for new_key, sid_mapping in six.iteritems(conf.extrakeys_to_sidkeys):
         if new_key in data:
             for key, _dict in six.iteritems(sid_mapping):
-                data[key] = _dict.get(data.get(new_key))
+                map_result = _dict.get(data.get(new_key))
+                if map_result:
+                    data[key] = map_result
 
     # Sorting the result data into an OrderedDict()
     sid_type = template.name.split(sidtype_keytype_sep)[0]
@@ -97,6 +117,15 @@ def path_to_dict(path, _type=None):
 
 
 def dict_to_path(data, _type=None):
+    """
+    Resolves the given data dictionary into a path.
+    Uses the _type, if given, else calls dict_to_type to find matching type.
+
+    Uses the Lucidity template mechanism.
+    Applies configured mappings and defaults before template formatting.
+
+    Returns path string.
+    """
 
     if not data:
         raise SpilException('[dict_to_path] Data is empty')
@@ -116,8 +145,12 @@ def dict_to_path(data, _type=None):
     # reverse path mapping
     for key, value in six.iteritems(data):
         if value and path_mapping.get(key):
-            mapping = path_mapping.get(key)
+            mapping = path_mapping.get(key)  # global mapping
             data[key] = utils.get_key(mapping, value, value)
+
+            mapping = path_mapping.get((key, _type))  # type specific mapping
+            if mapping:
+                data[key] = utils.get_key(mapping, value, value)
 
     debug('sidtype: {}'.format(_type))
 

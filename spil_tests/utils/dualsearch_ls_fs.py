@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -12,31 +12,37 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+
+"""
+To launch searches on LS, the saved Sid list.
+(this list is either generated (see "save_sid_list_to_file"), or parsed (see "parse_sid_files")
+ 
+Searches is a dict with searches as 
+    key: search sid
+    value: search description 
+
+function: test_ls(searches) 
+"""
 import six
 
 if six.PY3:  #TODO: add Timer in package for PY3 (they have a great package setup) - Also add tox.
     from codetiming import Timer
 else:
-    from tests.mock_timer import Timer
+    from spil_tests.mock_timer import Timer
 
-from tests import test_00_init  # needs to be before spil.conf import
-from spil import LS
-from spil import FS
-from spil.util.log import debug, setLevel, INFO, DEBUG, info, WARN, ERROR
-from example_searches import searches
-
-from tests.test_02_save_sids_to_file import sid_file_path
+from spil_tests.utils import init  # needs to be before spil.conf import
+from spil import LS, FS
+from spil_tests.prep.save_sid_list_to_file import sid_file_path
 
 
-def test_ls_fs():
+def test_ls_fs(searches):
+
+    as_sid = False
 
     with open(str(sid_file_path()), 'r') as f:
         sids = f.read().splitlines()
-
     search_list = sids
-    info('Searching in {} sids'.format(len(search_list)))
-
-    as_sid = False
+    print('Searching in {} sids'.format(len(search_list)))
 
     global_timer = Timer(name="global")
     global_timer.start()
@@ -66,11 +72,16 @@ def test_ls_fs():
             print('Problem: {}'.format(i))
 
     print('*' * 10)
-    info('Done all searches.')
+    print('Done all searches.')
     global_timer.stop()
 
 
 if __name__ == '__main__':
 
-    setLevel(INFO)
-    test_ls_fs()
+    from spil.util.log import setLevel, ERROR, DEBUG
+    setLevel(ERROR)
+
+    searches = {}
+    searches['FTOT/S/SQ0001/SH0010/*'] = ''
+
+    test_ls_fs(searches)

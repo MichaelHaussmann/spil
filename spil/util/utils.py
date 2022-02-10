@@ -64,9 +64,12 @@ def uniqfy(seq, reverse=False):
 def get_key(adict, value, default=None):
     """
     Gets a dict key by the value.
-    (experimental - may misfunction for obvious reasons)
 
-    Note : if a value exists multiple times, key is returned "randomly".
+    If a value exists multiple times:
+        If the dictionary is ordered, returns the first key.
+        Otherwise key is returned "randomly".
+
+    NB: to get a consistent result in py < 3.6, we need to use an OrderedDict as input.
     """
     try:
         index = list(adict.values()).index(value)

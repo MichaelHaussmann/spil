@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -13,7 +13,6 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-import itertools as it
 
 import os
 import six
@@ -23,7 +22,13 @@ from spil import conf
 from spil.sid.search.ss import SidSearch
 from spil.sid.sid import Sid
 from spil.util.exception import SpilException
-from spil.util.log import debug, warn, info
+from spil.util.log import debug, warn, info, error
+
+try:
+    import fileseq
+except:
+    fileseq = None
+    error('fileseq could not be imported. File sequence search will not work.')
 
 
 class FS(SidSearch):
@@ -31,8 +36,9 @@ class FS(SidSearch):
     File search.
 
     Searches for sids in a File System.
+    Mainly uses the glob search.
 
-    Still experimental.
+    Still Alpha.
 
     """
 
@@ -41,9 +47,10 @@ class FS(SidSearch):
 
     def star_search(self, search_sids, as_sid=False, do_sort=False):
         """
-        Simple star search.
+        Star search main function.
 
-        Uses Glob.
+        Delegates to "star_search_simple" by default,
+        or to "star_search_framed" to handle file sequences, if "frame=*" is in the search
 
         :param search_sids:
         :param as_sid:
@@ -53,6 +60,29 @@ class FS(SidSearch):
         if do_sort:
             info('do_sort not implemented in FS')
 
+        # depending on input, select the right generator
+        is_framed_search = any([ssid.get('frame') == '*' for ssid in search_sids])  #FIXME: hardcoded "frame"
+
+        if is_framed_search and fileseq:
+            generator = self.star_search_framed(search_sids, as_sid=as_sid)
+        else:
+            generator = self.star_search_simple(search_sids, as_sid=as_sid)
+
+        for i in generator:
+            yield i
+
+    def star_search_simple(self, search_sids, as_sid=False):
+        """
+        Simple star search.
+
+        Uses Glob.
+
+        :param search_sids:
+        :param as_sid:
+        :return:
+        """
+        debug('Starting star_search_simple')
+
         done = set()
         done_add = done.add  # performance
 
@@ -60,55 +90,21 @@ class FS(SidSearch):
 
             debug('[fs_star_search] "{}"'.format(search_sid))
 
-            search = Sid(search_sid)
-
-            # filling intermediate values with *
-
-            """
-            print('Search expanded : {}'.format(search_sids))
-            for sid in search_sids:
-                data = Sid(sid).data
-                print(data)
-                types = dict_to_type(data, all=True)
-                print(types)
-                print(Sid(sid).type)
-            """
+            search = search_sid  # TODO: handle also strings ?
 
             debug('Search : ' + str(search))
-            debug('PATH : {}'.format(search.path))
-            path = search.path
+            pattern = search.path
 
-            if not path:
+            if not pattern:
                 warn('Search sid {} did not resolve to a path. Cancelled.'.format(search))
                 return
-
-            debug('Search path : ' + str(path))
-
-            # TODO need a way to find a root path depending on other sid parts (eg: fx caches)
-            project_path = search.get_as('project').path
-
-            pattern = path.split(project_path + '/')[-1]
 
             for key, value in six.iteritems(conf.search_path_mapping):
                 pattern = pattern.replace(key, value)
 
-            debug('pattern : ' + str(pattern))
-            debug('project_path : ' + str(project_path))
+            debug('Search pattern : ' + str(pattern))
 
-            """
-            if str(pattern) == str(project_path):
-                warn('No valid search pattern')
-                return
-            """
-
-            """
-            found = []
-            for ext in pattern.split('.')[-1].split(','):
-                new_pattern = pattern.split('.')[0] + '.' + ext
-                found.extend(glob.glob(os.path.join(project_path, new_pattern)))
-            """
-
-            found = glob.glob(os.path.join(project_path, pattern))
+            found = glob.glob(pattern)
             debug('found')
             debug(found)
             for path in found:
@@ -123,13 +119,7 @@ class FS(SidSearch):
                     warn('Path did not generate sid : {}'.format(path))
                     continue
 
-                if as_sid:
-                    yield sid
-                else:
-                    item = str(sid)
-                    yield item
-
-                """
+                item = str(sid)
                 if item not in done:
                     done_add(item)
                     if as_sid:
@@ -137,8 +127,75 @@ class FS(SidSearch):
                     else:
                         yield item
                 else:
-                    warn('{} was already found, skipped. '.format(item))
-                """
+                    debug('{} was already found, skipped. '.format(item))
+
+    def star_search_framed(self, search_sids, as_sid=False):
+        """
+        Star search with file sequence handling.
+
+        Uses Glob and fileseq.
+
+        :param search_sids:
+        :param as_sid:
+        :return:
+        """
+        debug('Starting star_search_framed')
+
+        done = set()
+        done_add = done.add  # performance
+
+        for search_sid in search_sids:
+
+            debug('[fs_star_search] "{}"'.format(search_sid))
+
+            search = search_sid  # TODO: handle also strings ?
+
+            if search.get('frame') == '*':  #FIXME: hardcoded "frame"
+                search = search.get_with('frame', '@')  # for usage in fileseq
+
+            debug('Search : ' + str(search))
+            pattern = search.path
+
+            if not pattern:
+                warn('Search sid {} did not resolve to a path. Cancelled.'.format(search))
+                return
+
+            for key, value in six.iteritems(conf.search_path_mapping):
+                pattern = pattern.replace(key, value)
+
+            dir_pattern, file_pattern = os.path.split(pattern)
+            debug(dir_pattern)
+            parents = glob.glob(dir_pattern)
+            file_sequences = []
+            for parent in parents:
+                file_search = os.path.join(parent, file_pattern).replace(os.sep, '/')
+                debug('search ' + file_search)
+                file_sequences.extend(fileseq.findSequencesOnDisk(file_search))
+
+            debug('found sequences : {}'.format(file_sequences))
+            for file_sequence in file_sequences:
+                debug(file_sequence)
+                path = str(file_sequence[0]).replace(os.sep, '/')  # we get the first file of the sequence
+                try:
+                    sid = Sid(path=path)
+                    debug('found ' + str(sid))
+                except SpilException as e:
+                    debug('Path did not generate sid : {}'.format(path))
+                    continue
+                if not sid:
+                    warn('Path did not generate sid : {}'.format(path))
+                    continue
+
+                item = str(sid)
+                if item not in done:
+                    done_add(item)
+                    if as_sid:
+                        yield sid
+                    else:
+                        yield item
+                else:
+                    debug('{} was already found, skipped. '.format(item))
+
 
 if __name__ == '__main__':
 

@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -18,17 +18,20 @@ import itertools as it
 from spil.sid.search.util import first
 from spil.sid.search.transformers import extensions, or_op, expand, transform
 from spil.sid.sid import Sid
-from sid_conf import sip
-from spil.util.exception import SpilException
 from spil.util.log import debug, warn, info
 
 
 class SidSearch(object):
+    """
+    Interface for Sid Search sources.
+
+    Implements common public Sid Search methods "get", "get_one", and "exists"
+
+    """
 
     def __init__(self):
         """
         #TODO
-
         - more iterators where possible
         - better control over string / Sid
         - better algorithms
@@ -44,31 +47,35 @@ class SidSearch(object):
 
     def get(self, search_sid, as_sid=True):
         """
-        Search dispatcher.
+        gets the Sids found using the given search_sid.
+        Returns a generator over Sids, if as_sid is True (default), or over Sid strings.
 
-        :param search_sid:
+        The search process is as follows:
+        - the search sid string is "transformed" into a list of typed search Sids.
+        - depending on the types of searches, defined by the search symbols ('>', ...), the search is delegated to a search function.
+        (currently either "sorted_search" or "star_search").
+
+        :param search_sid: string
         :param as_sid:
-        :return:
+        :return: Sid or string
         """
         # we start by transforming
-        list_search_transformers = [extensions, or_op, expand]
-        search_sids = transform(search_sid, list_search_transformers)
+        list_search_transformers = [extensions, or_op, expand]  # uri_apply is removed, because uri is automatically applied bu Sid()
+        search_sids = transform(str(search_sid), list_search_transformers)
+
+        for ssid in search_sids[:]:  # make this a search transformer?
+            if ssid.string.count('?'):
+                warn('SearchSid "{}" has un-applied URI and cannot be searched. Skipped'.format(ssid))
+                search_sids.remove(ssid)
 
         # depending on input, select the right generator
-        is_qm_search = any([ssid.count('?') for ssid in search_sids])
-        is_sorted_search = any([ssid.count('>') for ssid in search_sids])
+        is_sorted_search = any([ssid.string.count('>') for ssid in search_sids])
 
-        if is_qm_search and is_sorted_search:
-            raise NotImplementedError('Currently no multi search implemented.')
-
-        if is_sorted_search:
-            generator = self.sorted_search(search_sids)
-
-        elif is_qm_search:
-            if search_sids[0].endswith('?'):  # FIXME: check coherence
-                generator = self.star_search(search_sids, as_sid=as_sid)
-            else:
-                generator = self.qm_search(search_sids, as_sid=as_sid)
+        if not search_sids:
+            warn('Nothing Searchable. ')
+            generator = ()
+        elif is_sorted_search:
+            generator = self.sorted_search(search_sids, as_sid=as_sid)
         else:
             generator = self.star_search(search_sids, as_sid=as_sid)
 
@@ -76,6 +83,17 @@ class SidSearch(object):
             yield i
 
     def get_one(self, search_sid, as_sid=True):
+        """
+        Returns the first Sid found using the given search_sid.
+
+        Returns a Sid, if as_sid is True (default), or a Sid strings.
+
+        Internally calls "first" on "get".
+
+        :param search_sid: string
+        :param as_sid:
+        :return: Sid or string
+        """
 
         found = first(self.get(search_sid, as_sid=False))  # search is faster if as_sid is False
         if as_sid:
@@ -84,100 +102,47 @@ class SidSearch(object):
             return found
 
     def exists(self, search_sid):
+        """
+        Returns True if the given search_sid returns a result.
+        Else False.
+
+        Internally calls "bool" on "first" on "star_search".
+
+        :param search_sid: string
+        :return: True or False
+        """
         return bool(first(self.star_search([search_sid], as_sid=False)))
-
-    def qm_search(self, search_sids, as_sid=False):
-        """
-        Question mark search.
-
-        We star-search all Sids that match up to the '?'.
-        Then we check if at least one matches the complete search_sid pattern.
-
-        This is faster than the full search, but fails to find results if the partial search is not implemented.
-        In this case we invoque qm_search_full.
-
-        :param search_sids:
-        :param as_sid:
-        :param do_sort:
-        :return:
-        """
-        done = set()
-        done_add = done.add  # performance
-
-        for search_sid in search_sids:
-            index = str(search_sid).split('/').index('?')
-            ssid = sip.join(str(search_sid).split('/')[0:index + 1]).replace('?', '*')
-            search_roots = self.star_search([ssid], as_sid=False)
-
-            for root in search_roots:
-                ssid = str(search_sid).replace('?', root.split(sip)[-1])
-                if first(self.star_search([ssid], as_sid=False)):
-                    done_add(root)
-                    continue
-
-        if done:
-            done = sorted(list(done))
-
-            for sid in done:
-                if as_sid:
-                    yield Sid(sid)
-                else:
-                    yield sid
-
-        else:
-            info('qm_search did not find any result, invoking qm_search_full.')
-            for i in self.qm_search_full(search_sids, as_sid=as_sid):
-                yield i
-
-    def qm_search_full(self, search_sids, as_sid=False):
-        """
-        Question mark search.
-
-        We star search all Sids that matches the search, and then keep only the part until the '?'
-        (This is slower than the other qm_search function and will be removed in the next commit)
-
-        :param search_sids:
-        :param as_sid:
-        :return:
-        """
-        done = set()
-        done_add = done.add  # performance
-        for search_sid in search_sids:
-            ssid = str(search_sid).replace('?', '*')
-            debug('star search start on {}'.format(ssid))
-            founds = self.star_search([ssid], as_sid=False)
-            debug('star search done')
-
-            index = str(search_sid).split('/').index('?')
-            for f in founds:
-                sid = sip.join(f.split('/')[0:index + 1])
-                if sid not in done:
-                    done_add(sid)
-                    if as_sid:
-                        yield Sid(sid)
-                    else:
-                        yield sid
 
     def sorted_search(self, search_sids, as_sid=False):
         """
         Operates a sorted search.
         A sorted search contains the ">" sign, standing for "last"
-        or the "<>" sign, standing for "first". (not yet implemented)
+        or the "<" sign, standing for "first". (not yet implemented)
+
+        TODO: "meaningful sort" (eg. LAY < ANI < RND), currently only alphanumerical sort.
 
         :param search_sids:
         :param as_sid:
         :return:
         """
-        # FIXME: check if index is coherent in all search_sids
+        # index is coherent in all search_sids, which is a bit strange
         index = str(search_sids[0]).split('/').index('>')
+
+        """
+        indices = []
+        for ss in search_sids:
+            indices.append(str(ss).split('/').index('>'))
+        print('ind' + str(indices))
+        indices = list(set(indices))
+        """
         # indices = [i for i, x in enumerate(str(search_sid).split('/')) if x == '>']
         # debug index, indices
 
         founds = list()
         for search_sid in search_sids:
-            ssid = str(search_sid).replace('>', '*')
+            ssid = search_sid.full_string.replace('>', '*')
             debug('star search start on {}'.format(ssid))
-            founds.extend(self.star_search([ssid], as_sid=False))
+            founds.extend(self.star_search([Sid(ssid)], as_sid=False))
             debug('star search done')
 
         founds = sorted(list(set(founds)), reverse=True)
@@ -185,6 +150,7 @@ class SidSearch(object):
         #pprint(founds)
         debug('found {} matches'.format(len(founds)))
 
+        #for index in indices:
         # works with > in any position, but does not use sort by row, and no delegate sorting, and no special sorting
         for key, grp in it.groupby(founds, key=lambda x: x.split('/')[0:index]):
             result = list(grp)
@@ -213,3 +179,13 @@ class SidSearch(object):
                 result = list(grp)
                 debug('{}: "{}" {}'.format(key, result[0].split('/')[index], result))
         """
+
+
+    """
+    Problem:
+
+    FTOT/S/SQ0001/SH0020/**/cache,maya?state=WIP&version=>
+    Doesn't return FTOT/S/SQ0001/SH0020/ANI/V019/WIP/CAM/abc
+    See tests/filesearch.
+
+    """

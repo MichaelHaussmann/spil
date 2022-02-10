@@ -1,4 +1,4 @@
-
+# mock timer for py2 or in case of missing timer package.
 
 class Timer(object):
 
