@@ -11,7 +11,7 @@ The goal of SPIL is to provide a simple, universal, hierarchical, human-readable
 This identifier is called the "**Sid**" - for "Scene Identifier", or simply "String ID".
 
 # 
-### Unique Identifier
+## Unique Identifier
 
 SPIL considers entities of a CG pipeline as being nodes of a hierarchy.
 Each node has a unique path, which is the entitie's unique identifier, the "Sid".
@@ -64,7 +64,7 @@ Some examples:
 ```
 
 #
-### Simple API
+## Simple API
 
 Spil offers a simple API to work with Sids.  
 
@@ -84,12 +84,13 @@ current_shot.fullstring      # "shot__shot:hamlet/s/sq030/sh0010"
 ```
 
 #
-### Resolver to and from datasources - versatile middleware 
+## Resolver to and from datasources - versatile middleware 
 The Sid can be translated to and from different data sources.
 
 - For example a file system:
 ```
 current_file = Sid(path="/projects/hamlet/chars/ophelia/modeling/v002/publish/ophelia_model.mb")
+
 print( current_file )       # "hamlet/a/chars/ophelia/modeling/v002/p/mb"
 current_file.path           # "/projects/hamlet/chars/ophelia/modeling/v002/publish/ophelia_model.mb"
 ```
@@ -105,6 +106,7 @@ current.get('version')                # "v002"
 Common requests are delegated from the Sid to a configurable Data Source
 ```
 task_sid = Sid("hamlet/s/sq030/sh0010/layout") 
+
 task_sid.exists()                 # True
 task_sid.get_last('version')      # "hamlet/s/sq030/sh0010/layout/v003"
 ```
@@ -112,6 +114,7 @@ task_sid.get_last('version')      # "hamlet/s/sq030/sh0010/layout/v003"
 Sids can be chained to easily express common pipeline needs 
 ```
 task_sid = Sid("hamlet/s/sq030/sh0010/layout") 
+
 if task_sid.exists():
   print( task_sid.get_last('version').get_attr('comment') )     # "Changed camera angle."
 ```
@@ -119,7 +122,8 @@ if task_sid.exists():
 This all makes the Sid a versatile and lightweight data source abstraction layer.
 
 #
-### Intuitive Search Syntax 
+## Intuitive Search Syntax  
+
 Building on top of these ideas, and considering the Sid as a middleware, 
 it can be used as a simple, intuitive, and unified search syntax.
 
@@ -129,7 +133,7 @@ The search syntax is string based, and uses operators:
 - \>   : last
 - \,   : or
   
-#### Search Examples
+### Search Examples
 - "All the Shots of sequence sq030" ?
 ```
 "hamlet/s/sq030/*"
@@ -137,7 +141,7 @@ The search syntax is string based, and uses operators:
 
 - "All the published maya files of Ophelias modeling" ?
 ```
-"hamlet/a/chars/ophelia/modeling/*/p/mb"
+"hamlet/a/chars/ophelia/modeling/*/p/maya"
 ```
 - "Last published maya file of Ophelias modeling" ?
 ```
@@ -154,7 +158,7 @@ The search syntax is string based, and uses operators:
 "hamlet/s/sq030/sh010/**/cache"
 ```
 
-#### URI in search 
+### URI in search 
 
 URI Syntax can be used to add search filters on yet untyped searches
 
@@ -169,7 +173,7 @@ URI Syntax can be used to add search filters on yet untyped searches
 ```
 
   
-#### Implementation
+### Implementation
 
 This search syntax is currently implemented:
 - to search the file system
@@ -178,17 +182,19 @@ This search syntax is currently implemented:
 It is possible (and planned) to implement this search as a front to other query methods.
 For example to translate to an SQL, Shotgrid or Ftrack query. 
 
+A CGWire kitsu connector is under development.
+
 # 
-### UI
+## UI
 
 Spil can be used with the spil_ui.browser.
 
-The browser allows to run sid searches and to navigate through the results.
+The browser allows to run sid searches, navigate through the results and select Sids.
 spil_ui is a separate repository.
 
 
 # 
-### Flexible and configurable
+## Flexible and configurable
 
 Spil is a library, and not a framework.  
 It can easily integrate and connect onto existing pipelines.
@@ -235,7 +241,7 @@ sg.find('Shot',
 ```
 
 # 
-### Performance
+## Performance
 
 Spil thrives to be used interactively. 
 It's performance depends on the data sources that are used.
@@ -247,11 +253,11 @@ It's performance depends on the data sources that are used.
 
 
 #
-### Concepts  
+## Concepts  
 
 The Sid builds upon general concepts, as well as production proven CG pipeline concepts.  
 
-#### General concepts
+### General concepts
 
 - Unique Identifier - Human readable Identifier - "Natural Key"  
 https://dzone.com/articles/7-strategies-for-assigning-ids-to-microservices  
@@ -265,7 +271,7 @@ https://www.python.org/dev/peps/pep-0428
 - Node tree & hierarchy
 
 
-#### Pipeline concepts
+### Pipeline concepts
 
 - Unique Identifier & Resource Locator  
 Examples: "SPREF" (Sony Pictures), or the "Pipeline Resource Identifier - PRI" (Blue Sky)  
@@ -291,7 +297,7 @@ https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432
   The Sid has been used in general and fx pipelines for over 10 years, in various implementations and at various degrees.  
  
 #
-### Philosophy
+## Philosophy
 
 Spil aims to be : flexible, pragmatic, simple - and reliable. 
 ####
@@ -316,7 +322,7 @@ But who are you to have read this far anyway?
 
 
 # 
-### Main limitations
+## Main limitations
 
 - Beta stage  
 The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.  
@@ -334,7 +340,7 @@ File sequence support (eg. image sequences using fileseq) is still very slow.
 
 
 # 
-### Plans and ongoing development
+## Plans and ongoing development
 
 The priority is to make the current feature set more robust and efficient.  
 Adding tests, documentation and quickstart.
@@ -365,7 +371,7 @@ Some under the hood development is under evaluation
 Yeah, and we need a quickstart video... 
 
 # 
-### Interested ?
+## Interested ?
 
 We'd love to hear from you.
 
