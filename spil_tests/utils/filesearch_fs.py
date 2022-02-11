@@ -32,11 +32,11 @@ from spil_tests.utils import init  # needs to be before spil.conf import
 from spil import FS
 
 
-def test_fs(searches):
+def run_test_fs(searches):
 
     do_doublon_check = True  # Set to false when testing performance
     as_sid = True
-    do_attributes = True
+    do_attributes = False
 
     global_timer = Timer(name="global")
     global_timer.start()
@@ -75,6 +75,31 @@ if __name__ == '__main__':
     setLevel(ERROR)
 
     searches = {}
-    searches['FTOT/S/SQ0001/SH0010/*'] = ''
+    searches['tp/s/*'] = 'sequences'
+    searches['tp/s/s01/*'] = 'shots'
+    searches['tp/s/s01/p020/*/*'] = 'tasks'
+    searches['tp/s/s01/p020/**/ma'] = ''
+    searches['tp/s/s01/p020/*/*/*/*/*/ma'] = 'shot__publish_scene'
+    searches['tp/s/s01/p020/*/*/*/*/ma'] = 'shot__work_scene'
+    searches['tp/s/s01/p020/fx/**/ma'] = 'fx tasktype'
+    searches['tp/s/**/maya'] = 'all maya'
+    searches['tp/s/**/cache'] = 'all caches'
+    # searches['tp/s/**/maya?state=p'] = 'all published maya'
+    # searches['tp/a/**/maya'] = 'all maya'
 
-    test_fs(searches)
+    #searches = {}
+    searches['tp/a/*'] = 'asset types'
+    searches['tp/a/characters/*'] = 'chars'
+    searches['tp/a/characters/baobab/*/*'] = 'baobab tasks'
+    searches['tp/a/characters/baobab/*/*/*'] = 'baobab states'
+    searches['tp/a/characters/baobab/*/*/*/*/maya'] = 'baobab maya work scenes'
+    searches['tp/a/characters/baobab/**/maya'] = 'baobab all maya'
+    searches['tp/a/characters/baobab/**/cache'] = 'baobab all caches'
+    searches['tp/a/**/maya'] = 'all asset maya files'
+    searches['tp/a/**/vdb'] = 'all asset vdbs'
+    searches['tp/a/**/cache'] = 'all asset caches'
+    searches['tp/a/**/*'] = 'all asset files'
+    #searches['tp/s/s01/p020/*/*'] = 'tasks'
+
+    run_test_fs(searches)
+

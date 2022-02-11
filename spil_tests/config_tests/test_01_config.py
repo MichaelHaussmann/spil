@@ -29,6 +29,19 @@ log = get_logger('spil_tests')
 log.setLevel(DEBUG)
 
 
+def test_show_config():
+
+    log.debug('Starting')
+    log.debug('Sid Templates: ')
+    for k, v in six.iteritems(sid_templates):
+        log.info('{} -> {}'.format(k, v))
+
+    log.debug('')
+    log.debug('Path Templates: ')
+    for k, v in six.iteritems(path_templates):
+        log.info('{} -> {}'.format(k, v))
+
+
 def get_duplicates(items):
     unique = set()
     duplicate = set()
