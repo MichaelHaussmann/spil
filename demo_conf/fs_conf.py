@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -12,17 +12,17 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-from collections import OrderedDict
-
-from sid_conf import projects, asset_tasks, shot_tasks, asset_cats, extensions_scene, extensions_cache, extensions_image, extensions_movie
-
 """
 Example File System resolver config.
-
 Maps file paths to Sid components.
-
-
+The order is important, first match is returned.
+#TODO : one root path per project
+#IDEA config per project
 """
+
+from collections import OrderedDict
+from sid_conf import shot_tasks, asset_tasks, asset_types
+
 
 ###########################################################################################
 # PATHS The order is important, first match is returned.
@@ -30,34 +30,47 @@ Maps file paths to Sid components.
 
 path_templates = OrderedDict([
 
-    # ('project',                 r'/home/mh/Desktop/SID_DEMO/projects/{project}'),
-    ('project_root',            r'/home/mh/Desktop/SID_DEMO/projects'),
+    # ('project_root',            r'/home/mh/Desktop/SID_DEMO/projects'),
+    ('project_root',            r'P:'),
 
     # type asset
-    ('asset__file',             r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:scenes}'),
-    ('asset__movie_file',       r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}/{name}.{ext:movies}'),
+    ('asset__work_scene',       r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}/{tasktype}_{task}/{state:work}/' +
+                                r'{project}_{assettype}_{asset}_{tasktype}_{task}_{state:work}_{version}.{ext:scenes}'),
 
-    ('asset__state',            r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{state}_{version}'),
-    # ('asset__version',            r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}/{}'),  # FIXME: should not exist as a folder
+    ('asset__publish_scene',    r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}/{tasktype}_{task}/{state:publish}/{version}/{ext:scenes}/{name}/' +
+                                r'{project}_{assettype}_{asset}_{tasktype}_{task}_{state:publish}_{version}_{name}.{ext:scenes}'),
 
-    ('asset__task',             r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}/{task}'),
-    ('asset__variant',          r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}/{variant}'),
-    ('asset__name',             r'{@project_root}/{project}/{type:01_assets}/{cat_long}/{name}'),
-    ('asset__cat',              r'{@project_root}/{project}/{type:01_assets}/{cat_long}'),
+    ('asset__publish_cache',    r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}/{tasktype}_{task}/{state:publish}/{version}/{ext:caches}/{name}/' +
+                                r'{project}_{assettype}_{asset}_{tasktype}_{task}_{state:publish}_{version}_{name}.{ext:caches}'),
+    ('asset__publish_movie',    r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}/{tasktype}_{task}/{state:publish}/{version}/{ext:movies}/{name}/' +
+                                r'{project}_{assettype}_{asset}_{tasktype}_{task}_{state:publish}_{version}_{name}.{ext:movies}'),
 
-    ('asset',                   r'{@project_root}/{project}/{type:01_assets}'),
+    ('asset__state',            r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}/{tasktype}_{task}/{state}'),
+    ('asset__task',             r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}/{tasktype}_{task}'),
+    ('asset__asset',            r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}'),
+    ('asset__assettype',        r'{@project_root}/{project}/{type:assets}/{assettype}'),
+
+    ('asset',                   r'{@project_root}/{project}/{type:assets}'),
 
     # type shot
-    ('shot__file',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:scenes}'),
-    ('shot__movie_file',       r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}/{seq}_{shot}.{ext:movies}'),
+    ('shot__work_scene',        r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}/{tasktype}_{task}/{state:work}/' +
+                                r'{project}_{sequence}_{shot}_{tasktype}_{task}_{state:work}_{version}.{ext:scenes}'),
 
-    ('shot__state',            r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{state}_{version}'),
-    #  ('shot__version',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}/{}'),
-    ('shot__subtask',          r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}/{subtask}'),
-    ('shot__task',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}/{task}'),
-    ('shot__shot',             r'{@project_root}/{project}/{type:02_shots}/{seq}/{seq}_{shot}'),
-    ('shot__seq',              r'{@project_root}/{project}/{type:02_shots}/{seq}'),
-    ('shot',                   r'{@project_root}/{project}/{type:02_shots}'),
+    ('shot__publish_scene',     r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}/{tasktype}_{task}/{state:publish}/{version}/{ext:scenes}/{name}/' +
+                                r'{project}_{sequence}_{shot}_{tasktype}_{task}_{state:publish}_{version}_{name}.{ext:scenes}'),
+
+    ('shot__publish_cache',     r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}/{tasktype}_{task}/{state:publish}/{version}/{ext:caches}/{name}/' +
+                                r'{project}_{sequence}_{shot}_{tasktype}_{task}_{state:publish}_{version}_{name}.{ext:caches}'),
+
+    ('shot__publish_movie',     r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}/{tasktype}_{task}/{state:publish}/{version}/{ext:movies}/{name}/' +
+                                r'{project}_{sequence}_{shot}_{tasktype}_{task}_{state:publish}_{version}_{name}.{ext:movies}'),
+
+    ('shot__state',             r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}/{tasktype}_{task}/{state}'),
+    ('shot__task',              r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}/{tasktype}_{task}'),
+    ('shot__shot',              r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}'),
+    ('shot__sequence',          r'{@project_root}/{project}/{type:shots}/{sequence}'),
+
+    ('shot',                    r'{@project_root}/{project}/{type:shots}'),
 
     # type project
     ('project',                r'{@project_root}/{project}'),
@@ -69,87 +82,73 @@ path_templates_reference = 'project_root'
 path_defaults = {
 
     'state': 'work',
-    # 'frame': '#'  #  does not need to be part of the sid, but may be needed for path creation
+    # 'frame': '#'  does not need to be part of the sid, but may be needed for path creation
 }
 
-# path_new_keys
-sidkeys_to_extrakeys = {
-    'cat': {
-            'cat_long': {
-                'char': '01_char',
-                'location': '02_location',
-                'prop': '03_prop',
-                'fx': '04_fx',
-                'dmp': '05_dmp',
-                '*': '*',  # FIXME : needed for search ?
-            },
-        },
-}
+# not needed here
+sidkeys_to_extrakeys = {}
 
-extrakeys_to_sidkeys = {  # FIXME: generate from above (redundant)
-
-    'cat_long': {
-        'cat': {
-            '01_char': 'char',
-            '02_location': 'location',
-            '03_prop': 'prop',
-            '04_fx': 'fx',
-            '05_dmp': 'dmp',
-            '*': '*',  # FIXME : needed for search ?
-        },
-    },
-}
+extrakeys_to_sidkeys = {}
 
 
 path_mapping = {  # TODO put into project_conf
 
     'project': {
-        'ROMEO_AND_JULIET': 'raj',
+        'test_pipe': 'tp',
     },
     'state': {
         'work': 'w',
         'publish': 'p',
     },
-    'type': {
-        '01_assets': 'a',
-        '02_shots': 's',
-    },
+    'type': OrderedDict([        # the resolver gets the key by value - if the value exists multiple times, the first one is returned.
+        ('assets', 'a'),
+        ('shots', 's'),
+    ]),
 }
 
-search_path_mapping = {
+search_path_mapping = {  # FIXME: useful ?
     # '/3d/scenes/': '/*/scenes/',
 }
+
+# asset_cats = ['CHR', 'SET', 'PRP']
+
+extensions_scene = ['ma', 'mb', 'hip', 'py']  # only real file extensions, not aliases
+extensions_cache = ['abc', 'json', 'fur', 'grm', 'vdb', 'fbx']
+#extensions_image = ['jpg', 'png', 'exr', 'dpx']
+extensions_movie = ['mp4', 'mov', 'avi']
 
 project_path_names = list(path_mapping.get('project').keys())
 
 key_patterns = {
 
     '__': {
-        '{state}':   r'{state:(work|publish|\*)}',      # "work" or "publish" or *
-        '{version}': r'{version:(v\w*|\*)}',            # "v" followed by a word, or *
-        '{seq}':     r'{seq:(sq\w*|\*)}',               # "sq" followed by a word, or *
-        '{shot}':    r'{shot:(sh\w*|\*)}',              # "sh" followed by a word, or *
-        # '{frame}':   r'{frame:(\*|\$\w*|#*|@*|[0-9]*)}',  # number, or "$" followed by a word, or "#"s, or "@"s, or *
+        '{state}':   r'{state:(work|publish|\*|\>)}',     # "w" or "p" or *
+        '{state:work}': r'{state:(work|\*|\>)}',  # "w" or "p" or *
+        '{state:publish}': r'{state:(publish|\*|\>)}',  # "w" or "p" or *
+        '{version}': r'{version:(v\d\d\d|\*|\>)}',  # "V" followed by 3 digits, or *
+        '{seq}':     r'{seq:(s\d\d|\*|\>)}',      # "s" followed by 2 digits, or *  # !!!: do not use r'{2}', error with lucidity
+        '{shot}':    r'{shot:(p\d\d\d|\*|\>)}',      # "p" followed by 3 digits, or *  # !!!: do not use r'{3}', error with lucidity
+        #'{frame}':   r'{frame:(\*|\$\w*|#*|@*|[0-9]*)}',  # number, or "$" followed by a word, or "#"s, or "@"s, or *
 
-        '{ext:scenes}': r'{ext:(' + '|'.join(extensions_scene) + '|\*)}',
-        '{ext:caches}': r'{ext:(' + '|'.join(extensions_cache) + '|\*)}',
-        '{ext:images}': r'{ext:(' + '|'.join(extensions_image) + '|\*)}',
-        '{ext:movies}': r'{ext:(' + '|'.join(extensions_movie) + '|\*)}',
+        '{ext:scenes}': r'{ext:(' + '|'.join(extensions_scene) + r'|\*|\>)}',
+        '{ext:caches}': r'{ext:(' + '|'.join(extensions_cache) + r'|\*|\>)}',
+        #'{ext:images}': r'{ext:(' + '|'.join(extensions_image) + r'|\*|\>)}',
+        '{ext:movies}': r'{ext:(' + '|'.join(extensions_movie) + r'|\*|\>)}',
     },
 
     'asset__': {
-        '{task}': r'{task:(' + '|'.join(asset_tasks) + '|\*)}',
+        '{tasktype}': r'{tasktype:(' + '|'.join(asset_tasks) + r'|\*|\>)}',
+        '{assettype}': r'{assettype:(' + '|'.join(asset_types) + r'|\*|\>)}',
+        # '{name}': r'{name:([a-z0-9]+|\*|\?|\>)}',  # lowercase word or number, with at least one character
     },
-
     'shot__': {
-        '{task}': r'{task:(' + '|'.join(shot_tasks) + '|\*)}',
+        '{tasktype}': r'{tasktype:(' + '|'.join(shot_tasks) + r'|\*|\>)}',
     },
-    't': {  # everything
-        '{project}': r'{project:(' + '|'.join(project_path_names) + '|\*)}',
-        '{type:02_shots}': '{type:(02_shots|\*)}',
-        '{type:01_assets}': '{type:(01_assets|\*)}',
-    }
-
+    't': {  # everything   containing a "t" (asset, shot, project...) # FIXME
+        '{project}': r'{project:(' + '|'.join(project_path_names) + r'|\*|\>)}',
+        '{type:assets}': r'{type:(assets|\*|\>)}',
+        '{type:shots}': r'{type:(shots|\*|\>)}',
+    },
 }
 
 

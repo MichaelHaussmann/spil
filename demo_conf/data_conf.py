@@ -56,12 +56,12 @@ def get_attribute_source(sid, attribute):
 
     Currently the sid argument is not used.
     """
-    from pipe_action.libs.files import get_comment, get_size, get_time
+    # from pipe_action.libs.files import get_comment, get_size, get_time
 
     attribute_sources = {
-        'comment': get_comment,
-        'size': get_size,
-        'time': get_time,
+        #'comment': get_comment,
+        #'size': get_size,
+        #'time': get_time,
     }
 
     source = attribute_sources.get(attribute)

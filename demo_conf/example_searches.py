@@ -17,52 +17,28 @@ from collections import OrderedDict
 
 searches = OrderedDict()
 
-# star search
-searches['*'] = 'All projects'
-searches['raj/*'] = 'All types for project raj'
-searches['raj/s/sq001/*'] = 'All shots of Sequence sq001'
+searches = {}
+searches['tp/s/*'] = 'sequences'
+searches['tp/s/s01/*'] = 'shots'
+searches['tp/s/s01/p020/*/*'] = 'tasks'
+searches['tp/s/s01/p020/**/ma'] = ''
+searches['tp/s/s01/p020/*/*/*/*/*/ma'] = 'shot__publish_scene'
+searches['tp/s/s01/p020/*/*/*/*/ma'] = 'shot__work_scene'
+searches['tp/s/s01/p020/fx/**/ma'] = 'fx tasktype'
+searches['tp/s/**/maya'] = 'all maya'
+searches['tp/s/**/cache'] = 'all caches'
+# searches['tp/s/**/maya?state=p'] = 'all published maya'
+# searches['tp/a/**/maya'] = 'all maya'
 
-# double star search
-searches['raj/s/sq001/sh0020/**/avi'] = 'All avi files of shot sq001/sh0020'
-searches['raj/s/sq001/sh0020/**/p/avi'] = 'All p avi files of shot sq001/sh0020'
-searches['raj/s/*/*/animation/**/p/ma'] = 'All published (p) animation maya files in shots'
-
-# sorted search
-searches['raj/s/sq001/>'] = 'Last shot of Sequence sq001'
-searches['raj/s/sq001/*/>'] = 'Last task for all shots of Sequence sq001'
-searches['raj/s/sq001/sh0010/layout/*/>/w/ma'] = 'Maya file for last work version of layout'
-searches['raj/s/sq001/sh0010/animation/*/>/*/mov'] = 'Mov file for last version of Animation'
-searches['raj/s/sq001/sh0020/**/>/p/avi'] = 'All last published (p) avi files of shot sq001/sh0020'
-searches['raj/s/sq001/**/>/>/p/avi'] = 'Last published (p) avi files from last task, for all shots of sq001'
-
-searches['raj/a/*'] = 'All asset categories'
-searches['raj/a/prop/*'] = 'All props'
-searches['raj/a/prop/*/*/>'] = 'Last task of all props'
-searches['raj/a/prop/*/*/*'] = 'All tasks of all props'
-searches['raj/a/char/romeo/low/**'] = 'Everything under romeo low'
-
-# "or" (comma separated values) in search
-searches['raj/a/char,prop/*'] = 'All characters and props'
-
-# extension alias in search ("movie" is an alias for avi, mp4, mov)
-searches['raj/a/char/romeo/main/surfacing/**/movie'] = 'All romeo main surfacing movie files ("movie" alias)'
-
-# mixed features
-searches['raj/s/sq001,sq002/sh0050/animation/**/maya'] = 'All H.....'
-searches['raj/s/sq001,sq002/sh0050/animation/*/*/*/maya'] = 'All H.....'
-searches['raj/s/sq001,sq002/sh0050/animation/*/>/p/maya'] = 'Last published (p) maya file for animation of shot 10 in sq 1 and 2'
-
-# QM searches
-searches['raj/a/location/#/**/maya'] = 'All sets that have maya files'
-searches['raj/a/prop/#/**/hip'] = 'All props that have hip files'
-searches['raj/a/prop/*/#/*'] = 'All subtasks of props that have tasks and versions'
-searches['raj/s/sq001,sq002/#/animation/*/*/*/maya'] = 'All H.....'
-searches['raj/s/sq001/sh0050/animation/*/#/p/maya'] = 'Versions of shot 50 animation that are published in maya'
-
-# currently not working - looks like sorted and double star do not work
-searches['raj/s/sq001/sh0020/**/>/p/avi'] = 'All last published (p) avi files of shot sq001/sh0020'
-searches['raj/s/sq001,sq002/sh0010/>/**/maya'] = 'Last task for ...'
-
-searches['raj/s/sq001/sh0010/*/*/*/*/*'] = 'Test for ext 1.'
-searches['raj/s/sq001/sh0010/**'] = 'Test for ext 2.'
-searches['raj/s/sq001/sh0010/**/maya,movie,hou'] = 'Test for ext 3.'
+#searches = {}
+searches['tp/a/*'] = 'asset types'
+searches['tp/a/characters/*'] = 'chars'
+searches['tp/a/characters/baobab/*/*'] = 'baobab tasks'
+searches['tp/a/characters/baobab/*/*/*'] = 'baobab states'
+searches['tp/a/characters/baobab/*/*/*/*/maya'] = 'baobab maya work scenes'
+searches['tp/a/characters/baobab/**/maya'] = 'baobab all maya'
+searches['tp/a/characters/baobab/**/cache'] = 'baobab all caches'
+searches['tp/a/**/maya'] = 'all asset maya files'
+searches['tp/a/**/vdb'] = 'all asset vdbs'
+searches['tp/a/**/cache'] = 'all asset caches'
+searches['tp/a/**/*'] = 'all asset files'
