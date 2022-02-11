@@ -8,7 +8,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-version = "0.0.2"
+version = "0.0.3"
 
 with io.open('README.rst', 'r', encoding='utf-8') as readme_file:
     readme = readme_file.read()
@@ -35,7 +35,7 @@ setup(
     license='LGPL',
     zip_safe=False,
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         'Operating System :: OS Independent',
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
@@ -48,18 +48,20 @@ setup(
         "Topic :: Software Development :: Libraries",
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     ],
-    keywords=(
+    keywords=[
         'vfx', 'cg', 'vfx-pipeline', 'cg-pipeline', 'path templates'
 
-    ),
+    ],
     install_requires=[  # 'lucidity' for python 3 is shipped as vendor lib, not required.
         'six',
         'logzero',
+        'fileseq'
     ],
     extras_require={
         ':python_version<"3.0"': ['pathlib2', 'lucidity']
     },
     tests_require=[
+        'codetiming',
         'pytest',
     ],
 
