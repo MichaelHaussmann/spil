@@ -27,6 +27,7 @@ sid_templates = {}
 to_extrapolate = []
 key_types = {}
 extrapolate_types = {}
+extrapolation_leaf_subtype = None
 key_patterns = {}
 extension_alias = {}
 projects = []
@@ -60,7 +61,7 @@ for name, value in inspect.getmembers(module):
     globals()[name] = value
     __all__.append(name)
 
-sid_templates = extrapolate(sid_templates, extrapolate_types, to_extrapolate)
+sid_templates = extrapolate(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
 pattern_replacing(sid_templates, key_patterns)
 
 if __name__ == '__main__':

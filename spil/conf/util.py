@@ -24,7 +24,7 @@ def get_keys(template):
     return [t[1] for t in string.Formatter().parse(template) if t[1] is not None]
 
 
-def extrapolate(sid_templates, key_types, to_extrapolate=[]):
+def extrapolate(sid_templates, key_types, to_extrapolate=[], leaf_subtype='file'):
     """
     Templates are extrapolated: leave type entries are looped downwards to create subtypes.
 
@@ -35,7 +35,7 @@ def extrapolate(sid_templates, key_types, to_extrapolate=[]):
 
     # first we copy all the full paths, they have to match first
     for keytype, template in six.iteritems(sid_templates):
-        if keytype.endswith('file'):  # FIXME: hard coded !
+        if keytype.endswith(leaf_subtype):  # FIXME: hard coded !
             generated[keytype] = template
 
     # then we start over to generate the subtypes
@@ -50,14 +50,14 @@ def extrapolate(sid_templates, key_types, to_extrapolate=[]):
             continue
 
         # generating sub keys
-        if keytype.endswith('file'):
+        if keytype.endswith(leaf_subtype):
             parts = template.split('/')
             # keys = get_keys(template)
             # print(type.split(sidtype_keytype_sep)[0])
             keys = key_types.get(keytype.split(sidtype_keytype_sep)[0])
             # print(keys)
             for i, key in enumerate(reversed(keys[:-1]), 1):
-                new_type = keytype.replace('file', key)
+                new_type = keytype.replace(leaf_subtype, key)
                 new_template = '/'.join(parts[:-1 * i])
 
                 # new_template = template.split('/{' + key)[0]  # for paths
