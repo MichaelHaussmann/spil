@@ -118,12 +118,21 @@ class SidCache(SidSearch):
         """
         Inits the cache from the data source, from scratch.
         """
-        temp_path = self.cache_path.with_stem('temp_{}'.format(time.time()))
+        # temp_path = self.cache_path.with_stem('temp_{}'.format(time.time()))  # with_stem is PY3.9
+        temp_path = self.cache_path.with_name('temp_{}'.format(time.time()) + self.cache_path.suffix)
         temp_list = []
+        generated = set()
         with open(temp_path, 'a') as f:
-            for sid in extrapolate(self.data_source.get(self.data_search, as_sid=False)):
-                f.write(sid + EOL)
-                temp_list.append(sid)
+            for search in extrapolate([self.data_search]):
+                if not search.endswith('*'):
+                    continue
+                print('searching ' + search)
+                for sid in extrapolate(self.data_source.get(search, as_sid=False)):
+                    if sid in generated:
+                        continue
+                    generated.add(sid)
+                    f.write(sid + EOL)
+                    temp_list.append(sid)
         Path(temp_path).replace(self.cache_path)
 
         self.cache_list = temp_list
@@ -131,6 +140,7 @@ class SidCache(SidSearch):
 
         self.last_read_time = now()
         self.last_check_time = now()
+        log.info('Init done for {}'.format(self))
 
     def _read(self):
         if not self.cache_path.exists():
@@ -163,6 +173,10 @@ if __name__ == '__main__':
 
     from spil_tests.utils import stop
     import os
+
+    for i in extrapolate(['CBM/A/*/*/*']):
+        print(i)
+    stop()
 
     log.setLevel(logging.DEBUG)
 

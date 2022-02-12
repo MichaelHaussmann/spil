@@ -1,3 +1,5 @@
+
+
 from spil import Sid
 from spil.sid.search.ss import SidSearch
 
@@ -66,6 +68,13 @@ def get_cached_attribute(sid, attribute):
     source = get_attribute_source(sid, attribute)
     if source:
         return source(sid)
+
+
+def reload_data_source(sid):
+    """
+    Reloads the data source for given sid
+    """
+
 
 
 class Data(SidSearch):

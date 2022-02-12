@@ -68,7 +68,7 @@ def glob2re(pat):
     return res + '\Z(?ms)'
 
 
-def extrapolate(sids):
+def extrapolate(sids):  # TODO: move extrapolate in a more general helper.
     """
     From an iterable containing leaf node paths, extrapolates all the subnode paths.
 
@@ -82,7 +82,7 @@ def extrapolate(sids):
     :return:
     """
 
-    print('In Extrapolate')
+    print('In Extrapolate')  # TODO: warning if a string or Sid is given, need iterable.
 
     generated = set()
 
