@@ -48,6 +48,8 @@ def get_sidcache(sid_cache_file, data_search, data_source=None):
 
     Note that the file can be accessed concurrently from different python instances, from different machines.
     SidCache still needs to ensure threadsafety.
+
+    #TODO: replace lru cache with a custom cache, with only filename as key.
     """
     return SidCache(sid_cache_file, data_search, data_source=data_source)
 
@@ -106,14 +108,9 @@ class SidCache(SidSearch):
     >>> sidcache = get_sidcache(sid_cache_file='/temp/hamlet_shots.txt', data_search='hamlet/s/*/*', data_source=FS())
     >>> sidcache.get('hamlet/s/*')
     ```
-
-    TODO: file create/update.
-    TODO: cache reload from file, using file date (make self.cache_list into function that checks for file time, and updates list if needed).
-    TODO: default cache file to start from scratch
-
-    time to check /
-    last check
-    last_read
+    TODO: optional multiple data sources
+    TODO: ttl for warmup
+    TODO: file conform (dedoublon, sort) in background process
     """
 
     def __init__(self, sid_cache_file, data_search, data_source=None):
@@ -136,12 +133,12 @@ class SidCache(SidSearch):
         self.last_read_time = 0
         self.ttl = 30  # Minimal interval in seconds, before we check if the cache file modification time has been changed.
 
-        # configuration: data source and searchkeyd
+        # configuration: data source and searchkey
         if not data_source:
             from spil import FS, Data
 
             # Use list of data sources in Data ? What to do if this cache is included in Data ?
-            self.data_source = FS() # , Data()  # test - datasource is any implementing SidSearch ?
+            self.data_source = FS()  # , Data()  # test - datasource is any implementing SidSearch ?
         else:
             self.data_source = data_source
         self.data_search = data_search  # '*/A/*/*/*'
@@ -157,9 +154,7 @@ class SidCache(SidSearch):
         return self._source().get_one(str(search_sid), as_sid=as_sid)
 
     def exists(self, search_sid):
-        return bool(
-            first(self._source().get_one([str(search_sid)], as_sid=False))
-        )  # [str(search_sid) + self.EOL] ?        .
+        return bool(first(self._source().get_one([str(search_sid)], as_sid=False)))
 
     def create(self, sid, do_extrapolate=False):
         """
@@ -181,6 +176,10 @@ class SidCache(SidSearch):
             self.ls = LS(searchlist=self.cache_list)
 
     def _source_to_file(self):
+        """
+        Reads the original data source into the cache file.
+
+        """
         log.info("Start _source_to_file on {}".format(self.cache_path))
         lock = self.cache_path.with_suffix(".lock")
         temp_path = self.cache_path.with_name(
@@ -203,6 +202,12 @@ class SidCache(SidSearch):
 
     @staticmethod
     def __wait_for_warmup(lock):
+        """
+        Waits as long as the given lock file exists.
+        In case of time out, raises an exception.
+
+        This is used by a SidCache that needs to wait for the warmup to complete, typically to insert data.
+        """
         for i in range(max_warmup_wait):
             if lock.exists():
                 time.sleep(1)
@@ -218,6 +223,11 @@ class SidCache(SidSearch):
     def _warm_up(self, blocking=False):
         """
         Inits the cache from the data source, from scratch.
+
+        The warmup (cache reading function _source_to_file) is launched in a new process, protected by a lock file.
+
+        If blocking is True, we wait for completion before returning.
+        If blocking is False, we return the original data source, to serve the cache clients during warmup.
         """
         # check if no warmup already in process
         lock = self.cache_path.with_suffix(".lock")
@@ -245,6 +255,10 @@ class SidCache(SidSearch):
             log.info("Warm_up launched for {}".format(self))
 
     def _heat_up(self):
+        """
+        The cache file is loaded into memory.
+        This process is blocking.
+        """
 
         if not self.cache_path.exists():
             log.debug("File does not exist, cache is cold, needs warm up.")
@@ -279,10 +293,18 @@ class SidCache(SidSearch):
 
         return self.ls or self._heat_up()
 
+    def __str__(self):
+        return '<SidCache: "{}"@{} ({})>'.format(
+            self.data_search, self.cache_path.name, self.data_source
+        )
+
+    def __repr__(self):
+        return str(self)
+
 
 if __name__ == "__main__":
 
-    from spil_tests.utils import stop
+    from spil_tests import stop
     import os
 
     log.setLevel(logging.DEBUG)
@@ -296,15 +318,15 @@ if __name__ == "__main__":
     assert sc == sc3
 
     print(get_sidcache.cache_info())
-    for i in sc.get('FTOT/S/*'):
+    for i in sc.get("FTOT/S/*"):
         print(i)
 
-    for i in sc2.get('FFM/S/SQ0001/*'):
+    for i in sc2.get("FFM/S/SQ0001/*"):
         print(i)
 
     # sc2.create('FFM/S/SQ0001/SH0007')
 
-    for i in sc2.get('FFM/S/SQ0001/SH0007'):
+    for i in sc2.get("FFM/S/SQ0001/SH0007"):
         print(i)
 
     stop()
