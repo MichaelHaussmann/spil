@@ -77,6 +77,8 @@ class Sid(object):
     - ConcreteSid: describes one single data, that can exist or not
     - DataSid: a sid that may call data sources internally
     - Nice idea >>> Sid('roju', 'a', 'props') -> Sid('roju/a/props')
+
+    #TODO: implement a strict mode that raises Exception if a valid Sid returns a non Sid during an operation like get_with, get_as, /, copy, ...
     """
 
     def __str__(self):
@@ -93,6 +95,21 @@ class Sid(object):
             return unicode(other.full_string) == unicode(self.full_string)
         else:
             return unicode(other) == unicode(self)
+
+    if six.PY2:
+        #FIXME: handle uri here
+        def __div__(self, other):
+            return Sid(str(self) + conf.sip + str(other))
+    else:
+        def __truediv__(self, other):
+            """
+            Override the division operator.
+            Is this really useful ? Seems nice, but actually dangerous.
+
+            For every Sid:
+            >>> sid.parent / sid.get(sid.keytype) == sid
+            """
+            return Sid(str(self) + conf.sip + str(other))
 
     def __lt__(self, other):
         return unicode(self) < unicode(other)
@@ -415,8 +432,8 @@ class Sid(object):
         >>>Sid('roju/a/chars/romeo/modeling').keytype
         "task"
 
-        >>>Sid('roju/a/chars/romeo')
-        "name"
+        >>>Sid('roju/s/sq001/sh0010').keytype
+        "shot"
 
         :return: string keytype
         """
@@ -474,6 +491,8 @@ class Sid(object):
         """
         Returns the data as a key value string, as in an URI.
 
+        The name of this method will likely change!
+
         Usage still experimental.
         #TODO: (method name to be improved)
 
@@ -492,6 +511,8 @@ class Sid(object):
         Returns self with version incremented, or first version if there is no version.
         If version is '*', returns "new" version (next of last)
 
+        If the result is not a valid Sid (not typed, no data), returns an empty Sid.
+
         :return: Sid
         """
         if key != 'version':
@@ -506,13 +527,16 @@ class Sid(object):
             version = 0  # allow non existing version #RULE: starts with V001 (#FIXME)
         version = (int(version) + 1)
         version = 'V' + str('%03d' % version)
-        return self.get_with(version=version)
+        result = self.get_with(version=version)
+        return result if result else Sid()
 
     def get_new(self, key):  # FIXME: delegate to Data framework
         """
-        This method is experimental.
+        This implementation is experimental.
 
         Returns self with next of last version, or first version if there is no version.
+
+        If the result is not a valid Sid (not typed, no data), returns an empty Sid.
 
         :return: Sid
         """
@@ -520,15 +544,19 @@ class Sid(object):
             raise NotImplementedError("get_new() support only 'version' key for the moment.")
         if self.get('version'):
             if self.get_last('version'):
-                return self.get_last('version').get_next('version')
+                result = self.get_last('version').get_next('version')
+                return result if result else Sid()
             else:
-                return self.get_next('version')  # Returns a first version
+                result = self.get_next('version')  # Returns a first version
+                return result if result else Sid()
         else:
             with_added_version = self.get_with(version='*').get_last('version')
             if with_added_version:
-                return with_added_version.get_next('version')
+                result = with_added_version.get_next('version')
+                return result if result else Sid()
             else:
-                return self.get_next('version')  # Returns a first version
+                result = self.get_next('version')  # Returns a first version
+                return result if result else Sid()
 
     def exists(self):
         """
@@ -553,6 +581,8 @@ class Sid(object):
         True
         >>>Sid('roju/s/sq0030/sh0100/animation').match('roju/s/*/*/*')
         True
+        >>>Sid('roju/a/chars/romeo').match('roju/a/props/*')
+        False
 
         :return: bool
         """
@@ -566,12 +596,27 @@ class Sid(object):
 
         This method is experimental. Implementation and concept to be clarified.
 
+        Note: A leaf should be dependent on the context and type.
+        For example, in searching for render files,
+        it can be useful to handle the "render pass" as leave,
+        to avoid going too deep in the hierarchy.
+        This is done in the browser, to browse render files by the pass folder, not individually by default.
+
         :return: bool
         """
         return bool(self.get('ext'))
         #FIXME: hard coded. Relying on the fact that a leaf has an extention, called "ext".
         # Define "complete". Also in regard to a search Sid. For example Sids containing /** are "complete".
         # or if a Sid has no children, it is leaf.
+
+    def is_search(self):
+        """
+        Returns True if the current Sid contains search symbols.
+        Search symbols are defined in the Sid conf, and are typically: ['*', ',', '>', '<', '**']
+
+        The Sid may not be typed.
+        """
+        return any(s in str(self) for s in conf.search_symbols)
 
     # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
     # implement URIs: Sid('FTOT').get_with(uri='type=A') <==> FTOT?type=A  ==>  FTOT/A
