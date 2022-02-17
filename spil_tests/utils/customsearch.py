@@ -13,28 +13,28 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 """
-To launch searches on FS.
-FS is the file system.
+To launch searches on a custom data source.
+
  
 Searches is a dict with searches as 
     key: search sid
     value: search description 
 
-function: test_fs(searches) 
+function: test_custom(searches) 
 """
 import six
 from spil_tests import Timer
 from spil_tests.utils.test_utils import test_sid
 from spil.util.log import DEBUG, ERROR, get_logger
-from spil import FS, Sid
+from spil import Data, Sid
 
 log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace=None):
+def test_custom(searches, data_source, as_sid=True, do_deep=False, do_doublon_check=True, replace=None):
     """
-    Runs a given searches on FS() Source.
+    Runs given searches on the given Data Source.
 
     Optionally operates a replace in the search, using given replace tuple.
     """
@@ -42,7 +42,6 @@ def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace
     global_timer = Timer(name="global", logger=log.debug)
     global_timer.start()
 
-    ls = FS()
     for search_sid, comment in six.iteritems(searches):
 
         if replace:
@@ -55,7 +54,7 @@ def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace
         ls_timer = Timer(name="search_sid", logger=log.debug)
         ls_timer.start()
         count = 0
-        for i in ls.get(search_sid, as_sid=as_sid):
+        for i in data_source.get(search_sid, as_sid=as_sid):
             log.info(i)
             match = Sid(i).match(search_sid)
             if not match:
@@ -84,4 +83,4 @@ if __name__ == "__main__":
     searches = {}
     searches["FTOT/S/SQ0001/SH0010/*"] = ""
 
-    test_fs(searches)
+    test_custom(searches, Data())

@@ -12,37 +12,32 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+
 """
-To launch searches on FS.
-FS is the file system.
- 
+To launch searches on two sources. 
+Allows comparing of data sources.
+
 Searches is a dict with searches as 
     key: search sid
     value: search description 
 
-function: test_fs(searches) 
+function: test_a_b(searches) 
 """
 import six
 from spil_tests import Timer
-from spil_tests.utils.test_utils import test_sid
 from spil.util.log import DEBUG, ERROR, get_logger
-from spil import FS, Sid
 
 log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace=None):
-    """
-    Runs a given searches on FS() Source.
+def test_search_ab(searches, sourceA, sourceB, as_sid=False, replace=None):
 
-    Optionally operates a replace in the search, using given replace tuple.
-    """
+    log.debug("Searching sids in A:{} and B:{}".format(sourceA, sourceB))
 
     global_timer = Timer(name="global", logger=log.debug)
     global_timer.start()
 
-    ls = FS()
     for search_sid, comment in six.iteritems(searches):
 
         if replace:
@@ -50,33 +45,32 @@ def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace
 
         log.debug("*" * 10)
         log.info("{} --> {}".format(search_sid, comment))
-        double_check = set()
 
-        ls_timer = Timer(name="search_sid", logger=log.debug)
-        ls_timer.start()
-        count = 0
-        for i in ls.get(search_sid, as_sid=as_sid):
-            log.info(i)
-            match = Sid(i).match(search_sid)
-            if not match:
-                log.warning('No match "{}" <-> "{}". This is not normal'.format(i, search_sid))
-            count += 1
-            if do_doublon_check:
-                if i in double_check:
-                    log.warning("--------------------------------------> Doublon {}".format(i))
-                double_check.add(i)
-            if do_deep:
-                log.debug("Sid test for {}".format(i))
-                test_sid(i, from_search=search_sid)
+        a_timer = Timer(name="a_timer", logger=log.info)
+        a_timer.start()
+        found_a = set(sourceA.get(search_sid, as_sid=as_sid))
+        log.info("A : {}".format(len(found_a)))
+        a_timer.stop()
 
-        log.debug("Total: " + str(count))
-        ls_timer.stop()
+        b_timer = Timer(name="b_timer", logger=log.info)
+        b_timer.start()
+        found_b = set(sourceB.get(search_sid, as_sid=as_sid))
+        log.info("B : {}".format(len(found_b)))
+        b_timer.stop()
 
+        problems = found_b ^ found_a
+
+        for i in problems:
+            log.warning("Not equal in both searches: {}".format(i))
+
+    log.debug("*" * 10)
+    log.debug("Done all searches.")
     global_timer.stop()
 
 
 if __name__ == "__main__":
 
+    from spil import Data, FS
     from spil.util.log import setLevel, ERROR, DEBUG
 
     setLevel(ERROR)
@@ -84,4 +78,6 @@ if __name__ == "__main__":
     searches = {}
     searches["FTOT/S/SQ0001/SH0010/*"] = ""
 
-    test_fs(searches)
+    test_search_ab(searches, Data(), FS())
+    # to compare speed, run the test twice and check second time.
+    test_search_ab(searches, Data(), FS())

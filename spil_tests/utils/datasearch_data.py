@@ -23,71 +23,65 @@ Searches is a dict with searches as
 function: test_data(searches) 
 """
 import six
+from spil_tests import Timer
+from spil_tests.utils.test_utils import test_sid
+from spil.util.log import DEBUG, ERROR, get_logger
+from spil import Data, Sid
 
-if six.PY3:  #TODO: add Timer in package for PY3 (they have a great package setup) - Also add tox.
-    from codetiming import Timer
-else:
-    from spil_tests.mock_timer import Timer
-
-from spil_tests.utils import init  # needs to be before spil.conf import
-from spil import Data
+log = get_logger("spil_tests")
+log.setLevel(DEBUG)
 
 
-def test_data(searches):
+def test_data(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace=None):
+    """
+    Runs given searches on Data() Source.
 
-    do_doublon_check = True  # Set to false when testing performance
-    as_sid = True
-    do_attributes = True
+    Optionally operates a replace in the search, using given replace tuple.
+    """
 
-    global_timer = Timer(name="global")
+    global_timer = Timer(name="global", logger=log.debug)
     global_timer.start()
 
     ls = Data()
     for search_sid, comment in six.iteritems(searches):
 
-        print('*' * 10)
-        print('{} --> {}'.format(search_sid, comment))
+        if replace:
+            search_sid = search_sid.replace(*replace)
+
+        log.debug("*" * 10)
+        log.info("{} --> {}".format(search_sid, comment))
         double_check = set()
 
-        ls_timer = Timer(name="search_sid")
+        ls_timer = Timer(name="search_sid", logger=log.debug)
         ls_timer.start()
         count = 0
         for i in ls.get(search_sid, as_sid=as_sid):
-            print(i)
+            log.info(i)
+            match = Sid(i).match(search_sid)
+            if not match:
+                log.warning('No match "{}" <-> "{}". This is not normal'.format(i, search_sid))
             count += 1
             if do_doublon_check:
                 if i in double_check:
-                    print('--------------------------------------> Doublon {}'.format(i))
+                    log.warning("--------------------------------------> Doublon {}".format(i))
                 double_check.add(i)
-            # sid = Sid(i)
-            if do_attributes:
-                for d in ['comment', 'size', 'time']:
-                    print(i.get_attr(d) or '')
-                print('#' if i.get_with(state='OK').exists() else None)
-            # print sid.path
-        print('Total: ' + str(count))
+            if do_deep:
+                log.debug("Sid test for {}".format(i))
+                test_sid(i, from_search=search_sid)
+
+        log.debug("Total: " + str(count))
         ls_timer.stop()
+
     global_timer.stop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from spil.util.log import setLevel, ERROR, DEBUG
+
     setLevel(ERROR)
 
     searches = {}
-    searches['FTOT/S/SQ0001/SH0010/*'] = ''
+    searches["FTOT/S/SQ0001/SH0010/*"] = ""
 
     test_data(searches)
-
-    """
-    Problem:
-    
-    FTOT/S/SQ0001/SH0020/ANI/**/cache,maya?state=WIP&version=>
-    Doesn't return FTOT/S/SQ0001/SH0020/ANI/V019/WIP/CAM/abc
-    Reason: General "sort by / group by" problem.
-    Missing a "sort by row".
-    Now just makes an overall sort and group by the previous to ">" field.
-    So it is the "last" version, but across all states, extensions, etc. Not what we would expect if we do a broad search.
-
-    """

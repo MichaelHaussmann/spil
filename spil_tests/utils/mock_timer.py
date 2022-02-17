@@ -2,7 +2,7 @@
 
 class Timer(object):
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, logger=None):
         pass
 
     def start(self):
