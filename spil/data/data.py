@@ -100,6 +100,8 @@ class Data(SidSearch):
             return source.exists(search_sid)
 
     def create(self, sid):
+        # FIXME: this is a stub.
+        return
         destination = get_data_destination(sid)
         if destination:  #  and hasattr(destination, 'create'):
             return destination.create(sid)
@@ -111,7 +113,7 @@ if __name__ == '__main__':
 
     setLevel(ERROR)
 
-    sid = 'FTOT/A/PRP'
+    sid = 'roju/a/props'
     sid = Sid(sid)
     value = get(sid, 'comment')
     print(value)
@@ -128,6 +130,6 @@ if __name__ == '__main__':
                 value = get(i, 'comment')
                 print(value)
 
-    sids = ['CBM/*', 'CBM/*', 'CBM/A/*', 'FTOT/A/PRP/*']
+    sids = ['roju/*', 'roju/a/*', 'roju/a/props/*']
     for sid in sids:
-        test(sid, limit=None)
+        test(sid, limit=0)
