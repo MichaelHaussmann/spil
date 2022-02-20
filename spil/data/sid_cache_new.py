@@ -2,11 +2,11 @@ import time
 import os
 from multiprocessing import Process
 
+from spil.sid.search.tools import unfold_search
 from spil.util.caching import lru_kw_cache as cache
 
-from spil.sid.search.ls import extrapolate
 from spil.sid.search.ss import SidSearch
-from spil.sid.search.util import first
+from spil.sid.search.util import first, extrapolate
 
 import six
 
@@ -113,7 +113,7 @@ class SidCache(SidSearch):
     TODO: file conform (dedoublon, sort) in background process
     """
 
-    def __init__(self, sid_cache_file, data_search, data_source=None):
+    def __init__(self, sid_cache_file, data_search, data_source=None, do_validate=True):
         """
         sid_cache_file is a file containing Sid strings, one per line (separated by EOL).
         sid_cache_file should be a Path or path string.
@@ -121,6 +121,9 @@ class SidCache(SidSearch):
         If do_cache_file is True (default) the file is converted to a list (loaded in RAM),
         else it is opened as a generator (reread at each usage).
         In case of large cache files, it is likely faster to set do_cache_file to False.
+
+        If do_validate is True (the default), the data_source query is done with as_sid=True, to be certain only valid Sids make it in the cache.
+        If you trust your data source, you can set it to False, which may slightly speed up the query.
 
         TODO: better error handling, to rule out problems in the input data (input, conf or cache).
         TODO: better newline handling. Maybe automatic strip in LS.
@@ -132,8 +135,11 @@ class SidCache(SidSearch):
         self.last_check_time = 0
         self.last_read_time = 0
         self.ttl = 30  # Minimal interval in seconds, before we check if the cache file modification time has been changed.
+        self.do_validate = do_validate
 
         # configuration: data source and searchkey
+        self.data_search = data_search
+
         if not data_source:
             from spil import FS, Data
 
@@ -141,14 +147,16 @@ class SidCache(SidSearch):
             self.data_source = FS()  # , Data()  # test - datasource is any implementing SidSearch ?
         else:
             self.data_source = data_source
-        self.data_search = data_search  # '*/A/*/*/*'
 
         # starting
         self._source()
         log.info("Init of SidCache with file {}".format(self.cache_path))
 
-    def get(self, search_sid, as_sid=True):
-        return self._source().get(str(search_sid), as_sid=as_sid)
+    def get(self, search_sid, as_sid=True, is_unfolded=False):
+        return self._source().get(search_sid, as_sid=as_sid, is_unfolded=is_unfolded)
+
+    #def _get(self, search_sids, as_sid=True):
+     #   return self._source().get(search_sids, as_sid=as_sid)
 
     def get_one(self, search_sid, as_sid=True):
         return self._source().get_one(str(search_sid), as_sid=as_sid)
@@ -186,17 +194,27 @@ class SidCache(SidSearch):
             "temp_{}".format(time.time()) + self.cache_path.suffix
         )
         generated = set()
+        search_sids = unfold_search(self.data_search, do_extrapolate=True)
+        from pprint import pformat
+        log.error(pformat(search_sids))
+        log.error(self.data_source)
         with open(temp_path, "a") as f:
-            for search in extrapolate([self.data_search]):
-                if not search.endswith("*"):
-                    continue
-                print("searching " + search)
-                for sid in extrapolate(self.data_source.get(search, as_sid=False)):
-                    if sid in generated:
+            for sid in extrapolate(self.data_source._get(search_sids, as_sid=self.do_validate), as_sid=self.do_validate):
+                log.error(sid)
+                if self.do_validate:
+                    if not sid:
                         continue
-                    generated.add(sid)
-                    f.write(sid + EOL)
-        Path(temp_path).replace(self.cache_path)
+                    else:
+                        sid = str(sid)
+                if sid in generated:
+                    continue
+                generated.add(sid)
+                f.write(sid + EOL)
+        try:
+            Path(temp_path).replace(self.cache_path)
+        except PermissionError:  # FIXME: better strategy
+            time.sleep(5)
+            Path(temp_path).replace(self.cache_path)
         lock.unlink()
         log.info("Done _source_to_file on {}".format(self.cache_path))
 
@@ -219,6 +237,12 @@ class SidCache(SidSearch):
                 max_warmup_wait, lock
             )
         )
+
+    def clear(self, reload=True, blocking=False):
+        if self.cache_path.exists():
+            self.cache_path.unlink()
+        if reload:
+            self._warm_up(blocking=blocking)
 
     def _warm_up(self, blocking=False):
         """

@@ -59,7 +59,7 @@ class CS(SidSearch):
                 continue
 
             if result not in done:
-                done.add(result)
+                #done.add(result)
                 if as_sid:
                     yield result
                 else:
@@ -75,10 +75,12 @@ class CS(SidSearch):
 
             if "*" not in str(root):
 
-                if as_sid:
-                    yield root
-                else:
-                    yield str(root)
+                if root not in done:
+                    #done.add(root)  # FIXME: check why data is so often repeated, this is expensice, optimize
+                    if as_sid:
+                        yield root
+                    else:
+                        yield str(root)
 
             elif "*" in str(root.parent) and root != root.parent:
 
@@ -90,9 +92,19 @@ class CS(SidSearch):
                     )
 
                 for found_root in self.parent_source.get(root):
-                    generator = self._append_value(found_root, done, as_sid=as_sid)
-                    for i in generator:
-                        yield i
+
+                    if root.get(self.key) != "*":
+                        result = found_root / root.get(self.key)
+                        if result not in done:
+                            #done.add(result)
+                            if as_sid:
+                                yield result
+                            else:
+                                yield str(result)
+                    else:
+                        generator = self._append_value(found_root, done, as_sid=as_sid)
+                        for i in generator:
+                            yield i
             else:
 
                 generator = self._append_value(root, done, as_sid=as_sid)

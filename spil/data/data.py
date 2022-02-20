@@ -1,4 +1,10 @@
+"""
 
+- optional: deactivate lru caching (for performance tests)
+
+NOTE: searches where the type is followed by a /** ('FTOT/*/**') are currently unsupported due to faulty expand script.
+Performances of FS: 100 sids per second, 1000 per second after memory caching.
+"""
 
 from spil import Sid
 from spil.sid.search.ss import SidSearch
@@ -76,60 +82,8 @@ def reload_data_source(sid):
     """
 
 
-
-class Data(SidSearch):
-    """
-    Data abstraction Layer.
-
-    On top of the built-in FS, and delegating data access to other custom Data sources.
-    """
-
-    def get(self, search_sid, as_sid=True):
-        source = get_data_source(search_sid)
-        if source:
-            return source.get(search_sid, as_sid=as_sid)
-
-    def get_one(self, search_sid, as_sid=True):
-        source = get_data_source(search_sid)
-        if source:
-            return source.get_one(search_sid, as_sid=as_sid)
-
-    def exists(self, search_sid):
-        source = get_data_source(search_sid)
-        if source:
-            return source.exists(search_sid)
-
-    def create(self, sid):
-        # FIXME: this is a stub.
-        return
-        destination = get_data_destination(sid)
-        if destination:  #  and hasattr(destination, 'create'):
-            return destination.create(sid)
-
-
 if __name__ == '__main__':
 
     from spil.util.log import setLevel, DEBUG, ERROR
 
     setLevel(ERROR)
-
-    sid = 'roju/a/props'
-    sid = Sid(sid)
-    value = get(sid, 'comment')
-    print(value)
-
-    def test(sid, limit=5):
-        sid = Sid(sid)
-        print(sid)
-        got = Data().get(sid)
-        if limit:
-            print(list(got)[:limit])
-        else:
-            for i in got:
-                print('"{}"'.format(i))
-                value = get(i, 'comment')
-                print(value)
-
-    sids = ['roju/*', 'roju/a/*', 'roju/a/props/*']
-    for sid in sids:
-        test(sid, limit=0)
