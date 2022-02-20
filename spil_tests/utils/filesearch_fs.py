@@ -32,7 +32,7 @@ log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace=None):
+def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, do_match_check=True, replace=None):
     """
     Runs a given searches on FS() Source.
 
@@ -57,9 +57,10 @@ def test_fs(searches, as_sid=True, do_deep=False, do_doublon_check=True, replace
         count = 0
         for i in ls.get(search_sid, as_sid=as_sid):
             log.info(i)
-            match = Sid(i).match(search_sid)
-            if not match:
-                log.warning('No match "{}" <-> "{}". This is not normal'.format(i, search_sid))
+            if do_match_check:
+                match = Sid(i).match(search_sid)
+                if not match:
+                    log.warning('No match "{}" <-> "{}". This is not normal'.format(i, search_sid))
             count += 1
             if do_doublon_check:
                 if i in double_check:
