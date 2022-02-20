@@ -134,7 +134,8 @@ class Sid(object):
 
     def __define_by_sid(self, sid, do_check=False):
 
-        self.string = str(sid)
+        # TODO: better handling if Sid is given. Handle as a copy or re-create
+        self.string = sid.full_string if isinstance(sid, Sid) else str(sid)
 
         if self.string.count('?'):  # sid contains URI ending. We put it aside, and later append it back
             string, uri = self.string.split('?', 1)
@@ -174,6 +175,16 @@ class Sid(object):
         if not uri:
             self.string = string  # string without type, without uri
         else:
+            """
+            uri integration algorithm:
+            - the URI key/values are applied to the existing data dict --> uri_helper.update
+            - the data dictionary is submitted to type resolve --> sid_resolver.dict_to_type(data, all=True)
+            - if a single type is resolved, it is now used, integration done.
+            - else if no type is resolved, the URI is not applied (kept in the string, the data and type are unchanged)
+            - else if multiple types are resolved, the URI is not applied (kept in the string, the previous data and type are unchanged)
+            
+            This is a problem in case of a search Sid, which could be poly-typed.
+            """
             data = uri_helper.update(self.data, uri)
             _type = sid_resolver.dict_to_type(data, all=True)
             if not _type:
@@ -182,9 +193,14 @@ class Sid(object):
                 return
             if len(_type) > 1:
                 if self.type not in _type:
-                    warn('[Sid] After URI apply, Sid "{}" matches different types: {}. URI will not be applied.'.format(self.string, _type))
-                    self.string = '{}?{}'.format(string, uri)
-                    return
+                    if any(s in '{}?{}'.format(string, uri) for s in conf.search_symbols):
+                        debug(
+                            '[Sid] After URI apply, Sid "{}" matches different types: {}. But it is a Search, so URI will be applied.'.format(
+                                self.string, _type))
+                    else:
+                        warn('[Sid] After URI apply, Sid "{}" matches different types: {}. URI will not be applied.'.format(self.string, _type))
+                        self.string = '{}?{}'.format(string, uri)
+                        return
                 else:  # URI apply still matches previously given type
                     _type = [self.type]
             # updated data is OK
@@ -355,6 +371,11 @@ class Sid(object):
             return Sid()  # Return type is always Sid.
 
         data_copy = self.data.copy()
+
+        # if we have a single param, we treat is as a URI
+        if key and not any([value, kwargs]):
+            return Sid('{}?{}'.format(self.full_string, key))
+
         if key:
             kwargs[key] = value
         for key, value in six.iteritems(kwargs.copy()):  # removing a key if the value is None. Use '' for empty values.
@@ -454,7 +475,7 @@ class Sid(object):
 
         :return: Sid
         """
-        return Sid(str(self))  # self.get_with()
+        return Sid(self.full_string)  # self.get_with()
 
     def get_last(self, key=None):
         """
@@ -586,9 +607,12 @@ class Sid(object):
 
         :return: bool
         """
+        if not self.data:  # Should untyped sids be able to match ?
+            warn('[Sid][match] Asked for a match check on an undefined Sid: "{}". Returning False.'.format(self.string))
+            return False
         from spil import LS
-        fs = LS([self.string])
-        return fs.get_one(search_sid, as_sid=False) == self.string
+        ls = LS([self.string])
+        return ls.get_one(search_sid, as_sid=False) == self.string
 
     def is_leaf(self):
         """
