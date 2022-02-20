@@ -16,9 +16,9 @@ If not, see <https://www.gnu.org/licenses/>.
 import itertools as it
 
 from spil.sid.search.util import first
-from spil.sid.search.transformers import extensions, or_op, expand, transform
+from spil.sid.search.tools import unfold_search
 from spil.sid.sid import Sid
-from spil.util.log import debug, warn, info
+from spil.util.log import debug, warn, info, error
 
 
 class SidSearch(object):
@@ -37,9 +37,11 @@ class SidSearch(object):
         pass
 
     def star_search(self, search_sids, **kwargs):
-        raise NotImplementedError('SidSearch is an abstract class. Please use FS or LS.')
+        msg = 'Current instance "{}" has no star_search. SidSearch is abstract, use FS or LS.'.format(self)
+        error(msg)
+        raise NotImplementedError(msg)
 
-    def get(self, search_sid, as_sid=True):
+    def get(self, search_sid, as_sid=True, is_unfolded=False):
         """
         Search dispatcher.
 
@@ -47,14 +49,19 @@ class SidSearch(object):
         :param as_sid:
         :return:
         """
-        # we start by transforming
-        list_search_transformers = [extensions, or_op, expand]  # uri_apply is removed, because uri is automatically applied bu Sid()
-        search_sids = transform(str(search_sid), list_search_transformers)
 
-        for ssid in search_sids[:]:  # make this a search transformer?
-            if ssid.string.count('?'):
-                warn('SearchSid "{}" has un-applied URI and cannot be searched. Skipped'.format(ssid))
-                search_sids.remove(ssid)
+        # we start by transforming
+        if is_unfolded:
+            search_sids = [search_sid]
+        else:
+            search_sids = unfold_search(search_sid)
+
+        generator = self._get(search_sids, as_sid=as_sid)
+
+        for i in generator:
+            yield i
+
+    def _get(self, search_sids, as_sid=True):
 
         # depending on input, select the right generator
         is_sorted_search = any([ssid.string.count('>') for ssid in search_sids])

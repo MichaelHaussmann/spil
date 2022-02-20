@@ -80,8 +80,7 @@ class FS(SidSearch):
         """
         debug('Starting star_search_simple')
 
-        done = set()
-        done_add = done.add  # performance
+        searched = set()
 
         for search_sid in search_sids:
 
@@ -89,17 +88,21 @@ class FS(SidSearch):
 
             search = search_sid  # TODO: handle also strings ?
 
-            debug('Search : ' + str(search))
+            debug('Search : {}'.format(search))
             pattern = search.path
 
             if not pattern:
                 warn('Search sid {} did not resolve to a path. Cancelled.'.format(search))
-                return
+                continue
 
             for key, value in six.iteritems(conf.search_path_mapping):
                 pattern = pattern.replace(key, value)
 
             debug('Search pattern : ' + str(pattern))
+            if pattern in searched:
+                continue
+            else:
+                searched.add(pattern)
 
             found = glob.glob(pattern)
             debug('found')
@@ -113,18 +116,14 @@ class FS(SidSearch):
                     debug('Path did not generate sid : {}'.format(path))
                     continue
                 if not sid:
-                    warn('Path did not generate sid : {}'.format(path))
+                    info('Path did not generate sid : {}'.format(path))
                     continue
 
-                item = str(sid)
-                if item not in done:
-                    done_add(item)
-                    if as_sid:
-                        yield sid
-                    else:
-                        yield item
+                if as_sid:
+                    yield sid
                 else:
-                    debug('{} was already found, skipped. '.format(item))
+                    yield str(sid)
+
 
     def star_search_framed(self, search_sids, as_sid=False):
         """
@@ -138,8 +137,9 @@ class FS(SidSearch):
         """
         debug('Starting star_search_framed')
 
+        searched = set()
         done = set()
-        done_add = done.add  # performance
+        done_add = done.add
 
         for search_sid in search_sids:
 
@@ -156,6 +156,11 @@ class FS(SidSearch):
             if not pattern:
                 warn('Search sid {} did not resolve to a path. Cancelled.'.format(search))
                 return
+
+            if pattern in searched:
+                continue
+            else:
+                searched.add(pattern)
 
             for key, value in six.iteritems(conf.search_path_mapping):
                 pattern = pattern.replace(key, value)
