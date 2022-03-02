@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -78,13 +78,15 @@ class FS(SidSearch):
         :param as_sid:
         :return:
         """
-        debug('Starting star_search_simple')
+        info('Starting star_search_simple')
 
+        # doublon detection
         searched = set()
+        found_paths = set()
 
         for search_sid in search_sids:
 
-            debug('[fs_star_search] "{}"'.format(search_sid))
+            info('Starting search:  "{}"'.format(repr(search_sid)))
 
             search = search_sid  # TODO: handle also strings ?
 
@@ -104,11 +106,14 @@ class FS(SidSearch):
             else:
                 searched.add(pattern)
 
+            info('Now searching pattern : ' + str(pattern))
             found = glob.glob(pattern)
             debug('found')
             debug(found)
             for path in found:
                 path = str(path).replace(os.sep, '/')
+                if path in found_paths:
+                    continue
                 try:
                     sid = Sid(path=path)
                     debug('found ' + str(sid))
@@ -119,6 +124,7 @@ class FS(SidSearch):
                     info('Path did not generate sid : {}'.format(path))
                     continue
 
+                found_paths.add(path)
                 if as_sid:
                     yield sid
                 else:

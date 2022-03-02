@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+This file is part of SPIL, The Simple Pipeline Lib.
+
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+
+SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with SPIL.
+If not, see <https://www.gnu.org/licenses/>.
+
+"""
+import six
+
 from spil import Sid
 #from spil.conf import pre_search_update
 from spil.util.log import debug, warn, info, error
@@ -19,6 +35,12 @@ class Data(SidSearch):
         """
         Search dispatcher.
 
+        The search is "unfolded" into atomic searches (from one search sid, split into a list of typed search sids).
+        For each "atomic" typed search, we get the data source.
+
+        We then group the searches by data source, to call each source with a list of searches (instead of each search individually).
+
+
         :param search_sid:
         :param as_sid:
         :return:
@@ -27,18 +49,28 @@ class Data(SidSearch):
         search_sids = unfold_search(search_sid)
 
         done = set()  #TEST
+        sources_to_searches = dict()
 
         for ssid in search_sids:
 
             source = get_data_source(ssid)
 
             if source:
-                debug('Searching "{}" using "{}"'.format(ssid.full_string, source))
-                generator = source.get(ssid, as_sid=as_sid, is_unfolded=True)
+                l = sources_to_searches.get(source) or list()
+                l.append(ssid)
+                sources_to_searches[source] = l
 
-                for i in generator:
-                    if i not in done:  # FIXME: check why data is so often repeated, this is expensice, optimize
-                        done.add(i)
+        for source, searches in six.iteritems(sources_to_searches):
+
+            debug('Searching "{}" --> "{}"'.format(source, searches))
+            generator = source.get(searches, as_sid=False, is_unfolded=True)
+
+            for i in generator:
+                if i not in done:  # FIXME: check why data is so often repeated, this is expensice, optimize
+                    done.add(i)
+                    if as_sid:
+                        yield Sid(i)
+                    else:
                         yield i
 
             else:

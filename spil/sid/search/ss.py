@@ -52,7 +52,7 @@ class SidSearch(object):
 
         # we start by transforming
         if is_unfolded:
-            search_sids = [search_sid]
+            search_sids = search_sid
         else:
             search_sids = unfold_search(search_sid)
 
