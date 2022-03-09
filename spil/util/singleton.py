@@ -1,7 +1,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -28,10 +28,18 @@ class Singleton(object):
 if __name__ == '__main__':
 
     class Person(Singleton):
-        pass
 
-    john = Person()
-    jane = Person()
+        def __init__(self, name):
+            self.name = name
+
+        def __str__(self):
+            return '[Person] : {}'.format(self.name)
+
+    john = Person('john')
+    print(john)
+
+    jane = Person('jane')
+    print(jane)
 
     assert(john is jane)
 

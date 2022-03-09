@@ -14,12 +14,12 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 import re
-import itertools as it
 
-from sid_conf import sip
 from spil.sid.search.ss import SidSearch
+from spil.sid.search.tools import unfold_search
+from spil.sid.search.util import extrapolate
 from spil.sid.sid import Sid
-from spil.util.log import debug, info, warn
+from spil.util.log import debug
 
 
 def glob2re(pat):
@@ -68,41 +68,6 @@ def glob2re(pat):
     return res + '\Z(?ms)'
 
 
-def extrapolate(sids):
-    """
-    From an iterable containing leaf node paths, extrapolates all the subnode paths.
-
-    This is useful when the data source quickly provides leaves only, but we want to find child data.
-
-    For example: the path "TEST/A/CHR/HERO/MOD/V001/W/avi"
-    will generate: "TEST/A/CHR/HERO/MOD/V001/W", "TEST/A/CHR/HERO/MOD/V001", "TEST/A/CHR/HERO/MOD", etc.
-    until "TEST"
-
-    :param sids: generator
-    :return:
-    """
-
-    print('In Extrapolate')
-
-    generated = set()
-
-    for sid in sids:
-
-        generated.add(sid)
-        # print(sid)
-        yield sid
-
-        parts = str(sid).split('/')
-        for i, key in enumerate(reversed(parts[:-1]), 1):
-            new_sid = '/'.join(parts[:-1 * i])
-            if new_sid in generated:
-                break
-            else:
-                generated.add(new_sid)
-                # print(new_sid)
-                yield new_sid
-
-
 class LS(SidSearch):
     """
     List search.
@@ -144,6 +109,26 @@ class LS(SidSearch):
             self.sort_searchlist()
 
         self.do_strip = do_strip
+
+    def get(self, search_sid, as_sid=True, is_unfolded=False):
+        """
+        Search dispatcher.
+
+        :param search_sid:
+        :param as_sid:
+        :return:
+        """
+
+        # we start by transforming
+        if is_unfolded:
+            search_sids = list(set(search_sid))  # TODO: check if this is correct
+        else:
+            search_sids = unfold_search(search_sid, do_uniquify=True)
+
+        generator = self._get(search_sids, as_sid=as_sid)
+
+        for i in generator:
+            yield i
 
     def sort_searchlist(self):
         self.searchlist = sorted(list(set(self.searchlist)))

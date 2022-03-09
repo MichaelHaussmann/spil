@@ -28,6 +28,7 @@ to_extrapolate = []
 key_types = {}
 extrapolate_types = {}
 extrapolation_leaf_subtype = None
+basetyped_search_narrowing = {}
 key_patterns = {}
 extension_alias = {}
 projects = []

@@ -42,7 +42,7 @@ def execute(sids):
 
     return result
 
-@cache
+
 def expand(sid, do_extrapolate=False):
     """
     This expects a string and converts to Sid (#SMELL)
@@ -93,6 +93,7 @@ def expand(sid, do_extrapolate=False):
 
     root = sid.split('/**')[0]
     basetype = Sid(root).basetype
+    debug('Basetype: {}'.format(basetype))
     if not basetype:
         raise SpilException('The Search Sids "{}" root "{}" cannot be typed, so it cannot be expanded. This is probably a configuration error.'.format(sid, root))
 
@@ -102,10 +103,10 @@ def expand(sid, do_extrapolate=False):
     for key, template in six.iteritems(sid_templates):
         debug('Checking ' + key)
         if key in found:
-            debug('Already checked, continue')
+            debug('.. Already checked {}, continue'.format(key))
             continue
         if key.startswith(basetype + sidtype_keytype_sep):  # matching basetype
-            debug('Matching basetype "{}" for key "{}"'.format(basetype, key))
+            debug('.. Matching basetype "{}" for key "{}"'.format(basetype, key))
             keys = list(string.Formatter().parse(template))
             if do_extrapolate or keys[-1][1] == 'ext':        # FIXME: "ext" is hard coded
                 count = len(keys)-1
@@ -113,25 +114,25 @@ def expand(sid, do_extrapolate=False):
                 needed = count-current+1
                 test = sid.replace('/**', '/*' * needed)
                 if test in tested:
-                    debug('Already tested, continue')
+                    debug('... Already tested, continue')
                     continue
                 else:
                     tested.append(test)
-                debug('Filled {}x* --> {}'.format(needed, test))
+                debug('... Filled {}x* --> {}'.format(needed, test))
                 matching = sid_to_dicts(test)
-                debug('Got {}'.format(matching))
+                debug('... Got {}'.format(matching))
                 for __type, data in six.iteritems(matching):
-                    debug('found :' + __type)
+                    debug('.... found :' + __type)
                     found.append(__type)
                     if data and (do_extrapolate or (list(data)[-1] == 'ext')):  #
                         if uri:
                             new_sid = Sid('{}:{}?{}'.format(__type, test, uri))
                         else:
                             new_sid = Sid(__type + ':' + test)
-                        debug('appending: {}'.format(new_sid.full_string))
+                        debug('.... appending: {}'.format(new_sid.full_string))
                         result.append(new_sid)
             else:
-                debug('Type "{}" is not a leaf, and do_extrapolate is False, skipped.')
+                debug('.. Type "{}" is not a leaf, and do_extrapolate is False, skipped.'.format(key))
                 continue
 
     """

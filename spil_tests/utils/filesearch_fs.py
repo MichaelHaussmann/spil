@@ -13,7 +13,8 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 """
-To launch searches on FS, the file system.
+To launch searches on FS.
+FS is the file system.
  
 Searches is a dict with searches as 
     key: search sid
@@ -22,84 +23,66 @@ Searches is a dict with searches as
 function: test_fs(searches) 
 """
 import six
+from spil_tests import Timer
+from spil_tests.utils.test_utils import test_sid
+from spil.util.log import DEBUG, ERROR, get_logger
+from spil import FS, Sid
 
-if six.PY3:  #TODO: add Timer in package for PY3 (they have a great package setup) - Also add tox.
-    from codetiming import Timer
-else:
-    from spil_tests.mock_timer import Timer
-
-from spil_tests.utils import init  # needs to be before spil.conf import
-from spil import FS
+log = get_logger("spil_tests")
+log.setLevel(DEBUG)
 
 
-def run_test_fs(searches):
+def test_fs(searches, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None):
+    """
+    Runs a given searches on FS() Source.
 
-    do_doublon_check = True  # Set to false when testing performance
-    as_sid = True
-    do_attributes = False
+    Optionally operates a replace in the search, using given replace tuple.
+    """
 
-    global_timer = Timer(name="global")
+    global_timer = Timer(name="global", logger=log.debug)
     global_timer.start()
 
     ls = FS()
     for search_sid, comment in six.iteritems(searches):
 
-        print('*' * 10)
-        print('{} --> {}'.format(search_sid, comment))
+        if replace:
+            search_sid = search_sid.replace(*replace)
+
+        log.debug("*" * 10)
+        log.info("{} --> {}".format(search_sid, comment))
         double_check = set()
 
-        ls_timer = Timer(name="search_sid")
+        ls_timer = Timer(name="search_sid", logger=log.debug)
         ls_timer.start()
         count = 0
         for i in ls.get(search_sid, as_sid=as_sid):
-            print(i)
+            if do_log:
+                log.info(i)
+            if do_match_check:
+                match = Sid(i).match(search_sid)
+                if not match:
+                    log.warning('No match "{}" <-> "{}". This is not normal'.format(i, search_sid))
             count += 1
             if do_doublon_check:
                 if i in double_check:
-                    print('--------------------------------------> Doublon {}'.format(i))
+                    log.warning("--------------------------------------> Doublon {}".format(i))
                 double_check.add(i)
-            # sid = Sid(i)
-            if do_attributes:
-                for d in ['comment', 'size', 'time']:
-                    print(i.get_attr(d) or '')
-                print('#' if i.get_with(state='OK').exists() else None)
-            # print sid.path
-        print('Total: ' + str(count))
+            if do_deep:
+                log.debug("Sid test for {}".format(i))
+                test_sid(i, from_search=search_sid)
+
+        log.debug("Total: " + str(count))
         ls_timer.stop()
+
     global_timer.stop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from spil.util.log import setLevel, ERROR, DEBUG
+
     setLevel(ERROR)
 
     searches = {}
-    searches['tp/s/*'] = 'sequences'
-    searches['tp/s/s01/*'] = 'shots'
-    searches['tp/s/s01/p020/*/*'] = 'tasks'
-    searches['tp/s/s01/p020/**/ma'] = ''
-    searches['tp/s/s01/p020/*/*/*/*/*/ma'] = 'shot__publish_scene'
-    searches['tp/s/s01/p020/*/*/*/*/ma'] = 'shot__work_scene'
-    searches['tp/s/s01/p020/fx/**/ma'] = 'fx tasktype'
-    searches['tp/s/**/maya'] = 'all maya'
-    searches['tp/s/**/cache'] = 'all caches'
-    # searches['tp/s/**/maya?state=p'] = 'all published maya'
-    # searches['tp/a/**/maya'] = 'all maya'
-
-    #searches = {}
-    searches['tp/a/*'] = 'asset types'
-    searches['tp/a/characters/*'] = 'chars'
-    searches['tp/a/characters/baobab/*/*'] = 'baobab tasks'
-    searches['tp/a/characters/baobab/*/*/*'] = 'baobab states'
-    searches['tp/a/characters/baobab/*/*/*/*/maya'] = 'baobab maya work scenes'
-    searches['tp/a/characters/baobab/**/maya'] = 'baobab all maya'
-    searches['tp/a/characters/baobab/**/cache'] = 'baobab all caches'
-    searches['tp/a/**/maya'] = 'all asset maya files'
-    searches['tp/a/**/vdb'] = 'all asset vdbs'
-    searches['tp/a/**/cache'] = 'all asset caches'
-    searches['tp/a/**/*'] = 'all asset files'
-    #searches['tp/s/s01/p020/*/*'] = 'tasks'
-
-    run_test_fs(searches)
+    searches["FTOT/S/SQ0001/SH0010/*"] = ""
 

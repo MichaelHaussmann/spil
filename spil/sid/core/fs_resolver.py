@@ -32,7 +32,7 @@ if six.PY3:
 import lucidity
 from lucidity import Template
 
-from spil.util.caching import lru_cache as cache
+from spil.util.caching import lru_kw_cache as cache
 
 from spil.util import utils
 from spil.util.exception import SpilException
