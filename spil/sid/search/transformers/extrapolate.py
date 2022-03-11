@@ -13,23 +13,19 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-import traceback
-from spil.conf.global_conf import __version__
+from spil.sid.search.util import extrapolate
 
-try:
-    from spil.sid.sid import Sid
-    from spil.sid.search.fs import FS
-    from spil.sid.search.ls import LS
-    from spil.data.ds import Data
-    from spil.data.cs import CS
-    from spil.util.exception import SpilException
-    from spil.util import log
-    from spil.util import log as logging  # to use as standard logging and create custom loggers
-    from spil.util.log import setLevel, ERROR
 
-    setLevel(ERROR)
-except Exception as e:
-    traceback.print_exc()
-    raise Exception(
-        "Spil is imported, but impossible to import spil packages. \n Please check compatibility of your sid_conf and fs_conf files."
-    )
+def execute(sids):
+    """
+    Extrapolates the searches.
+
+    :param sids:
+    :return:
+    """
+    result = []
+    for sid in sids:
+        result.extend(extrapolate([sid], as_sid=True))
+
+    return result
+

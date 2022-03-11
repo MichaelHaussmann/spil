@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -14,21 +14,26 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 import os
 
-pysep = '/'  # python path separator
+pysep = "/"  # python path separator
 
-__version__ = '0.0.3'
-application_codename = 'Kumquat'
-application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(__version__, application_codename)
+__version__ = "0.0.3"
+application_codename = "Kumquat"
+application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(
+    __version__, application_codename
+)
 
-application_repo_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))).replace(os.sep, pysep)
+application_repo_path = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+).replace(os.sep, pysep)
 
 # automatic replacement to INFO and WARN in BETA and PROD
 loglevel = 80
 
-user_app_folder_name = 'pikko/conf'
-user_conf_file_name = 'user_conf.json'
+user_app_folder_name = "pikko/conf"
+user_conf_file_name = "user_conf.json"
 
-sip = '/'  # sid separator - changing this is untested.
-ors = ','   # "or" separator
-qms = '#'   # question mark search sign (previously '?', thus it's name)
-sidtype_keytype_sep = '__'
+sip = "/"  # sid separator - changing this is untested.
+ors = ","  # "or" separator
+qms = "#"  # question mark search sign (previously '?', thus it's name)
+sidtype_keytype_sep = "__"
+search_symbols = ["*", ",", ">", "<", "**"]

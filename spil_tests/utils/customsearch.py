@@ -13,14 +13,14 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 """
-To launch searches on Data.
-Data is the final Layer on top of FS and SidCaches and other data sources.
+To launch searches on a custom data source.
+
  
 Searches is a dict with searches as 
     key: search sid
     value: search description 
 
-function: test_data(searches) 
+function: test_custom(searches) 
 """
 import six
 from spil_tests import Timer
@@ -32,9 +32,9 @@ log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_data(searches, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None):
+def test_custom(searches, data_source, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None):
     """
-    Runs given searches on Data() Source.
+    Runs given searches on the given Data Source.
 
     Optionally operates a replace in the search, using given replace tuple.
     """
@@ -42,20 +42,19 @@ def test_data(searches, as_sid=True, do_log=True, do_deep=False, do_doublon_chec
     global_timer = Timer(name="global", logger=log.debug)
     global_timer.start()
 
-    ls = Data()
     for search_sid, comment in six.iteritems(searches):
 
         if replace:
             search_sid = search_sid.replace(*replace)
 
         log.debug("*" * 10)
-        log.info("{} --> {}".format(search_sid, comment))
+        log.info("{} --> {} (source: {})".format(search_sid, comment, data_source))
         double_check = set()
 
         ls_timer = Timer(name="search_sid", logger=log.debug)
         ls_timer.start()
         count = 0
-        for i in ls.get(search_sid, as_sid=as_sid):
+        for i in data_source.get(search_sid, as_sid=as_sid):
             if do_log:
                 log.info(i)
             if do_match_check:
@@ -86,4 +85,4 @@ if __name__ == "__main__":
     searches = {}
     searches["FTOT/S/SQ0001/SH0010/*"] = ""
 
-    test_data(searches)
+    test_custom(searches, Data())

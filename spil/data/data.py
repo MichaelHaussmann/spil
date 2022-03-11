@@ -1,3 +1,11 @@
+"""
+
+- optional: deactivate lru caching (for performance tests)
+
+NOTE: searches where the type is followed by a /** ('FTOT/*/**') are currently unsupported due to faulty expand script.
+Performances of FS: 100 sids per second, 1000 per second after memory caching.
+"""
+
 # -*- coding: utf-8 -*-
 """
 
@@ -13,6 +21,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+
 from spil import Sid
 from spil.sid.search.ss import SidSearch
 
@@ -33,7 +42,7 @@ def get_data_source(sid):
     """
     _sid = Sid(sid)
     if not str(_sid) == str(sid):
-        warning('Sid could not be created, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
+        warning('Sid could not be instanced, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
     source = data_source(_sid)
     if source:
         debug('Getting data source for "{}": -> {}'.format(sid, source))
@@ -41,6 +50,10 @@ def get_data_source(sid):
     else:
         warning('Data Source not found for Sid "{}" ({})'.format(sid, _sid.type))
         return None
+
+
+def get_data_destination(sid):  # TODO: implement separate source and destination objects.
+    return get_data_source(sid)
 
 
 def get_attribute_source(sid, attribute):
@@ -79,27 +92,10 @@ def get_cached_attribute(sid, attribute):
         return source(sid)
 
 
-class Data(SidSearch):
+def reload_data_source(sid):
     """
-    Data abstraction Layer.
-
-    On top of the built-in FS, and delegating data access to other custom Data sources.
+    Reloads the data source for given sid
     """
-
-    def get(self, search_sid, as_sid=True):
-        source = get_data_source(search_sid)
-        if source:
-            return source.get(search_sid, as_sid=as_sid)
-
-    def get_one(self, search_sid, as_sid=True):
-        source = get_data_source(search_sid)
-        if source:
-            return source.get_one(search_sid, as_sid=as_sid)
-
-    def exists(self, search_sid):
-        source = get_data_source(search_sid)
-        if source:
-            return source.exists(search_sid)
 
 
 if __name__ == '__main__':
@@ -107,24 +103,3 @@ if __name__ == '__main__':
     from spil.util.log import setLevel, DEBUG, ERROR
 
     setLevel(ERROR)
-
-    sid = 'roju/a/props'
-    sid = Sid(sid)
-    value = get(sid, 'comment')
-    print(value)
-
-    def test(sid, limit=5):
-        sid = Sid(sid)
-        print(sid)
-        got = Data().get(sid)
-        if limit:
-            print(list(got)[:limit])
-        else:
-            for i in got:
-                print('"{}"'.format(i))
-                value = get(i, 'comment')
-                print(value)
-
-    sids = ['roju/*', 'roju/a/*', 'roju/a/props/*']
-    for sid in sids:
-        test(sid, limit=0)

@@ -35,7 +35,7 @@ def extrapolate(sid_templates, key_types, to_extrapolate=[], leaf_subtype='file'
 
     # first we copy all the full paths, they have to match first
     for keytype, template in six.iteritems(sid_templates):
-        if keytype.endswith(leaf_subtype):  # FIXME: hard coded !
+        if keytype.endswith(leaf_subtype):
             generated[keytype] = template
 
     # then we start over to generate the subtypes

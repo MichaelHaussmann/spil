@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
 (C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
@@ -13,23 +12,25 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-import traceback
-from spil.conf.global_conf import __version__
 
-try:
-    from spil.sid.sid import Sid
-    from spil.sid.search.fs import FS
-    from spil.sid.search.ls import LS
-    from spil.data.ds import Data
-    from spil.data.cs import CS
-    from spil.util.exception import SpilException
-    from spil.util import log
-    from spil.util import log as logging  # to use as standard logging and create custom loggers
-    from spil.util.log import setLevel, ERROR
+# FIXME: this is work in progress
+def reload_lru_caches():
+    """
+    Reloads all current lru caches.
 
-    setLevel(ERROR)
-except Exception as e:
-    traceback.print_exc()
-    raise Exception(
-        "Spil is imported, but impossible to import spil packages. \n Please check compatibility of your sid_conf and fs_conf files."
-    )
+
+    """
+    from spil.data.sid_cache_new import get_sidcache
+    from spil.data.data import get_cached_attribute, get_data_source
+    from spil.sid.search.tools import unfold_search
+    from spil.sid.core.sid_resolver import sid_to_dict, sid_to_dicts
+    from spil.sid.core.fs_resolver import path_to_dict
+
+    cached_functions = [get_cached_attribute, sid_to_dict, path_to_dict, get_data_source, unfold_search, get_sidcache, sid_to_dicts]
+    for f in cached_functions:
+        f.cache_clear()
+
+
+if __name__ == '__main__':
+
+    reload_lru_caches()
