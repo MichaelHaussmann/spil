@@ -26,26 +26,34 @@ def get_data_source(sid):
     For a given Sid, looks up the Sid type and the matching data_source, as defined in a dict.
     Returned value from the config is an instance.
     """
-    from spil.data.sid_cache import SidCache
+    from sid_conf import projects, asset_types, asset_tasks, shot_tasks
+    from spil.data.cs import CS
     from spil import FS
 
-    sid_cache_file = '..../data/sid_caches/all.sids.txt'
-    sid_cache_instance = SidCache(sid_cache_file)  # is a Singleton
+    # CS is for a Constant data source.
+    cs_projects = CS('project', projects)
+    cs_types = CS('type', ['a', 's'], parent_source=cs_projects)
+    cs_assettypes = CS('assettype', asset_types, parent_source=cs_types)
+    cs_asset_tasktypes = CS('tasktype', asset_tasks, parent_source= FS())
+    cs_shot_tasktypes = CS('tasktype', shot_tasks, parent_source=FS())
 
     data_sources = {
-        'project': sid_cache_instance,
-        'asset': sid_cache_instance,
-        'asset__cat': sid_cache_instance,
-        'shot__seq': sid_cache_instance,
-        'shot': sid_cache_instance,
+        'project': cs_projects,
+        'asset__type': cs_types,
+        'shot__type': cs_types,
+        'render__type': cs_types,
+        'asset__assettype': cs_assettypes,
+        'asset__tasktype': cs_asset_tasktypes,
+        'shot__tasktype': cs_shot_tasktypes,
         'default': FS()
     }
 
     source = data_sources.get(sid.type, {}) or data_sources.get('default', {})
+    #print('Sid {} --> {} --> {}'.format(sid.full_string, sid.type, source))
     if source:
         return source
     else:
-        print('Data Source not found for Sid "{}" ({})'.format(sid, sid.type))
+        #print('Data Source not found for Sid "{}" ({})'.format(sid, sid.type))
         return None
 
 

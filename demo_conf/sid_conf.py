@@ -35,7 +35,7 @@ sid_templates = OrderedDict([
     ('asset__publish_cache',     '{project}/{type:a}/{assettype}/{asset}/{tasktype}/{task}/{state:p}/{version}/{name}/{ext:caches}'),
     ('asset__publish_movie',     '{project}/{type:a}/{assettype}/{asset}/{tasktype}/{task}/{state:p}/{version}/{name}/{ext:movies}'),
 
-    ('asset',                     '{project}/{type:a}'),
+    ('asset__type',              '{project}/{type:a}'),
 
     # type shot
     ('shot__work_scene',         '{project}/{type:s}/{sequence}/{shot}/{tasktype}/{task}/{state:w}/{version}/{ext:scenes}'),
@@ -43,7 +43,7 @@ sid_templates = OrderedDict([
     ('shot__publish_cache',      '{project}/{type:s}/{sequence}/{shot}/{tasktype}/{task}/{state:p}/{version}/{name}/{ext:caches}'),
     ('shot__publish_movie',      '{project}/{type:s}/{sequence}/{shot}/{tasktype}/{task}/{state:p}/{version}/{name}/{ext:movies}'),
 
-    ('shot',                     '{project}/{type:s}'),
+    ('shot__type',               '{project}/{type:s}'),
 
     # type project
     ('project',                 '{project}'),
@@ -120,6 +120,26 @@ extrapolate_types = {
     'shot': ['project', 'type', 'sequence', 'shot', 'tasktype', 'task', 'state', 'version', 'ext'],
     'project': ['project'],
 }
+
+"""
+Once a search Sid is typed, we may need to narrow down the values, to make sure the right type is hit in the search.
+For example: 
+"asset_cat:hamlet/*/*" and "shot_seq:hamlet/*/*" should be narrowed down to 
+"asset_cat:hamlet/a/*" and "shot_seq:hamlet/s/*"
+The patterns cannot yet be properly automated. The goal for this config is to explicitly configure this.
+"""
+basetyped_search_narrowing = {
+
+    'asset__type': 'type=~a',
+    'shot__type': 'type=~s',
+    # 'render': 'type=~R',
+
+}
+
+typed_search_narrowing = {
+    # not implemented yet.
+}
+
 
 if __name__ == '__main__':
 

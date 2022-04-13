@@ -50,7 +50,7 @@ path_templates = OrderedDict([
     ('asset__asset',            r'{@project_root}/{project}/{type:assets}/{assettype}/{asset}'),
     ('asset__assettype',        r'{@project_root}/{project}/{type:assets}/{assettype}'),
 
-    ('asset',                   r'{@project_root}/{project}/{type:assets}'),
+    ('asset__type',             r'{@project_root}/{project}/{type:assets}'),
 
     # type shot
     ('shot__work_scene',        r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}/{tasktype}_{task}/{state:work}/' +
@@ -70,10 +70,10 @@ path_templates = OrderedDict([
     ('shot__shot',              r'{@project_root}/{project}/{type:shots}/{sequence}/{shot}'),
     ('shot__sequence',          r'{@project_root}/{project}/{type:shots}/{sequence}'),
 
-    ('shot',                    r'{@project_root}/{project}/{type:shots}'),
+    ('shot__type',              r'{@project_root}/{project}/{type:shots}'),
 
     # type project
-    ('project',                r'{@project_root}/{project}'),
+    ('project',                 r'{@project_root}/{project}'),
 
 ])
 
