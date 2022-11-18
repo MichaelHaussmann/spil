@@ -262,12 +262,18 @@ The Sid builds upon general concepts, as well as production proven CG pipeline c
 - Unique Identifier - Human readable Identifier - "Natural Key"  
 https://dzone.com/articles/7-strategies-for-assigning-ids-to-microservices  
 https://medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575
-
+####
 - File sytem path  
 https://www.python.org/dev/peps/pep-0428
-
+####
+- Query by Example  
+  A query technique where "example" entities, with search values, are used to retrieve "matching" results.  
+  QBE is typically an abstraction layer on top of a database system query, like SQL or ORM (object-relational mapping).
+  https://en.wikipedia.org/wiki/Query_by_Example#As_a_general_technique
+####
 - URI / URL  
   https://en.wikipedia.org/wiki/Uniform_Resource_Identifier
+####
 - Node tree & hierarchy
 
 
@@ -276,23 +282,25 @@ https://www.python.org/dev/peps/pep-0428
 - Unique Identifier & Resource Locator  
 Examples: "SPREF" (Sony Pictures), or the "Pipeline Resource Identifier - PRI" (Blue Sky)  
 https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432776da6ab
-
+####
 - Resource description and "Context" (Shotgrid Toolkit)  
   https://developer.shotgridsoftware.com/tk-core/core.html#context
-
+####
 - the "TypedContext", an entity for hierarchical types in Ftrack
-
+####
 - Template based path resolving  
   As implemented in Shotgrid Toolkit:  
   https://github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml  
-  Or by Lucidity : https://gitlab.com/4degrees/lucidity/
-
-- Middleware between Asset consumers or producers, "OpenAssetIO"  
-  https://github.com/TheFoundryVisionmongers/OpenAssetIO  
-
+  Or by CGWire's kitsu https://zou.cg-wire.com/file_trees  
+  Or by Lucidity : https://gitlab.com/4degrees/lucidity
+####
+- Middleware between Asset consumers or producers  
+  [OpenAssetIO](https://github.com/OpenAssetIO/OpenAssetIO)  
+  [Katana Asset API](https://learn.foundry.com/katana/4.0/Content/tg/asset_management_system_plugin_api/concepts.html)  
+####
 - Asset Resolution - ArResolver - in USD    
   https://graphics.pixar.com/usd/release/wp_ar2.html  
-  
+####
 - The Sid itself    
   The Sid has been used in general and fx pipelines for over 10 years, in various implementations and at various degrees.  
  
@@ -320,19 +328,32 @@ This part is yet to prove.
 "In the face of ambiguity, refuse the temptation to guess."  
 But who are you to have read this far anyway?  
 
+# 
+## Discussion
+
+- Human readable Identifier ("Natural Key") vs Generated Unique ID (UUID)  
+Using the Sid implies that the name of the item becomes its unique ID.  
+While this has a huge advantage on readability and simplicity, it comes at a price.
+The biggest disadvantage is the locking of names. It becomes difficult to rename things.  
+*(Example: if the sid is stored in a database, and I would like to rename an asset category.
+Either I need to update all the asset sids, or use a sid name mapping for types).*  
+We still believe the advantage is worth the price. 
+Please see also the blue sky tech blog on the subject:
+https://medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575
+
 
 # 
 ## Main limitations
 
+- The configuration is tricky  
+For complex projects, creating the config is not simple, and is lacking tools to help.
+Complex configurations do not work out of the box
+####
 - Beta stage  
 The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.  
 But this version of "Spil" is a complete rewrite. It is currently used in production, but is still young.
 It lacks automated code testing and profiling.
-
-- The configuration is tricky  
-For complex projects, creating the config is not simple, and is lacking tools to help.
-Complex configurations do not work out of the box  
-
+####
 - Needs optimisation  
 Core parts will need a C++ implementation.
 Searches returning big result sets can be relatively slow.  
