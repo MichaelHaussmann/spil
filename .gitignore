@@ -8,3 +8,4 @@ venv27
 /drafts/
 /dist/
 /build/
+.pytest_cache

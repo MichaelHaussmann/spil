@@ -8,7 +8,7 @@ import sys
 
 from setuptools import setup, find_packages
 
-version = "0.0.3"
+version = "0.0.4"
 
 with io.open('README.rst', 'r', encoding='utf-8') as readme_file:
     readme = readme_file.read()
@@ -41,7 +41,7 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Intended Audience :: Developers",
         "Natural Language :: English",
         "Topic :: Software Development",
