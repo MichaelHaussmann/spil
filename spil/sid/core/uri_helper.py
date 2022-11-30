@@ -19,14 +19,13 @@ URI style string handling helper functions.
 
 TODO: Sid URI handling needs to be streamlined and documented.
 """
-import six
+from urllib.parse import urlencode
+from urllib import parse as urlparse
 
-if six.PY2:
-    from urllib import urlencode
-    import urlparse as urlparse
-else:
-    from urllib.parse import urlencode
-    from urllib import parse as urlparse
+from spil.sid.core import sid_resolver
+from spil import conf
+from spil.util.log import warning, debug
+from spil.util.exception import SpilException
 
 
 def to_dict(uri_string):
@@ -72,12 +71,6 @@ def to_string(uri_dict):
     def encode(x, *args, **kwargs):
         return x.replace(' ', '')
 
-    if six.PY2:
-        l = []
-        for k, v in six.iteritems(uri_dict):
-            l.append(encode(k) + '=' + encode(v))
-        return '&'.join(sorted(l))
-
     return urlencode(uri_dict, quote_via=encode)
 
 
@@ -103,7 +96,7 @@ def update(data, uri, option_prefix='~'):
     data = data.copy()
     new_data = to_dict(uri)
 
-    for key, value in six.iteritems(new_data):
+    for key, value in new_data.items():
 
         if option_prefix:
             if str(value).startswith(str(option_prefix)):
@@ -118,6 +111,71 @@ def update(data, uri, option_prefix='~'):
             data[key] = value
 
     return data
+
+
+def apply_uri(string, uri=None, type=None, data=None):
+    """
+    Uri integration algorithm:
+    - the URI key/values are applied to the existing data dict --> uri_helper.update
+    - the data dictionary is submitted to type resolve --> sid_resolver.dict_to_type(data, all=True)
+    - if a single type is resolved, it is now used, integration done.
+    - else if no type is resolved, the URI is not applied (kept in the string, the data and type are unchanged)
+    - else if multiple types are resolved, the URI is not applied (kept in the string, the previous data and type are unchanged)
+
+    This is a problem in case of a search Sid, which could be poly-typed.
+
+    Examples.
+
+    Uri updates the sequence:
+    >>> apply_uri('hamlet/s/sq01', uri='sequence=sq03', type='shot__sequence', data={'project':'hamlet','type':'s','sequence':'sq01'})
+    ('hamlet/s/sq03', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq03'})
+
+    Uri adds a shot:
+    >>> apply_uri('hamlet/s/sq01', uri='shot=sh010', type='shot__sequence', data={'project':'hamlet','type':'s','sequence':'sq01'})
+    ('hamlet/s/sq01/sh010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': 'sq01', 'shot': 'sh010'})
+
+    Uri updates the sequence and adds a shot:
+    >>> apply_uri('hamlet/s/sq01', uri='sequence=*&shot=sh010', type='shot__sequence', data={'project':'hamlet','type':'s','sequence':'sq01'})
+    ('hamlet/s/*/sh010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': '*', 'shot': 'sh010'})
+
+    Uri contains undigestable data (wrong sequence format), and is not applied:
+    >>> apply_uri('hamlet/s/sq01', uri='sequence=fuzz', type='shot__sequence', data={'project':'hamlet','type':'s','sequence':'sq01'})
+    ('hamlet/s/sq01?sequence=fuzz', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq01'})
+    """
+    if not type and data:
+        raise SpilException("Uri can only be applied on typed data.")
+
+    if not uri:
+        return string, type, data
+
+    _type = type
+
+    new_data = update(data, uri)
+    new_types = sid_resolver.dict_to_type(new_data, all=True)
+
+    if not new_types:
+        warning(f'[Sid] After URI apply, Sid "{string}" has no type. URI will not be applied.')
+        string = '{}?{}'.format(string, uri)
+        return string, _type, data
+
+    if len(new_types) > 1:
+        if _type not in new_types:
+            if any(s in '{}?{}'.format(string, uri) for s in conf.search_symbols):
+                debug(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
+                      f'But it is a Search, so URI will be applied.')
+                # URI will be applied, using the first new_types (# FIXME: refuse the temptation to guess)
+            else:
+                warning(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
+                        f'URI will not be applied.')
+                string = '{}?{}'.format(string, uri)
+                return string, _type, data
+
+    # data updated by URI is OK
+    new_string = sid_resolver.dict_to_sid(new_data, new_types[0])
+    if new_string:
+        return new_string, new_types[0], new_data
+    else:
+        raise SpilException(f"Sid: [{string}?{uri}] : Uri was correctly applied, but unable to resolve back to Sid")
 
 
 if __name__ == '__main__':
@@ -139,6 +197,6 @@ if __name__ == '__main__':
     doctest.testmod()
 
     r = to_dict('&keyA=valueA&keyB=valueB&')
-    print(r)
+    # print(r)
 
     info('Tests done.')
