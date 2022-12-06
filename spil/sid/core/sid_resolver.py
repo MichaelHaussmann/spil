@@ -12,39 +12,31 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-"""
+from __future__ import annotations
+from typing import Tuple, List
 
+"""
 Sid resolver
-
-Is the low level under the Sid object.
-
 Transforms the sid string into a valid sid dict, and reverse.
-
 """
-
-# TODO : refacto into class
-# TODO : use explicit project in resolve process, so we can have one configuration per project.
+import string
 from collections import OrderedDict
 
-import six
-
-if six.PY3:
-    import spil.vendor  # SMELL
+import spil.vendor  # SMELL
 import lucidity
 from lucidity import Template
-import string
 
 from spil.util.caching import lru_kw_cache as cache
-
 from spil.util.log import debug, info
 from spil.util.exception import SpilException
 
 # sid conf
-from spil.conf import sip, key_types, sidtype_keytype_sep
-from spil.conf import sid_templates  # , meta_items # sid_filters
+from spil.conf import key_types, sidtype_keytype_sep
+from spil.conf import sip, sid_templates  # , meta_items # sid_filters
+
 
 @cache
-def sid_to_dict(sid, _type=None):
+def sid_to_dict(sid: str, _type: str | None = None) -> Tuple[str, dict] | Tuple[None, None]:
     """
     Parses a given "sid" string using the existing sid_config templates.
     If "_type" is given, only the template named after the given "_type" is parsed.
@@ -60,22 +52,27 @@ def sid_to_dict(sid, _type=None):
     :return:
     """
 
-    # instantiating lucidity Templates
-    templates = []
-    for name, pattern in six.iteritems(sid_templates):
-        if _type and not _type == name:  # FIXME: if _type is given, we should not loop at all, or should we?
-            continue
-        template = Template(name, pattern,
+    if _type:
+        template = Template(_type, sid_templates.get(_type),
                             anchor=lucidity.Template.ANCHOR_BOTH,
-                            default_placeholder_expression='[^/]*',  # allows for empty keys // should it be '[^|]*' ?
+                            default_placeholder_expression='[^/]*',
                             duplicate_placeholder_mode=lucidity.Template.STRICT)
-        # template.template_resolver = resolvers
-        templates.append(template)
 
-    # try template parse
+        templates = [template]
+
+    else:
+        templates = []
+        for name, pattern in sid_templates.items():
+            template = Template(name, pattern,
+                                anchor=lucidity.Template.ANCHOR_BOTH,
+                                default_placeholder_expression='[^/]*',
+                                duplicate_placeholder_mode=lucidity.Template.STRICT)
+
+            templates.append(template)
+
     try:
         data, template = lucidity.parse(str(sid), templates)
-        #print 'found', data, template
+        # print 'found', data, template
     except lucidity.ParseError as e:
         debug('Lucidity did not find a matching pattern. Type given: {} (Message: "{}")'.format(_type, e))
         return None, None
@@ -96,14 +93,14 @@ def sid_to_dict(sid, _type=None):
     return template.name, ordered
 
 @cache
-def sid_to_dicts(sid):
+def sid_to_dicts(sid: str) -> dict:
     """
     Parses a given "sid" using the existing sid_config templates.
     Returns a dict with the types and the parsed data.
 
     This function parses all templates separately, so data from all matching templates are returned.
     This usage is not standard (as opposed to sid_to_dict).
-    It makes sense only for broad search sids (including /**) where we want to catch-all types.
+    It makes sense only for broad read sids (including /**) where we want to catch-all types.
 
     :param sid:
     :return:
@@ -111,12 +108,11 @@ def sid_to_dicts(sid):
     results = {}  # OrderedDict() TODO: check behaviour py2 != py3
 
     # instantiating lucidity Templates
-    for name, pattern in six.iteritems(sid_templates):
+    for name, pattern in sid_templates.items():
         template = Template(name, pattern,
                             anchor=lucidity.Template.ANCHOR_BOTH,
                             default_placeholder_expression='[^/]*',  # allows for empty keys // should it be '[^|]*' ?
                             duplicate_placeholder_mode=lucidity.Template.STRICT)
-        # template.template_resolver = resolvers
 
         # try template parse
         try:
@@ -143,7 +139,7 @@ def sid_to_dicts(sid):
     return results
 
 
-def dict_to_sid(data, _type=None):
+def dict_to_sid(data: dict, _type: str | None = None) -> str:
     """
     Formats the given "data" dictionary using the given template "_type".
     If "_type" is not given it is detected using "dict_to_type".
@@ -181,7 +177,7 @@ def dict_to_sid(data, _type=None):
     return sid
 
 
-def dict_to_type(data, all=False):  # SMELL - this code is obscure and should be replaced / not be used
+def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - this code is obscure and should be replaced / not be used
     """
     Retrieves the sid_keytypes for the given dict "data".
     "data" can be unsorted.
@@ -206,7 +202,7 @@ def dict_to_type(data, all=False):  # SMELL - this code is obscure and should be
 
     keys = data.keys()
 
-    for _type, template in six.iteritems(sid_templates.copy()):  # SMELL: this whole code is obscure...
+    for _type, template in sid_templates.copy().items():  # SMELL: this whole code is obscure...
 
         template_keys = [t[1] for t in string.Formatter().parse(template) if t[1] is not None]
 
@@ -236,13 +232,15 @@ def dict_to_type(data, all=False):  # SMELL - this code is obscure and should be
 
 if __name__ == '__main__':
 
-    from spil.util.log import setLevel, INFO, info
+    from spil.util.log import setLevel, INFO, info, warning
+    from scripts.example_sids import sids
 
     info('Tests start')
 
+    setLevel(INFO)
     # setLevel(DEBUG)  # In case of problems, use DEBUG mode
 
-    tests = ['raj/s']  # TODO: import test Sids
+    tests = ['hamlet/s/*']
 
     for test in tests:
 
@@ -262,7 +260,7 @@ if __name__ == '__main__':
 
         assert(test == retour)
 
-        info('*'*15)
+        info('*' * 15)
         print('  ')
 
     info('*' * 30)

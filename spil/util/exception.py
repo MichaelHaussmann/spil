@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -14,6 +14,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 
 """
+import traceback
 
 
 class SpilException(Exception):
@@ -23,6 +24,12 @@ class SpilException(Exception):
     This SpilException should always be raised and handled inside this Spil package.
     """
     pass
+
+    def __init__(self, *args, **kwargs):
+        self.message = str(args[0])
+
+    def __str__(self):
+        return f"[SpilException] {self.message}"
 
 
 if __name__ == '__main__':

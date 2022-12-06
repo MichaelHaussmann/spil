@@ -17,14 +17,14 @@ To launch searches on a custom data source.
 
  
 Searches is a dict with searches as 
-    key: search sid
-    value: search description 
+    key: read sid
+    value: read description 
 
 function: test_custom(searches) 
 """
 import six
 from spil_tests import Timer
-from spil_tests.utils.test_utils import test_sid
+from spil_tests.utils.sid_core_tests import test_sid
 from spil.util.log import DEBUG, ERROR, get_logger
 from spil import Data, Sid
 
@@ -36,7 +36,7 @@ def test_custom(searches, data_source, as_sid=True, do_log=True, do_deep=False, 
     """
     Runs given searches on the given Data Source.
 
-    Optionally operates a replace in the search, using given replace tuple.
+    Optionally operates a replace in the read, using given replace tuple.
     """
 
     global_timer = Timer(name="global", logger=log.debug)

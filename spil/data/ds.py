@@ -12,33 +12,33 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-import six
+from __future__ import annotations
+from typing import Iterable, List
 
 from spil import Sid
+from spil.sid.read.finder import Finder
 #from spil.conf import pre_search_update
-from spil.util.log import debug, warn, info, error
-
 from spil.data.data import get_data_source
-from spil.sid.search.ss import SidSearch
-from spil.sid.search.util import first
-from spil.sid.search.tools import unfold_search
+from spil.sid.read.tools import unfold_search
+
+from spil.util.log import debug, info, warning, error
 
 
-class Data(SidSearch):
+class FindByType(Finder):
     """
     Data abstraction Layer.
 
     On top of the built-in FS, and delegating data access to other custom Data sources.
     """
 
-    def get(self, search_sid, as_sid=True):
+    def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
         """
         Search dispatcher.
 
-        The search is "unfolded" into atomic searches (from one search sid, split into a list of typed search sids).
-        For each "atomic" typed search, we get the data source.
+        The read is "unfolded" into atomic searches (from one read sid, split into a list of typed read sids).
+        For each "atomic" typed read, we get the data source.
 
-        We then group the searches by data source, to call each source with a list of searches (instead of each search individually).
+        We then group the searches by data source, to call each source with a list of searches (instead of each read individually).
 
 
         :param search_sid:
@@ -60,10 +60,10 @@ class Data(SidSearch):
                 l.append(ssid)
                 sources_to_searches[source] = l
 
-        for source, searches in six.iteritems(sources_to_searches):
+        for source, searches in sources_to_searches.items():
 
             debug('Searching "{}" --> "{}"'.format(source, searches))
-            generator = source.get(searches, as_sid=False, is_unfolded=True)
+            generator = source.do_find(searches, as_sid=False)
 
             for i in generator:
                 if i not in done:  # FIXME: check why data is so often repeated, this is expensice, optimize
@@ -74,31 +74,21 @@ class Data(SidSearch):
                         yield i
 
             else:
-                warn('No data source found for "{}"'.format(ssid.full_string))
+                warning('No data source found for "{}"'.format(ssid.full_string))
 
-    def get_one(self, search_sid, as_sid=True):
+    def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+        raise NotImplementedError("Find by Type delegates do_find to other Finders, depending on the search type.")
 
-        found = first(self.get(search_sid, as_sid=False))  # search is faster if as_sid is False
-        if as_sid:
-            return Sid(found)
-        else:
-            return found
+    def find_one(self, search_sid: str | Sid, as_sid: bool = True) -> Sid | str:
+        source = get_data_source(search_sid)
+        if source:
+            return source.find_one(search_sid, as_sid=as_sid)
 
-    def exists(self, search_sid):  # TODO: evaluate best implementation
+    def exists(self, search_sid: str | Sid) -> bool:
         source = get_data_source(search_sid)
         if source:
             return source.exists(search_sid)
 
-    def create(self, sid):
-        # FIXME: this is a stub.
-        return
-        destination = get_data_destination(sid)
-        if destination:  # and hasattr(destination, 'create'):
-            return destination.create(sid)
 
-
-if __name__ == '__main__':
-
-    from spil.util.log import setLevel, DEBUG, ERROR
-
-    setLevel(ERROR)
+if __name__ == "__main__":
+    pass

@@ -29,7 +29,8 @@ Note that the cache size needs to be high enough.
 
 from functools import wraps
 
-_max_size = 4096*2*2  # approx 40 Mo
+_max_size = 4096 * 2 * 2  # approx 40 Mo
+_max_size = 4096
 
 
 def lru_cache(user_function):
@@ -41,9 +42,7 @@ def lru_cache(user_function):
         if key not in cache:
             # Validate we didn't exceed the max_size:
             if len(cache) >= _max_size:
-                # Delete an item in the dict:
-                # print('lru_cache over size')
-                cache.popitem()  # does not make sens in PY2
+                cache.popitem()
                 # cache.clear()
             cache[key] = user_function(*args)
         return cache[key]
@@ -63,27 +62,32 @@ def lru_cache(user_function):
 
 def lru_kw_cache(user_function):
     cache = {}
+    #stats = [0, 0]  # hits,misses
 
     @wraps(user_function)
     def wrapper(*args, **kwargs):
         #return user_function(*args, **kwargs)
         key = tuple(args) + tuple(kwargs)
         if key not in cache:
+            #stats[1] += 1  # miss
             # Validate we didn't exceed the max_size:
             if len(cache) >= _max_size:
-                # Delete an item in the dict:
-                # print('lru_cache over size')
-                cache.popitem()  # does not make sens in PY2
+                cache.popitem()
                 # cache.clear()
             cache[key] = user_function(*args, **kwargs)
+        else:
+            #stats[0] += 1  # hit
+            pass
         return cache[key]
 
     def cache_clear():
         cache.clear()
+        #stats[0] = stats[1] = 0
 
     def cache_info():
         from pprint import pformat
         return pformat(cache)
+        #return f"Hits: {stats[0]}/ Misses: {stats[1]} / Cache: {pformat(cache)}"
 
     wrapper.cache_clear = cache_clear
     wrapper.cache_info = cache_info

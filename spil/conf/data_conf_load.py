@@ -23,6 +23,7 @@ if six.PY2:
 # stubs that are replaced by imports
 get_data_source = None
 get_attribute_source = None
+sid_cache_folder = ''
 
 try:
     module = importlib.import_module('data_conf')

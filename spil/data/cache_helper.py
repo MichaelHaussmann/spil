@@ -13,6 +13,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 
+
 # FIXME: this is work in progress
 def reload_lru_caches():
     """
@@ -20,9 +21,9 @@ def reload_lru_caches():
 
 
     """
-    from spil.data.sid_cache_new import get_sidcache
+    from spil.data.find_in_cache import get_sidcache
     from spil.data.data import get_cached_attribute, get_data_source
-    from spil.sid.search.tools import unfold_search
+    from spil.sid.read.tools import unfold_search
     from spil.sid.core.sid_resolver import sid_to_dict, sid_to_dicts
     from spil.sid.core.fs_resolver import path_to_dict
 

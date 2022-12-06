@@ -1,5 +1,8 @@
 """
 
+    THIS IS WORK IN PROGRESS.
+
+
 - optional: deactivate lru caching (for performance tests)
 
 NOTE: searches where the type is followed by a /** ('FTOT/*/**') are currently unsupported due to faulty expand script.
@@ -23,7 +26,7 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 
 from spil import Sid
-from spil.sid.search.ss import SidSearch
+from spil.sid.read.finder import SidSearch
 
 from spil.util.log import debug, warning, error
 from spil.conf import get_data_source as data_source, get_attribute_source as attribute_source
@@ -99,7 +102,4 @@ def reload_data_source(sid):
 
 
 if __name__ == '__main__':
-
-    from spil.util.log import setLevel, DEBUG, ERROR
-
-    setLevel(ERROR)
+    pass

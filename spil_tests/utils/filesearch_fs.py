@@ -17,14 +17,14 @@ To launch searches on FS.
 FS is the file system.
  
 Searches is a dict with searches as 
-    key: search sid
-    value: search description 
+    key: read sid
+    value: read description 
 
 function: test_fs(searches) 
 """
 import six
 from spil_tests import Timer
-from spil_tests.utils.test_utils import test_sid
+from spil_tests.utils.sid_core_tests import test_sid
 from spil.util.log import DEBUG, ERROR, get_logger
 from spil import FS, Sid
 
@@ -36,7 +36,7 @@ def test_fs(searches, as_sid=True, do_log=True, do_deep=False, do_doublon_check=
     """
     Runs a given searches on FS() Source.
 
-    Optionally operates a replace in the search, using given replace tuple.
+    Optionally operates a replace in the read, using given replace tuple.
     """
 
     global_timer = Timer(name="global", logger=log.debug)

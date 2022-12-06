@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -19,19 +19,22 @@ from spil.conf.configio import ConfigIO
 
 try:
     from spil.conf.sid_conf_load import *
-    from spil.conf.fs_conf_load import *
+    # from spil.conf.fs_conf_load import *
     from spil.conf.data_conf_load import *
 except Exception as e:
-    raise Exception('Unable to import the spil_conf files (sid_conf, fs_conf, data_conf). \n'
+    raise Exception('Unable to import the spil_conf files (sid_conf, data_conf). \n'
                     'Please check the files compatibility with the latest SPIL version.')
 
 
 # function to override config into user config
-def set(key, value):
+def set(key, value, save=True):
     """
-    Sets a variable "key" with given "value" as a user config variable.
+    Sets a variable "key" with given "value" as a config variable.
 
-    This value will override the default config variable when called next time.
+    If the variable exists in the current config, it's value is overriden.
+
+    If save is True (the default), the variable is saved into the user config, and persisted
+    (unless the config file is wiped).
 
     Example :
 
@@ -41,7 +44,8 @@ def set(key, value):
     See also spil.tests.conf_tests
     """
     globals()[key] = value
-    user_conf.save(key, value)
+    if save:
+        user_conf.save(key, value)
 
 
 def get(key):

@@ -16,8 +16,8 @@ import os
 
 pysep = "/"  # python path separator
 
-__version__ = "0.0.3"
-application_codename = "Kumquat"
+__version__ = "0.1.0"
+application_codename = "Artichoke"
 application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(
     __version__, application_codename
 )
@@ -29,11 +29,28 @@ application_repo_path = os.path.dirname(
 # automatic replacement to INFO and WARN in BETA and PROD
 loglevel = 80
 
-user_app_folder_name = "pikko/conf"
+user_app_folder_name = "spil/conf"
 user_conf_file_name = "user_conf.json"
 
+# TODO: move these into sid_conf
 sip = "/"  # sid separator - changing this is untested.
 ors = ","  # "or" separator
-qms = "#"  # question mark search sign (previously '?', thus it's name)
+qms = "#"  # question mark read sign (previously '?', thus it's name)
 sidtype_keytype_sep = "__"
 search_symbols = ["*", ",", ">", "<", "**"]
+
+sid_conf_import_error_message = """
+    -------------------------------------------------------------------------------------------------------------
+    CONFIGURATION PROBLEM: 
+
+    The configuration module "{module}" was not found.
+
+    Ensure to either include "demo_conf" in your python path, 
+    or create your own "{module}" and add its folder to the python path.    
+
+    (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
+
+    Please see installation and configuration documentation.
+
+    -------------------------------------------------------------------------------------------------------------
+    """

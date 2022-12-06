@@ -18,8 +18,8 @@ To launch searches on two sources.
 Allows comparing of data sources.
 
 Searches is a dict with searches as 
-    key: search sid
-    value: search description 
+    key: read sid
+    value: read description 
 
 function: test_a_b(searches) 
 """

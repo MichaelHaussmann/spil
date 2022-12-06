@@ -24,7 +24,7 @@ def get_keys(template):
     return [t[1] for t in string.Formatter().parse(template) if t[1] is not None]
 
 
-def extrapolate(sid_templates, key_types, to_extrapolate=[], leaf_subtype='file'):
+def extrapolate_templates(sid_templates, key_types, to_extrapolate=[], leaf_subtype='file'):
     """
     Templates are extrapolated: leave type entries are looped downwards to create subtypes.
 

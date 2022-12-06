@@ -16,7 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 import importlib
 import inspect
 
-from spil.conf.util import extrapolate, pattern_replacing
+from spil.conf.util import extrapolate_templates, pattern_replacing
 
 import six
 if six.PY2:
@@ -32,25 +32,12 @@ basetyped_search_narrowing = {}
 key_patterns = {}
 extension_alias = {}
 projects = []
+leaf_key = {}
 
 try:
     module = importlib.import_module('sid_conf')
 except ModuleNotFoundError as e:
-    problem = """
-    -------------------------------------------------------------------------------------------------------------
-    CONFIGURATION PROBLEM: 
-
-    The configuration module "sid_conf" was not found.
-    
-    Ensure to either include "demo_conf" in your python path, 
-    or create your own "sid_conf" and add its folder to the python path.    
-
-    (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
-
-    Please see installation and configuration documentation.
-
-    -------------------------------------------------------------------------------------------------------------
-    """
+    problem = sid_conf_import_error_message.format(module='sid_conf')
     print(problem)
     raise Exception(problem)
 
@@ -62,7 +49,7 @@ for name, value in inspect.getmembers(module):
     globals()[name] = value
     __all__.append(name)
 
-sid_templates = extrapolate(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
+sid_templates = extrapolate_templates(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
 pattern_replacing(sid_templates, key_patterns)
 
 if __name__ == '__main__':
