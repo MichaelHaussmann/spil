@@ -246,10 +246,9 @@ sg.find('Shot',
 Spil thrives to be used interactively. 
 It's performance depends on the data sources that are used.
 
-- Spil ships with a configurable SidCache to handle data that changes rarely (projects, sequences, asset categories). 
+- Spil ships with a configurable SidCache to handle data that changes rarely (projects, sequences, asset types). 
 - String / Sid Resolves are internally stored in a lru_cache
 - searches use generators
-- Python 3 is globally faster that python 2
 
 
 #
@@ -331,7 +330,7 @@ But who are you to have read this far anyway?
 # 
 ## Discussion
 
-- Human readable Identifier ("Natural Key") vs Generated Unique ID (UUID)  
+- Human-readable Identifier ("Natural Key") vs Generated Unique ID (UUID)  
 Using the Sid implies that the name of the item becomes its unique ID.  
 While this has a huge advantage on readability and simplicity, it comes at a price.
 The biggest disadvantage is the locking of names. It becomes difficult to rename things.  
