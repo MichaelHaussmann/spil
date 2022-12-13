@@ -23,7 +23,7 @@ log.setLevel(DEBUG)
 
 def test_data_sid(s, reraise=True, replace=None, from_search=None):
     """
-    Little test protocol for the Sid.
+    Test protocol for the Data Sid.
 
     Only major or unexpected problems trigger exceptions.
     Most configuration problems trigger log warnings.
@@ -61,13 +61,16 @@ def test_data_sid(s, reraise=True, replace=None, from_search=None):
         params = {
             "exists": sid.exists(),
             "get_last": sid.get_last(),
+            "children": list(sid.children()),
+            "siblings": list(sid.siblings()),
+            "uncles": list(sid.parent.siblings()),
             #"get_last (version)": sid.get_last("version"),
             # "get_next": sid.get_next("version"),
             # "get_new": sid.get_new("version"),
         }
 
         log.info("Params: \n" + pformat(params))
-        log.info("Data: \n" + pformat(sid.fields))
+        log.info("Fields: \n" + pformat(sid.fields))
 
     except SpilException as e:
         log.error("SpilException : {} --> {}".format(e, s))
@@ -82,17 +85,18 @@ def test_data_sid(s, reraise=True, replace=None, from_search=None):
 
 def test_data_sids(sids, reraise=True, replace=None):
     """
-    Loop over test_sid.
+    Loop over test_data_sid.
     """
 
-    log.info("Testing if example sids match the Sid config")
+    log.info("Testing if example sids match the Sid config_name")
 
     if not sids:
         log.warning("No sids given, nothing to test.")
         return
 
     for i, s in enumerate(sids):
-        log.debug("---------------- {}".format(i))
+        log.info('*' * 75)
+        log.info("----------------------------------------- {}".format(i))
         test_data_sid(s, reraise=reraise, replace=replace)
 
 
@@ -119,11 +123,10 @@ def test_search(sid):
 
 if __name__ == "__main__":
 
-    from spil.util.log import setLevel, ERROR, DEBUG
+    from spil.util.log import setLevel, DEBUG, INFO
 
-    setLevel(ERROR)
+    setLevel(INFO)
 
-    sids = ["hamlet/a",
-            "hamlet/s/sq010/sh0010"]
+    from scripts.example_sids import sids
 
     test_data_sids(sids)

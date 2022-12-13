@@ -27,7 +27,7 @@ def execute(sids):
     """
     result = []
     for sid in sids:
-        result.extend(expand(sid))
+        result.extend(expand(sid, do_extrapolate=False))
 
     return result
 

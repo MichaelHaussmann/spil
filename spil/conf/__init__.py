@@ -14,27 +14,26 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 from spil.conf.global_conf import *
 
-# user config
+# user config_name
 from spil.conf.configio import ConfigIO
 
 try:
     from spil.conf.sid_conf_load import *
-    # from spil.conf.fs_conf_load import *
     from spil.conf.data_conf_load import *
 except Exception as e:
     raise Exception('Unable to import the spil_conf files (sid_conf, data_conf). \n'
                     'Please check the files compatibility with the latest SPIL version.')
 
 
-# function to override config into user config
+# function to override config_name into user config_name
 def set(key, value, save=True):
     """
-    Sets a variable "key" with given "value" as a config variable.
+    Sets a variable "key" with given "value" as a config_name variable.
 
-    If the variable exists in the current config, it's value is overriden.
+    If the variable exists in the current config_name, it's value is overriden.
 
-    If save is True (the default), the variable is saved into the user config, and persisted
-    (unless the config file is wiped).
+    If save is True (the default), the variable is saved into the user config_name, and persisted
+    (unless the config_name file is wiped).
 
     Example :
 
@@ -50,7 +49,7 @@ def set(key, value, save=True):
 
 def get(key):
     """
-    Gets a value from the config, or None if not set.
+    Gets a value from the config_name, or None if not set.
     """
     return globals().get(key)
 

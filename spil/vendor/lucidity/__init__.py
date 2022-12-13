@@ -1,14 +1,15 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2013 Martin Pengelly-Phillips
 # :license: See LICENSE.txt.
+from __future__ import absolute_import
 
 import os
 import uuid
 import imp
 
-from ._version import __version__
-from .template import Template, Resolver
-from .error import ParseError, FormatError, NotFound
+from lucidity._version import __version__
+from lucidity.template import Template, Resolver
+from lucidity.error import ParseError, FormatError, NotFound
 
 
 def discover_templates(paths=None, recursive=True):

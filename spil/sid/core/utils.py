@@ -5,7 +5,7 @@ from typing import List, Iterable
 
 from spil.util.log import info, debug
 from spil.util.exception import SpilException
-from spil.conf import sid_templates, sidtype_keytype_sep, leaf_key
+from spil.conf import sid_templates, sidtype_keytype_sep, leaf_keys
 from spil.sid.core.sid_resolver import sid_to_dicts
 from spil import Sid
 from spil.util.caching import lru_cache as cache
@@ -78,6 +78,9 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
 
     Note: if there is nothing to expand (no "/**" in the string), the string is typed as-is, to return a list of typed Sids.
 
+    Expand can only recieve "typable" sids.
+    aliases and "or" syntaxes are not allowed (they are handled before)
+
     The expand works like this:
     - First we get the root of the given Sid, before the "/**". We get the roots basetype ("asset", or "shot", etc).
 
@@ -96,7 +99,6 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
     sid = str(sid)
 
     if not sid.count('/**'):  # nothing to expand
-        # r = set([Sid(sid)])
         r = simple_typing(sid)
         debug('Nothing to expand for {}. Just casting to Sid set {}'.format(sid, r))
         return r
@@ -115,6 +117,10 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
     if not basetype:
         raise SpilException('The Search Sids "{}" root "{}" cannot be typed, so it cannot be expanded. This is probably a configuration error.'.format(sid, root))
 
+    leaf_key = leaf_keys.get(basetype)
+    if not do_extrapolate and not leaf_key:
+        raise SpilException(f'Leaf key not defined for basetype: "{basetype}". Please check config.')
+
     tested = []
     found = []
     result = []
@@ -123,46 +129,36 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
         if key in found:
             debug('.. Already checked {}, continue'.format(key))
             continue
-        if key.startswith(basetype + sidtype_keytype_sep):  # matching basetype
-            debug('.. Matching basetype "{}" for key "{}"'.format(basetype, key))
-            keys = list(string.Formatter().parse(template))
-            if do_extrapolate or keys[-1][1] == leaf_key.get(basetype):     # leaf_key.get(basetype) => "ext"
-                count = len(keys)-1
-                current = sid.count('/')
-                needed = count-current+1
-                test = sid.replace('/**', '/*' * needed)
-                if test in tested:
-                    debug('... Already tested, continue')
-                    continue
-                else:
-                    tested.append(test)
-                debug('... Filled {}x* --> {}'.format(needed, test))
-                matching = sid_to_dicts(test)
-                debug('... Got {}'.format(matching))
-                for __type, data in matching.items():
-                    debug('.... found :' + __type)
-                    found.append(__type)
-                    if data and (do_extrapolate or (list(data)[-1] == leaf_key.get(basetype))):
-                        if uri:
-                            new_sid = Sid('{}:{}?{}'.format(__type, test, uri))
-                        else:
-                            new_sid = Sid(__type + ':' + test)
-                        debug('.... appending: {}'.format(new_sid.full_string))
-                        result.append(new_sid)
-            else:
-                debug('.. Type "{}" is not a leaf, and do_extrapolate is False, skipped.'.format(key))
+        debug(f'.. Checking key "{key}"')
+        keys = list(string.Formatter().parse(template))
+        if do_extrapolate or keys[-1][1] == leaf_key:
+            count = len(keys)-1
+            current = sid.count('/')
+            needed = count-current+1
+            test = sid.replace('/**', '/*' * needed)
+            if test in tested:
+                debug('... Already tested, continue')
                 continue
+            else:
+                tested.append(test)
+            debug('... Filled {}x* --> {}'.format(needed, test))
+            matching = sid_to_dicts(test)
+            debug('... Got {}'.format(matching))
+            for __type, data in matching.items():
+                debug('.... found :' + __type)
+                found.append(__type)
+                if data and (do_extrapolate or (list(data)[-1] == leaf_key)):
+                    if uri:
+                        new_sid = Sid('{}:{}?{}'.format(__type, test, uri))
+                    else:
+                        new_sid = Sid(__type + ':' + test)
+                    debug('.... appending: {}'.format(new_sid.full_string))
+                    result.append(new_sid)
+        else:
+            debug('.. Type "{}" is not a leaf, and do_extrapolate is False, skipped.'.format(key))
+            continue
 
-    """
-    #SMELL still sometimes we have the same result twice. Algo CBB.
-    if len(result) != len(list(set(result))):
-        print('Check expand...')
-        print(len(result))
-        print(len(list(set(result))))
-        print(result)
-        print(list(set(result)))
-    """
-    return list(set(result))
+    return sorted(list(set(result)))
 
 
 @cache
@@ -200,3 +196,15 @@ def simple_typing(sid: str | Sid) -> List[Sid]:
         result.append(new_sid)
 
     return list(set(result)) or set([Sid(sid)])  # FIXME: why a set ?
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+    from spil import setLevel
+    from spil.util.log import DEBUG
+    setLevel(DEBUG)
+
+    sid = 'hamlet/**'
+    r = expand(sid)
+    pprint(r)
+

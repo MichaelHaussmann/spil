@@ -90,16 +90,17 @@ extrapolate_types = {
 }
 
 # "leaf": last key of a Sid, per basetype. Typically "ext".
-leaf_key = {'asset': 'ext',
-            'shot': 'ext',
-            None: 'ext'}  # if the Sid has None basetype
+leaf_keys = {'asset': 'ext',
+             'shot': 'ext',
+             'project': 'ext',  # used for expand
+             None: 'ext'}  # if the Sid has None basetype
 
 """
 Once a search Sid is typed, we may need to narrow down the values, to make sure the right type is hit in the search.
 For example: 
 "asset__assettype:hamlet/*/*" and "shot__sequence:hamlet/*/*" should be narrowed down to 
 "asset__assettype:hamlet/a/*" and "shot__sequence:hamlet/s/*"
-The patterns cannot yet be properly automated. The goal for this config is to explicitly configure this.
+The patterns cannot yet be properly automated. The goal for this config_name is to explicitly configure this.
 """
 basetyped_search_narrowing = {
 

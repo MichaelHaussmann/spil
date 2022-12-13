@@ -84,14 +84,15 @@ def test_path_sids(sids, reraise=True, replace=None):
     Loop over test_sid.
     """
 
-    log.info("Testing if example sids match the Sid config")
+    log.info("Testing if example sids match the Sid config_name")
 
     if not sids:
         log.warning("No sids given, nothing to test.")
         return
 
     for i, s in enumerate(sids):
-        log.debug("---------------- {}".format(i))
+        log.info('*' * 75)
+        log.info("----------------------------------------- {}".format(i))
         test_path_sid(s, reraise=reraise, replace=replace)
 
 

@@ -13,16 +13,17 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from spil.util.log import DEBUG, ERROR, get_logger
-from spil import Sid, SpilException, FS, Data
+from spil import Sid, SpilException
+from spil import FindInPaths  # , Data
 from pprint import pformat
 
 log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_sid(s, reraise=True, replace=None, from_search=None):
+def test_full_sid(s, reraise=True, replace=None, from_search=None):
     """
-    Little test protocol for the Sid.
+    Test protocol for the full Sid.
 
     Only major or unexpected problems trigger exceptions.
     Most configuration problems trigger log warnings.
@@ -40,7 +41,7 @@ def test_sid(s, reraise=True, replace=None, from_search=None):
     sid = Sid(s)
     log.info('Instanced: "{}"'.format(sid.full_string))
 
-    if not s.count("?"):  # Asset works only without URI part
+    if not s.count("?"):  # Assert works only without URI part
         assert str(sid) == s
     assert sid == eval(repr(sid))
 
@@ -58,7 +59,6 @@ def test_sid(s, reraise=True, replace=None, from_search=None):
 
         key = sid.keytype
         parent_key = sid.parent.keytype
-
         if not sid.type == "project":
             if sid.parent and sid.get_as(parent_key):
                 if not sid.parent == sid.get_as(parent_key):
@@ -66,13 +66,13 @@ def test_sid(s, reraise=True, replace=None, from_search=None):
             else:
                 log.warning('Sid "{}" has not parent ?'.format(sid))
 
-        if not sid.get_last(key):
-            log.warning('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
+        assert sid == Sid(sid.get("project") + "?" + sid.as_uri()), \
+            "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_uri()()))
 
         assert sid == Sid(
-            sid.get("project") + "?" + sid.get_uri()
-        ), "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.get_uri()))
-        log.info('Passed "URI": sid == Sid(sid.get("project") + "?" + sid.get_uri() ')
+            sid.get("project") + "?" + sid.as_uri()
+        ), "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_uri()()))
+        log.info('Passed "URI": sid == Sid(sid.get("project") + "?" + sid.as_uri() ')
 
         if not sid.parent:
             log.warning("Sid {} has no valid parent (got: {}).".format(sid, sid.parent))
@@ -82,24 +82,24 @@ def test_sid(s, reraise=True, replace=None, from_search=None):
             assert sid == sid.parent / sid.get(sid.keytype)
             log.info('Passed "parent": sid == sid.parent / sid.get(sid.keytype) ')
 
-        path = sid.path
+        path = sid.path()
         if path:
             try:
-                assert sid == Sid(path=sid.path)
-                log.info("Passed : sid == Sid(path=sid.path) ")
+                assert sid == Sid(path=sid.path())
+                log.info("Passed : sid == Sid(path=sid.path()) ")
             except AssertionError:
-                msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path: {}\nSid(path=sid.path): {}\n".format(
+                msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path(): {}\nSid(path=sid.path()): {}\n".format(
                     "(Sid is a search, this may be normal)." if sid.is_search() else "",
-                    sid, sid.path, Sid(path=sid.path)
+                    sid, sid.path(), Sid(path=sid.path())
                 )
                 log.warning(msg)
             try:
-                assert sid.path == Sid(path=sid.path).path
-                log.info("Passed : sid.path == Sid(path=sid.path).path ")
+                assert sid.path() == Sid(path=sid.path()).path()
+                log.info("Passed : sid.path() == Sid(path=sid.path()).path() ")
             except AssertionError:
-                msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path: {}\nSid(path=sid.path): {}\nSid(path=sid.path).path: {}".format(
+                msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path(): {}\nSid(path=sid.path()): {}\nSid(path=sid.path()).path(): {}".format(
                     "(Sid is a search, this may be normal)." if sid.is_search() else "",
-                    sid, sid.path, Sid(path=sid.path), Sid(path=sid.path).path
+                    sid, sid.path(), Sid(path=sid.path()), Sid(path=sid.path()).path()
                 )
                 log.warning(msg)
         else:
@@ -110,23 +110,26 @@ def test_sid(s, reraise=True, replace=None, from_search=None):
             "grand_parent": sid.parent.parent,
             "basetype": sid.basetype,
             "keytype": sid.keytype,
-            "path": sid.path,
+            "path": sid.path(),
             "exists": sid.exists(),
             "is_leaf": sid.is_leaf(),
             "len": len(sid),
-            "get_last": sid.get_last(),
-            "get_last (version)": sid.get_last("version"),
-            "get_next": sid.get_next("version"),
-            "get_new": sid.get_new("version"),
             "type": sid.type,
             "full_string": sid.full_string,
             "string": sid.string,
-            "uri": sid.get_uri(),
+            "uri": sid.as_uri(),
             "is_search": sid.is_search(),
+            "get_last": sid.get_last(),
+            "children": list(sid.children()),
+            "siblings": list(sid.siblings()),
+            "uncles": list(sid.parent.siblings()),
+            #"get_last (version)": sid.get_last("version"),
+            # "get_next": sid.get_next("version"),
+            # "get_new": sid.get_new("version"),
         }
 
         log.info("Params: \n" + pformat(params))
-        log.info("Data: \n" + pformat(sid.data))
+        log.info("Fields: \n" + pformat(sid.fields))
 
     except SpilException as e:
         log.error("SpilException : {} --> {}".format(e, s))
@@ -139,20 +142,21 @@ def test_sid(s, reraise=True, replace=None, from_search=None):
             raise e
 
 
-def test_sids(sids, reraise=True, replace=None):
+def test_full_sids(sids, reraise=True, replace=None):
     """
-    Loop over test_sid.
+    Loop over test_full_sid.
     """
 
-    log.info("Testing if example sids match the Sid config")
+    log.info("Testing if example sids match the Sid config_name")
 
     if not sids:
         log.warning("No sids given, nothing to test.")
         return
 
     for i, s in enumerate(sids):
-        log.debug("---------------- {}".format(i))
-        test_sid(s, reraise=reraise, replace=replace)
+        log.info('*' * 75)
+        log.info("----------------------------------------- {}".format(i))
+        test_full_sid(s, reraise=reraise, replace=replace)
 
 
 def test_search(sid):
@@ -164,21 +168,24 @@ def test_search(sid):
 
     sid = Sid(sid)
 
-    found = FS().get_one(sid)
-    log.info("{} ----> FS() --->  {}".format(sid, found))
-    # assert (sid == found)
+    found = FindInPaths().find_one(sid)
+    log.info("{} ----> FindInPaths() --->  {}".format(sid, found))
+    if found and not sid.is_search():
+        assert (sid == found)
 
+    """
     found = Data().get_one(sid)
     log.info("{} ----> Data() --->  {}".format(sid, found))
     # assert(sid == found)
+    """
 
 
 if __name__ == "__main__":
 
-    from spil.util.log import setLevel, ERROR, DEBUG
+    from spil.util.log import setLevel, DEBUG, INFO
 
-    setLevel(ERROR)
+    setLevel(INFO)
 
-    sids = ["FTOT/*", "FTOT/A","FTOT/S/SQ0001/SH0010"]  # , "FTOT/R",  "foo"]
+    from scripts.example_sids import sids
 
-    test_sids(sids)
+    test_full_sids(sids)

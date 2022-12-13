@@ -13,9 +13,9 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
-from typing import Iterable, Any
+from typing import Iterable, Any, Optional, Dict
 
-import os
+from os import PathLike
 import importlib
 from functools import total_ordering
 
@@ -27,14 +27,10 @@ from spil import conf
 from spil.util.exception import SpilException
 
 
-class Sid:
-
-    # __slots__ = [] to implement
-
-    _factory = ('spil.sid.core.sid_factory', 'sid_factory')  # TODO: config, or better system.
+class BaseSid:
 
     def __new__(cls, *args, **kwargs):
-        if cls == Sid:
+        if not kwargs.get("from_factory"):
             (mod, fn) = cls._factory
             mod = importlib.import_module(mod)
             fn = getattr(mod, fn)
@@ -47,7 +43,7 @@ class Sid:
 
 
 @total_ordering
-class StringSid(Sid):
+class StringSid(BaseSid):
 
     @property
     def string(self) -> str:
@@ -89,8 +85,8 @@ class StringSid(Sid):
     def __hash__(self, *args, **kwargs) -> int:
         return hash(repr(self))
 
-    def __eq__(self, other: Sid | str) -> bool:
-        if isinstance(other, Sid):
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, StringSid):
             return str(other.full_string) == str(self.full_string)
         else:
             return str(other) == str(self)
@@ -123,7 +119,7 @@ class TypedSid(StringSid):
          'hamlet/a/char'
          'hamlet'
 
-    At Sid creation time, the string is "resolved", matched against a config.
+    At Sid creation time, the string is "resolved", matched against a config_name.
     This defines its internal type, and store its data in a dictionary.
 
     Finally, a Sid contains 3 values.
@@ -156,11 +152,10 @@ class TypedSid(StringSid):
 
     #TODO: implement a strict mode that raises Exception if a valid Sid returns a non Sid during an operation like get_with, get_as, /, copy, ...
     """
-
-    def _init(self, string: str = None, type: str = None, fields: dict = None):
+    def _init(self, string: Optional[str] = None, type: Optional[str] = None, fields: Optional[dict] = None):
         # print(f"DataSid._init {string}, {type}, {fields}")
         self._string = string or ''
-        self._type = type
+        self._type = type or ''
         self._fields = fields or dict()
 
     @property
@@ -312,7 +307,11 @@ class TypedSid(StringSid):
 
         raise SpilException(f"[Sid][get_as] Something unexpected happened during {self}.get_as({key})")
 
-    def get_with(self, uri: str = None, key: str = None, value: str = None, **kwargs) -> Sid:
+    def get_with(self,
+                 uri: Optional[str] = None,
+                 key: Optional[str] = None,
+                 value: Optional[str] = None,
+                 **kwargs) -> Sid:
         """
         Returns a new Sid with
         - the given uri applied (see details in documentation)
@@ -357,15 +356,17 @@ class TypedSid(StringSid):
 
         data_copy.update(kwargs)
         new_sid = Sid(fields=data_copy)
+        # If the resulting Sid is not typed, we try return as StringSid, matching the Sid dictionary.
+        # This is useful for search Sids.
         if not new_sid:
-            new_sid = Sid('/'.join(list(data_copy.values())))  # FIXME: this is highly guesswork.
+            new_sid = Sid('/'.join(list(data_copy.values())))
         return new_sid
 
     def is_leaf(self):
         """
         Returns True if the current Sid is a leaf node.
 
-        Current implementation checks if the keytype is set as a leaf type in the config.
+        Current implementation checks if the keytype is set as a leaf type in the config_name.
         For example: "ext" (file extension) is the keytype of leaf nodes.
         This is configured per basetype.
 
@@ -379,7 +380,7 @@ class TypedSid(StringSid):
 
         :return: bool
         """
-        return bool(self.get(conf.leaf_key.get(self.basetype)))
+        return bool(self.get(conf.leaf_keys.get(self.basetype)))
         # TODO:
         # Better define "complete". Also in regard to a search Sid. For example Sids containing /** are "complete".
         # or if a Sid has no children, it is leaf.
@@ -430,7 +431,7 @@ class TypedSid(StringSid):
 class PathSid(TypedSid):
 
     @cache
-    def path(self, config: str | None = None) -> os.Pathlike[str]:
+    def path(self, config: Optional[str] = None) -> Pathlike[str]:  # type: ignore
         """
         Returns the file path for the current Sid, as a pathlib.Path.
         Returns None if the Sid has no path, or if it cannot be resolved.
@@ -445,16 +446,16 @@ class PathSid(TypedSid):
         try:
             result = dict_to_path(self._fields, self._type, config=config)
         except SpilException as e:
-            debug(f"This Sid has no path (config: {config}). ({e})")
+            debug(f"This Sid has no path (config_name: {config}). ({e})")
         return result
 
 
 class DataSid(PathSid):
 
     # TODO: configure which Finder is used for DataSid operations (FindByType per default).
-    # Could be handled using a default config, and/or be changed at runtime.
+    # Could be handled using a default config_name, and/or be changed at runtime.
 
-    def get_last(self, key: str | None = None) -> Sid:
+    def get_last(self, key: Optional[str] = None) -> Sid:
         """
         Returns a new Sid object, with the same fields as self, and the last existing match for given key.
         If key is not given, the keytype is used.
@@ -499,6 +500,8 @@ class DataSid(PathSid):
         value = get(self, attribute)
         if value:
             return value
+        else:
+            return None
 
     def get_next(self, key):  # FIXME: delegate to Data framework
         """
@@ -515,14 +518,14 @@ class DataSid(PathSid):
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
         current = self.get('version')
         if current:
-            if current in ['*', '>']:  #FIXME: point to "searcher signs" config
-                version = (self.get_last('version').get('version') or 'V000').split('V')[-1] or 0
+            if current in ['*', '>']:  #FIXME: point to "searcher signs" config_name
+                version = (self.get_last('version').get('version') or 'v000').split('v')[-1] or 0
             else:
-                version = self.get('version').upper().split('V')[-1]  # temporary workaround for "v001" FIXME
+                version = self.get('version').split('v')[-1]  # temporary workaround for "v001" FIXME
         else:
             version = 0  # allow non existing version #RULE: starts with V001 (#FIXME)
         version = (int(version) + 1)
-        version = 'V' + str('%03d' % version)
+        version = 'v' + str('%03d' % version)
         result = self.get_with(version=version)
         return result if result else Sid()
 
@@ -561,16 +564,16 @@ class DataSid(PathSid):
 
         :return: bool
         """
-        from spil import FindByType as FT
-        return FT().exists(self)
+        from spil import FindInPaths as Fp
+        return Fp().exists(self)
 
     def siblings_as(self, key: str) -> Iterable[Sid]:
         if key not in self._fields:
             info(f'[Sid][siblings_as] Key "{key}" not found in fields "{self._fields}"')
             return []
         search = self.get_as(key).get_with(key=key, value='*')
-        from spil import FindByType as FT
-        for i in FT.find(search, as_sid=True):
+        from spil import FindInPaths as FT
+        for i in FT().find(search, as_sid=True):
             yield i
 
     def siblings(self) -> Iterable[Sid]:
@@ -579,12 +582,10 @@ class DataSid(PathSid):
     def children(self) -> Iterable[Sid]:
         if self.is_leaf():  # per definition, leafs have no children.
             return []
-        from spil import FindByType as FT
+        from spil import FindInPaths as FT
         search = self / '*'
-        for i in FT.find(search, as_sid=True):
+        for i in FT().find(search, as_sid=True):
             yield i
-
-
 
     # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
     # implement URIs: Sid('FTOT').get_with(uri='type=A') <==> FTOT?type=A  ==>  FTOT/A
@@ -592,11 +593,17 @@ class DataSid(PathSid):
     # https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.parent
 
 
+class Sid(DataSid):
+
+    _factory = ('spil.sid.core.sid_factory', 'sid_factory')  # TODO: config_name, or better system.
+
+
 if __name__ == '__main__':
+
     from spil_tests import stop
     from pprint import pprint
     from spil.util.log import debug, setLevel, INFO, DEBUG, info
     setLevel(DEBUG)
 
-
-
+    s = Sid("hamlet/s")
+    print(s)

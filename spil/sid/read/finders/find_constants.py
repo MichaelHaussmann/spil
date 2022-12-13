@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import Iterable, List
 
 from spil import Sid, Finder
-from spil.sid.read.find_glob import FindByGlob
+from spil.sid.read.finders.find_glob import FindByGlob
 from spil.util.exception import SpilException
 from spil.util.log import debug
 
@@ -79,6 +79,9 @@ class FindInConstants(FindByGlob):
 
             root = Sid(search_sid).get_as(self.key)
 
+            if not root:
+                continue
+
             if "*" not in str(root):
 
                 if root not in done:
@@ -117,22 +120,36 @@ class FindInConstants(FindByGlob):
                 for i in generator:
                     yield i
 
+    def __str__(self) -> str:
+        return f'[FindInConstants] key: "{self.key}" / values: {self.values} / parent source: \n\t"{self.parent_source}"'
+
 
 if __name__ == "__main__":
 
-    from sid_conf import projects
-    from spil.util.log import setLevel, ERROR, DEBUG, WARN, INFO
+    from spil.conf import projects, asset_types
+    from spil.util.log import setLevel, WARN
 
-    setLevel(ERROR)
+    setLevel(WARN)
 
-    cs1 = CS("project", projects)
-    cs2 = CS("type", ["A", "R", "S"], parent_source=cs1)
+    cs1 = FindInConstants("project", projects)
+    cs2 = FindInConstants("type", ["a", "s"], parent_source=cs1)
+    cs3 = FindInConstants('assettype', asset_types, parent_source=cs2)
+    cs4 = FindInConstants('sequence', ['sq088'], parent_source=cs2)
     print(cs2)
 
-    for i in cs1.get("*"):
-        print(i)
-        print(i.path)
+    for i in cs1.find("*"):
+        print(f"sid: {i} / {type(i)} / path: {i.path()}")
+    print('-' * 20)
 
-    for i in cs2.get("FTOT/*"):
-        print(i)
-        print(i.path)
+    for i in cs2.find("hamlet/*"):
+        print(f"sid: {i} / {type(i)} / path: {i.path()}")
+    print('-' * 20)
+
+    for i in cs3.find("hamlet/*/*"):
+        print(f"sid: {i} / {type(i)} / path: {i.path()}")
+    print('-' * 20)
+
+    for i in cs4.find("hamlet/*/*"):
+        print(f"sid: {i} / {type(i)} / path: {i.path()}")
+    print('-' * 20)
+

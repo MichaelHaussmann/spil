@@ -12,49 +12,43 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-
 """
-To launch searches on two sources. 
-Allows comparing of data sources.
+To launch searches on two finders. 
+Allows comparing of finders.
 
 Searches is a dict with searches as 
     key: read sid
     value: read description 
 
-function: test_a_b(searches) 
 """
-import six
-from spil_tests import Timer
+from codetiming import Timer
 from spil.util.log import DEBUG, ERROR, get_logger
 
 log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_search_ab(searches, sourceA, sourceB, as_sid=False, replace=None):
+def test_search_ab(searches, finderA, finderB, as_sid=False, replace=None):
 
-    log.debug("Searching sids in A:{} and B:{}".format(sourceA, sourceB))
+    log.debug("Searching sids in A:{} and B:{}".format(finderA, finderB))
 
     global_timer = Timer(name="global", logger=log.debug)
     global_timer.start()
 
-    for search_sid, comment in six.iteritems(searches):
+    for search_sid, comment in searches.items():
 
-        if replace:
-            search_sid = search_sid.replace(*replace)
-
-        log.debug("*" * 10)
+        log.info("*" * 10)
         log.info("{} --> {}".format(search_sid, comment))
 
         a_timer = Timer(name="a_timer", logger=log.info)
         a_timer.start()
-        found_a = set(sourceA.get(search_sid, as_sid=as_sid))
+        found_a = set(finderA.find(search_sid, as_sid=as_sid))
         log.info("A : {}".format(len(found_a)))
         a_timer.stop()
 
         b_timer = Timer(name="b_timer", logger=log.info)
         b_timer.start()
-        found_b = set(sourceB.get(search_sid, as_sid=as_sid))
+        found_b = set(finderB.find(search_sid, as_sid=as_sid))
         log.info("B : {}".format(len(found_b)))
         b_timer.stop()
 
@@ -70,14 +64,19 @@ def test_search_ab(searches, sourceA, sourceB, as_sid=False, replace=None):
 
 if __name__ == "__main__":
 
-    from spil import Data, FS
+    from scripts.example_sids import sids
+    from spil import FindInList, FindInPaths
     from spil.util.log import setLevel, ERROR, DEBUG
 
     setLevel(ERROR)
 
     searches = {}
-    searches["FTOT/S/SQ0001/SH0010/*"] = ""
+    searches["hamlet/s/*/*"] = ""
 
-    test_search_ab(searches, Data(), FS())
+    fpl = FindInPaths('local')
+    fps = FindInPaths('server')
+    fl = FindInList(sids)
+
+    test_search_ab(searches, fpl, fps)
     # to compare speed, run the test twice and check second time.
-    test_search_ab(searches, Data(), FS())
+    test_search_ab(searches, fpl, fps)

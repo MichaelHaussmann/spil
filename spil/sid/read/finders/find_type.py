@@ -13,7 +13,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
-from typing import Iterable, List
+from typing import Iterable, List, Mapping, Dict
 
 from spil import Sid
 from spil.sid.read.finder import Finder
@@ -22,6 +22,38 @@ from spil.data.data import get_data_source
 from spil.sid.read.tools import unfold_search
 
 from spil.util.log import debug, info, warning, error
+
+
+from spil import Sid
+from spil.sid.read.finder import Finder
+
+from spil.util.log import debug, warning, error
+from spil.conf import get_data_source as data_source, get_attribute_source as attribute_source
+from spil.util.caching import lru_cache as cache
+
+
+
+@cache
+def get_data_source(sid: Sid | str) -> Finder | None:
+    """
+    For a given Sid, looks up the matching data_source, as given by config_name.
+    Return value is an instance implementing Finder.
+
+    Technical note: the result is cached.
+    This means that the choice of the data source is cached, not the resulting data itself.
+    The data source is called again each time a Finder() method is called.
+    """
+    _sid = Sid(sid)
+    if not str(_sid) == str(sid):
+        warning('Sid could not be instanced, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
+    source = data_source(_sid)
+    if source:
+        debug('Getting data source for "{}": -> {}'.format(sid, source))
+        return source
+    else:
+        warning('Data Source not found for Sid "{}" ({})'.format(sid, _sid.type))
+        return None
+
 
 
 class FindByType(Finder):
@@ -49,7 +81,7 @@ class FindByType(Finder):
         search_sids = unfold_search(search_sid)
 
         done = set()  #TEST
-        sources_to_searches = dict()
+        sources_to_searches: Dict[Finder, List[Sid]] = dict()
 
         for ssid in search_sids:
 

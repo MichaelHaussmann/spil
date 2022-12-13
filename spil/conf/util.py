@@ -15,7 +15,6 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 import string
 from collections import OrderedDict
-import six
 
 from spil.conf import sidtype_keytype_sep
 
@@ -34,12 +33,12 @@ def extrapolate_templates(sid_templates, key_types, to_extrapolate=[], leaf_subt
     skipped = OrderedDict()
 
     # first we copy all the full paths, they have to match first
-    for keytype, template in six.iteritems(sid_templates):
+    for keytype, template in sid_templates.items():
         if keytype.endswith(leaf_subtype):
             generated[keytype] = template
 
     # then we start over to generate the subtypes
-    for keytype, template in six.iteritems(sid_templates):
+    for keytype, template in sid_templates.items():
 
         # adding the current found
         if keytype not in generated.keys():
@@ -109,11 +108,11 @@ def pattern_replacing(sid_templates, key_patterns):
     :return:
     """
 
-    for _keytype, template in six.iteritems(sid_templates.copy()):
+    for _keytype, template in sid_templates.copy().items():
 
         for m in key_patterns.keys():
             if m in _keytype:
-                for find, replace in six.iteritems(key_patterns.get(m)):
+                for find, replace in key_patterns.get(m).items():
                     template = template.replace(find, replace)
 
         sid_templates[_keytype] = template

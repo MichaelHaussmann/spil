@@ -10,7 +10,7 @@ from spil.util.caching import lru_cache as cache
 @cache
 def get_path_config(name: str | None = None) -> PathConfig:
 
-    if not name:  # either name, or configured default, or first config entry
+    if not name:  # either name, or configured default, or first config_name entry
         name = conf.default_path_config or list(conf.path_configs.keys())[0]
 
     config_module_name = conf.path_configs.get(name)

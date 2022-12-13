@@ -15,9 +15,7 @@ If not, see <https://www.gnu.org/licenses/>.
 import json
 import platform
 
-import six
-if six.PY2: from pathlib2 import Path
-else: from pathlib import Path
+from pathlib import Path
 
 from spil.util.log import debug, info, error
 from spil.util.singleton import Singleton
@@ -48,7 +46,7 @@ user_config_path = get_user_config_path()
 
 class ConfigIO(Singleton):
     '''
-    Writer and Reader for User config
+    Writer and Reader for User config_name
     '''
 
     conf_path = None

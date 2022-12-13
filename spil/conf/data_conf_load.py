@@ -13,17 +13,17 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+from typing import Dict
 import importlib
 import inspect
 
-import six
-if six.PY2:
-    ModuleNotFoundError = ImportError
-
 # stubs that are replaced by imports
-get_data_source = None
-get_attribute_source = None
+get_finder_for = None
+get_getter_for = None
 sid_cache_folder = ''
+sid_cache_path = ''
+path_configs: Dict[str, str] = {}
+default_path_config = ''
 
 try:
     module = importlib.import_module('data_conf')

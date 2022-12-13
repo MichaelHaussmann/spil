@@ -14,11 +14,12 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
-from typing import Iterable, List
+from typing import Iterable, List, Set
+
 import re
 
 from spil import Sid
-from spil.sid.read.find_glob import FindByGlob
+from spil.sid.read.finders.find_glob import FindByGlob
 from spil.sid.core.utils import extrapolate
 from spil.util.log import debug
 
@@ -92,7 +93,8 @@ class FindInList(FindByGlob):
         """
         Sets the search list, a list of sid strings.
 
-        Note: searchlist can be a generator, but it will be exhausted after a single function call.
+        Note: searchlist could be a generator, but it would be exhausted after a single function call.
+        If do_extrapolate is True, searchlist becomes a list.
 
         :param searchlist:
         :param do_extrapolate:
@@ -100,7 +102,7 @@ class FindInList(FindByGlob):
         :param do_strip: if the returned items should be strip() (typically if coming from file input)
         """
         if do_extrapolate:
-            self.searchlist = extrapolate(searchlist)
+            self.searchlist = list(extrapolate(searchlist))
         else:
             self.searchlist = searchlist
 
@@ -119,7 +121,7 @@ class FindInList(FindByGlob):
     def _get_searchlist(self, do_sort: bool = False) -> List[str]:
         if do_sort and not self.is_searchlist_sorted:
             self._sort_searchlist()
-        return self.searchlist
+        return self.searchlist  # type: ignore
         # return (i for i in self.searchlist)  # new generator because list is used multiple times.
 
     def star_search(self, search_sids: List[Sid],
@@ -135,7 +137,7 @@ class FindInList(FindByGlob):
         :param do_sort:
         :return:
         """
-        done = set()
+        done: Set[str] = set()
         done_add = done.add  # performance
 
         search_list = self._get_searchlist(do_sort=do_sort)
@@ -159,7 +161,9 @@ class FindInList(FindByGlob):
                     else:
                         debug('{} was already found, skipped. '.format(item))
 
+    def __str__(self):
+        return f'[spil.{self.__class__.__name__} -- List: "{list(self.searchlist)[:5]}(...)"]'
 
-if __name__ == '__main__':
 
-    pass
+if __name__ == "__main__":
+    print(FindInList(['hamlet/s/sq010/sh0010/animation'], do_extrapolate=True))

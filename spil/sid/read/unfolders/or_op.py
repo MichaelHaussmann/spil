@@ -13,8 +13,6 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-import six
-
 from spil.conf import sip, ors
 from spil.sid.core import uri_helper
 
@@ -113,7 +111,7 @@ def or_on_uri(uri):
 
     uri_dict = uri_helper.to_dict(uri)
     result = [uri_dict.copy()]
-    for key, value in six.iteritems(uri_dict):
+    for key, value in uri_dict.items():
         if value.count(ors):
             new_result = []
             for i in value.split(ors):

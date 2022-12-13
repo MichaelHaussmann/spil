@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example File System resolver config.
+Example File System resolver config_name.
 """
 from collections import OrderedDict
 from sid_conf import shot_tasks, shot_sub_tasks, asset_tasks, asset_sub_tasks

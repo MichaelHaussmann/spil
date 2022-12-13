@@ -1,7 +1,8 @@
 from __future__ import annotations
+from typing import Optional
 import os
 
-from spil.sid.sid import Sid, DataSid
+from spil.sid.sid import Sid
 
 from spil.util.log import info, warning, debug
 from spil.sid.core import sid_resolver
@@ -9,7 +10,7 @@ from spil.sid.core.uri_helper import apply_uri
 from spil.sid.pathops import fs_resolver
 
 
-def sid_to_sid(sid: str = None) -> Sid:
+def sid_to_sid(sid: Optional[str] = None) -> Sid:
     """
     Given sid is either a Sid object or a string.
 
@@ -33,26 +34,26 @@ def sid_to_sid(sid: str = None) -> Sid:
     else:
         _type, fields = sid_resolver.sid_to_dict(string)
 
-    data_sid = DataSid()
+    new_sid = Sid(from_factory=True)
 
     if not fields:
         info(f'[Sid] Sid "{sid}" / {string} did not resolve to valid Sid fields.')
-        data_sid._init(string=string)
-        return data_sid
+        new_sid._init(string=string)
+        return new_sid
 
     # no uri to handle, we return
     if not uri:
-        data_sid._init(string=string, type=_type, fields=fields)
-        return data_sid
+        new_sid._init(string=string, type=_type, fields=fields)
+        return new_sid
 
     # applying the uri, and updating the type
     else:
         string, _type, fields = apply_uri(string, uri=uri, type=_type, fields=fields)
-        data_sid._init(string=string, type=_type, fields=fields)
-        return data_sid
+        new_sid._init(string=string, type=_type, fields=fields)
+        return new_sid
 
 
-def dict_to_sid(fields: dict) -> Sid:
+def dict_to_sid(fields: dict) -> Sid | None:
 
     # FIXME: when is this function used, and why don't we have the type at the same time ?
 
@@ -62,8 +63,8 @@ def dict_to_sid(fields: dict) -> Sid:
 
     _type = sid_resolver.dict_to_type(fields)  # FIXME: terrible code
     if not _type:
-        warning(f'[Sid] fields did not resolve to valid Sid type, returning empty Sid. fields: "{fields}"')
-        return DataSid()
+        warning(f'Fields did not resolve to valid Sid type, returning empty Sid. fields: "{fields}"')
+        return None
 
     # Now getting sid and ordered dict
     sid = sid_resolver.dict_to_sid(fields, _type)
@@ -71,38 +72,40 @@ def dict_to_sid(fields: dict) -> Sid:
     # TODO: this next line could be just a dict sorting ?
     type, fields = sid_resolver.sid_to_dict(sid, _type)  # check if type == _type ?
 
-    fields = fields or dict()
+    if not fields:
+        warning(f'After resolving back from Sid {sid}, Fields are empty. Your should investigate the config_name. Returning empty Sid.')
+        return None
 
-    data_sid = DataSid()
-    data_sid._init(string=sid, type=_type, fields=fields)
-    return data_sid
+    new_sid = Sid(from_factory=True)
+    new_sid._init(string=sid, type=_type, fields=fields)
+    return new_sid
 
 
-def path_to_sid(path: str | os.Pathlike[str], config: str | None) -> Sid:
+def path_to_sid(path: str | os.Pathlike[str], config: str | None) -> Sid | None:
 
     # resolving
     _type, fields = fs_resolver.path_to_dict(path, config=config)
 
     if not fields:
-        info(f"[Sid] Path [{path}] did not resolve to valid Sid fields (config:{config}.")
-        return
+        info(f"Path [{path}] did not resolve to valid Sid fields (config_name:{config}.")
+        return None
 
     # Now getting sid
     resolved_sid = sid_resolver.dict_to_sid(fields, _type)
     if not resolved_sid:
-        info('[Sid] Path "{}" did resolve to fields {}, but not back to Sid'.format(path, fields))
-        return
+        info('Path "{}" did resolve to fields {}, but not back to Sid'.format(path, fields))
+        return None
 
-    data_sid = DataSid()
-    data_sid._init(string=resolved_sid, type=_type, fields=fields)
-    return data_sid
+    new_sid = Sid(from_factory=True)
+    new_sid._init(string=resolved_sid, type=_type, fields=fields)
+    return new_sid
 
 
 # @lru_kw_cache
-def sid_factory(sid: str = None,
+def sid_factory(sid: Optional[str] = None,
                 fields: dict = None,
                 path: os.Pathlike[str] | str | None = None,
-                config: str | None = None) -> Sid:
+                config: Optional[str] = None) -> Sid:
     """
     Sid factory facade.
     Depending on input, calls a sid creation function and returns the produced sid.
@@ -110,24 +113,32 @@ def sid_factory(sid: str = None,
     In case of multiple arguments, the first has priority (others are ignored).
     If no param is given, eg. Sid(), returns an empty Sid().
 
+    Important:
+    Python always calls __init__ on objects returned by __new__.
+    In this factory, we circumvent doubled __init__ calls, by having an empty __init__, and calling an explicit _init() method.
+    To implement a new factory method, it is needed to explicitely call this _init(), or the DataSid object will end up malformed.
+
     :param sid: a Sid object or string
     :param fields: a fields dictionary
     :param path: a path for a Sid
-    :param config: config name for the path resolving
+    :param config: config_name name for the path resolving
 
     :return: Sid
     """
     debug(f"sid_factory start: {sid} - {fields} - {path}")
+    result = None
     if sid:
-        return sid_to_sid(sid)
+        result = sid_to_sid(sid)
 
     elif fields:
-        return dict_to_sid(fields=fields)
+        result = dict_to_sid(fields=fields)
 
     elif path:
-        return path_to_sid(path=path, config=config)
+        result = path_to_sid(path=path, config=config)
 
+    if result is not None:
+        return result
     else:
-        data_sid = DataSid()
-        data_sid._init()
-        return data_sid
+        new_sid = Sid(from_factory=True)
+        new_sid._init()
+        return new_sid

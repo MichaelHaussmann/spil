@@ -18,12 +18,14 @@ from spil.conf.global_conf import __version__
 
 try:
     from spil.sid.sid import Sid
+
     from spil.sid.read.finder import Finder
-    from spil.sid.read.find_paths import FindInPaths
-    from spil.sid.read.find_paths import FindInPaths as Data  # FIXME: TEMP
-    from spil.sid.read.find_list import FindInList
-    from spil.data.ds import FindByType  # FIXME: move to find
+    from spil.sid.read.finders.find_paths import FindInPaths
+    from spil.sid.read.finders.find_paths import FindInPaths as Data
+    from spil.sid.read.finders.find_list import FindInList
+#     from spil.data.ds import FindByType  # FIXME: move to find
 #    from spil.data.cs import CS
+    from spil.sid.read.getter import Getter
     from spil.util.exception import SpilException
     from spil.util import log
     from spil.util import log as logging  # to use as standard logging and create custom loggers

@@ -1,4 +1,4 @@
-from scripts.example_sids import sids
+from scripts.example_sids import sids  # type: ignore
 from spil_tests.utils.sid_core_tests import test_typed_sids
 
 if __name__ == "__main__":

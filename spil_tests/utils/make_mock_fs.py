@@ -19,7 +19,7 @@ from spil import Sid, SpilException
 """
 Creates all given Sids on the filesystem, as defined in data_conf (template or touch)
 
-Important: uses the actual project paths, as in config. Be careful !!
+Important: uses the actual project paths, as in config_name. Be careful !!
 
 """
 

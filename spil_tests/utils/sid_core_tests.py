@@ -23,8 +23,8 @@ log.setLevel(DEBUG)
 def test_typed_sid(s, reraise=True, replace=None):
     """
     Test protocol for the Typed Sid.
-    Tests only core feature, without delegation (to Finders or Getters).
 
+    Tests only core feature, without delegation (to Finders or Getters).
     Does not include path tests.
 
     Only major or unexpected problems trigger exceptions.
@@ -87,6 +87,9 @@ def test_typed_sid(s, reraise=True, replace=None):
         assert sid == Sid(sid.get("project") + "?" + sid.as_uri()), \
             "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.get_uri()))
 
+        assert sid == Sid(
+            sid.get("project") + "?" + sid.get_uri()
+        ), "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.get_uri()))
         log.info('Passed "URI": sid == Sid(sid.get("project") + "?" + sid.get_uri() ')
 
         if not sid.parent:
@@ -113,14 +116,14 @@ def test_typed_sids(sids, reraise=True, replace=None):
     Loop over core_test_sid.
     """
 
-    log.info("Testing if example sids match the Sid config")
+    log.info("Testing if example sids match the Sid config_name")
 
     if not sids:
         log.warning("No sids given, nothing to test.")
         return
 
     for i, s in enumerate(sids):
-        log.info('*'*75)
+        log.info('*' * 75)
         log.info("----------------------------------------- {}".format(i))
         test_typed_sid(s, reraise=reraise, replace=replace)
 

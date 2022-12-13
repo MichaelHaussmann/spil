@@ -18,10 +18,6 @@ import inspect
 
 from spil.conf.util import extrapolate_templates, pattern_replacing
 
-import six
-if six.PY2:
-    ModuleNotFoundError = ImportError
-
 # stubs that are replaced by imports
 sid_templates = {}
 to_extrapolate = []
@@ -32,7 +28,7 @@ basetyped_search_narrowing = {}
 key_patterns = {}
 extension_alias = {}
 projects = []
-leaf_key = {}
+leaf_keys = {}
 
 try:
     module = importlib.import_module('sid_conf')

@@ -16,12 +16,12 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 Global configuration test.
 
-Shows what may be duplicate, and what is missing from either config (sid, fs)
+Shows what may be duplicate, and what is missing from either config_name (sid, fs)
 
 """
 from spil_tests.utils import init  # import needed before spil.conf
 
-from spil.conf import sid_templates
+from spil.conf import sid_templates  # type: ignore
 
 from spil.util.log import DEBUG, ERROR, get_logger
 log = get_logger('spil_tests')

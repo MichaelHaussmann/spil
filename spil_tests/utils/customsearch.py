@@ -13,48 +13,44 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 """
-To launch searches on a custom data source.
+To launch searches on a custom Finder.
 
- 
 Searches is a dict with searches as 
     key: read sid
     value: read description 
 
-function: test_custom(searches) 
 """
-import six
-from spil_tests import Timer
-from spil_tests.utils.sid_core_tests import test_sid
+from codetiming import Timer
+from spil import Sid, FindInPaths
+
+from spil_tests.utils.sid_full_test import test_full_sid
 from spil.util.log import DEBUG, ERROR, get_logger
-from spil import Data, Sid
 
 log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_custom(searches, data_source, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None):
+def test_searches_in_finder(searches, finder=None, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None):
     """
-    Runs given searches on the given Data Source.
+    Runs given searches on the given Finder.
 
     Optionally operates a replace in the read, using given replace tuple.
     """
 
-    global_timer = Timer(name="global", logger=log.debug)
+    global_timer = Timer(name="global", logger=log.info)
     global_timer.start()
 
-    for search_sid, comment in six.iteritems(searches):
+    finder = finder or FindInPaths()
+    for search_sid, comment in searches.items():
 
-        if replace:
-            search_sid = search_sid.replace(*replace)
-
-        log.debug("*" * 10)
-        log.info("{} --> {} (source: {})".format(search_sid, comment, data_source))
+        log.info("*" * 10)
+        log.info("{} --> {} (finder: {})".format(search_sid, comment, finder))
         double_check = set()
 
-        ls_timer = Timer(name="search_sid", logger=log.debug)
-        ls_timer.start()
+        f_timer = Timer(name="search_sid", logger=log.info)
+        f_timer.start()
         count = 0
-        for i in data_source.get(search_sid, as_sid=as_sid):
+        for i in finder.find(search_sid, as_sid=as_sid):
             if do_log:
                 log.info(i)
             if do_match_check:
@@ -68,10 +64,10 @@ def test_custom(searches, data_source, as_sid=True, do_log=True, do_deep=False, 
                 double_check.add(i)
             if do_deep:
                 log.debug("Sid test for {}".format(i))
-                test_sid(i, from_search=search_sid)
+                test_full_sid(i, from_search=search_sid)
 
-        log.debug("Total: " + str(count))
-        ls_timer.stop()
+        log.info("Total: " + str(count))
+        f_timer.stop()
 
     global_timer.stop()
 
@@ -83,6 +79,6 @@ if __name__ == "__main__":
     setLevel(ERROR)
 
     searches = {}
-    searches["FTOT/S/SQ0001/SH0010/*"] = ""
+    searches["hamlet/s/*/*"] = ""
 
-    test_custom(searches, Data())
+    test_searches_in_finder(searches)

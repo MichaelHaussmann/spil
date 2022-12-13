@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example File System resolver config.
+Example File System resolver config_name.
 """
 
 from sid_conf import shot_tasks, asset_tasks, asset_types

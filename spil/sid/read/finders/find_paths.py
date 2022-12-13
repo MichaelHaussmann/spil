@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.debug
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -14,16 +14,17 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
+from typing import Iterable, List, Set
+
 import os
 import glob
-from typing import List, Iterable
 
+from spil import Sid
 from spil import conf
 from spil.sid.pathops.pathconfig import get_path_config
-from spil.sid.read.find_glob import FindByGlob
-from spil.sid.sid import Sid
+from spil.sid.read.finders.find_glob import FindByGlob
 from spil.util.exception import SpilException
-from spil.util.log import debug, warn, debug, error
+from spil.util.log import warn, debug, error
 
 try:
     import fileseq
@@ -43,16 +44,13 @@ class FindInPaths(FindByGlob):
     """
     def __init__(self, config: str | None = None):
         """
-        Config is the desired config name, as configured in data_conf.
-        If config is None, the default config (during class instantiation) is used.
+        Config is the desired config_name name, as configured in data_conf.
+        If config_name is None, the default config_name (during class instantiation) is used.
 
 
         """
-        self.config = config or conf.default_path_config
-        self.conf = get_path_config(self.config)
-
-    #def exists(self, search_sid):  TODO: Test and compare with Finder.exists
-    #    return os.path.exists(search_sid.path(self.conf)
+        self.config_name = config or conf.default_path_config
+        self.conf = get_path_config(self.config_name)
 
     def star_search(self, search_sids: List[Sid],
                     as_sid: bool = False,
@@ -106,7 +104,7 @@ class FindInPaths(FindByGlob):
             search = search_sid  # TODO: handle also strings ?
 
             debug('Search : {}'.format(search))
-            pattern = str(search.path(self.config))
+            pattern = str(search.path(self.config_name))
 
             if not pattern:
                 warn('Search sid {} did not resolve to a path. Cancelled.'.format(search))
@@ -130,7 +128,7 @@ class FindInPaths(FindByGlob):
                 if path in found_paths:
                     continue
                 try:
-                    sid = Sid(path=path, config=self.config)
+                    sid = Sid(path=path, config=self.config_name)
                     debug('found ' + str(sid))
                 except SpilException as e:
                     debug('Path did not generate sid : {}'.format(path))
@@ -158,8 +156,8 @@ class FindInPaths(FindByGlob):
         """
         debug('Starting star_search_framed')
 
-        searched = set()
-        done = set()
+        searched: Set[str] = set()
+        done: Set[str] = set()
         done_add = done.add
 
         for search_sid in search_sids:
@@ -172,7 +170,7 @@ class FindInPaths(FindByGlob):
                 search = search.get_with('frame', '@')  # for usage in fileseq
 
             debug('Search : ' + str(search))
-            pattern = str(search.path(self.config))
+            pattern = str(search.path(self.config_name))
 
             if not pattern:
                 warn('Search sid {} did not resolve to a path. Cancelled.'.format(search))
@@ -200,7 +198,7 @@ class FindInPaths(FindByGlob):
                 debug(file_sequence)
                 path = str(file_sequence[0]).replace(os.sep, '/')  # we get the first file of the sequence
                 try:
-                    sid = Sid(path=path, config=self.config)
+                    sid = Sid(path=path, config=self.config_name)
                     debug('found ' + str(sid))
                 except SpilException as e:
                     debug('Path did not generate sid : {}'.format(path))
@@ -219,7 +217,9 @@ class FindInPaths(FindByGlob):
                 else:
                     debug('{} was already found, skipped. '.format(item))
 
+    def __str__(self):
+        return f'[spil.{self.__class__.__name__} -- Config: "{self.config_name}"]'
 
-if __name__ == '__main__':
 
-    pass
+if __name__ == "__main__":
+    print(FindInPaths())

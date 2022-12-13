@@ -100,6 +100,9 @@ class Finder:
         """
         return bool(self.find_one(search_sid, as_sid=False))
 
+    def __str__(self):
+        return f"[spil.{self.__class__.__name__}]"
+
 
 if __name__ == "__main__":
-    pass
+    print(Finder())

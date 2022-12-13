@@ -26,7 +26,7 @@ def execute(sids):
     "asset_cat:hamlet/a/*" and "shot_seq:hamlet/s/*"
 
     The transformation cannot yet be properly automated.
-    For that reason it is set in a config, and handled here.
+    For that reason it is set in a config_name, and handled here.
 
     """
     result = []

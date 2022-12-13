@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example File System resolver config.
+Example File System resolver config_name.
 Maps file paths to Sid components.
 """
 from sid_conf import key_patterns

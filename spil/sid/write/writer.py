@@ -36,7 +36,7 @@ class Writer:
         :param data: dictionary
         :return: True on Success, False on failure
         """
-        pass
+        return False
 
 
 class WriteToDestinations(Writer):
