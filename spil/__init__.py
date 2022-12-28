@@ -21,11 +21,13 @@ try:
 
     from spil.sid.read.finder import Finder
     from spil.sid.read.finders.find_paths import FindInPaths
-    from spil.sid.read.finders.find_paths import FindInPaths as Data
     from spil.sid.read.finders.find_list import FindInList
-#     from spil.data.ds import FindByType  # FIXME: move to find
-#    from spil.data.cs import CS
+    from spil.sid.read.finders.find_constants import FindInConstants
+    from spil.sid.read.finders.find_finders import FindInFinders
+
     from spil.sid.read.getter import Getter
+    from spil.sid.write.writer import Writer
+
     from spil.util.exception import SpilException
     from spil.util import log
     from spil.util import log as logging  # to use as standard logging and create custom loggers
