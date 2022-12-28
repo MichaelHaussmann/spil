@@ -13,7 +13,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
-from typing import Tuple
+from typing import Tuple, Optional
 
 """
 File system resolver
@@ -21,11 +21,11 @@ Path <-> dict translation
 """
 import os
 from pathlib import Path
-from collections import OrderedDict
+from collections import OrderedDict  # TODO: replace by dict
 
 import spil.vendor  # SMELL
-import lucidity
-from lucidity import Template
+import lucidity  # type: ignore
+from lucidity import Template  # type: ignore
 
 from spil.util.caching import lru_kw_cache as cache
 from spil.util.log import debug
@@ -45,15 +45,15 @@ def get_resolvers(config: PathConfig) -> dict:
     :return: dict
     """
     return {
-        config.path_templates_reference: Template(
-            config.path_templates_reference, config.path_templates.get(config.path_templates_reference)
+        config.path_templates_reference: Template(  # type: ignore
+            config.path_templates_reference, config.path_templates.get(config.path_templates_reference)  # type: ignore
         )
     }
 
 @cache
 def path_to_dict(path: str | os.PathLike[str],
-                 _type: str | None = None,
-                 config: str = None) -> Tuple[str, dict] | Tuple[None, None]:
+                 _type: Optional[str] = None,
+                 config: Optional[str] = None) -> Tuple[str, dict] | Tuple[None, None]:
     """
     Resolves the given path into the matching data dictionary.
     Uses the _type, if given, else looks up all templates and uses the first matching one.
@@ -131,7 +131,7 @@ def path_to_dict(path: str | os.PathLike[str],
     return template.name, ordered
 
 
-def dict_to_path(data: dict, _type: str | None = None, config: str | None = None) -> os.PathLike[str]:
+def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] = None) -> os.PathLike[str]:
     """
     Resolves the given data dictionary into a path.
     Uses the _type, if given, else calls dict_to_type to find matching type.
@@ -208,7 +208,6 @@ def dict_to_path(data: dict, _type: str | None = None, config: str | None = None
 if __name__ == '__main__':
 
     from spil.util.log import setLevel, INFO, info, warning
-    from scripts.example_sids import sids
 
     info('Tests start')
 
