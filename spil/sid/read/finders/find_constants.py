@@ -120,8 +120,8 @@ class FindInConstants(FindByGlob):
                 for i in generator:
                     yield i
 
-    def __str__(self) -> str:
-        return f'[FindInConstants] key: "{self.key}" / values: {self.values} / parent source: \n\t"{self.parent_source}"'
+    def __str__(self):
+        return f'[spil.{self.__class__.__name__} -- Key: "{self.key}" -- values: {self.values} -- parent source: \n\t"{self.parent_source}"]'
 
 
 if __name__ == "__main__":

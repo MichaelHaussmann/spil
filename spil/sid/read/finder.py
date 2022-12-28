@@ -21,24 +21,14 @@ from spil.sid.read.tools import unfold_search
 
 from spil.util.log import debug, info, warning, error
 
-
 class Finder:
     """
     Interface for Sid Finder.
 
     Implements common public Sid Search methods "find", "find_one", and "exists"
-
     """
 
     def __init__(self):
-        """
-        #TODO
-        - better algorithms
-
-        2) allow Sid list.
-        Don't know if that makes sense.
-
-        """
         pass
 
     def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
@@ -47,7 +37,7 @@ class Finder:
         Returns a generator over Sids, if as_sid is True (default), or over Sid strings.
 
         The search process is as follows:
-        - the search sid string is "transformed" into a list of typed search Sids.
+        - the search sid string is "unfolded" into a list of typed search Sids.
         - depending on the types of searches, defined by the search symbols ('>', ...), the search is delegated to a finder function.
         (currently either "sorted_search" or "star_search").
 
@@ -75,7 +65,7 @@ class Finder:
 
         Returns a Sid, if as_sid is True (default), or a Sid strings.
 
-        Internally calls "first" on "get".
+        Internally calls "first" on "find".
 
         :param search_sid: string
         :param as_sid:
@@ -93,7 +83,7 @@ class Finder:
         Returns True if the given search_sid returns a result.
         Else False.
 
-        Internally calls "bool" on "first" on "find_one".
+        Internally calls "bool" on "find_one".
 
         :param search_sid: string or Sid
         :return: True or False

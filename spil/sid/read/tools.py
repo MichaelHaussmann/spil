@@ -6,7 +6,7 @@ This file is part of SPIL, The Simple Pipeline Lib.
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR a PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
@@ -21,7 +21,7 @@ from spil.sid.read.unfolders.expand import execute as expand
 from spil.sid.read.unfolders.typed_narrow import execute as narrow
 from spil.sid.read.unfolders.extrapolate import execute as extrapolate
 
-# unfolders by execution order for existing searches
+# "unfolders" by execution order for existing searches
 list_search_unfolders = [extensions, or_op, expand, narrow]
 
 # FIXME: at some point we will probably need to automatically narrow the searches.
@@ -30,7 +30,7 @@ list_search_unfolders = [extensions, or_op, expand, narrow]
 
 def apply_unfolders(sid, unfolders):
     """
-    Takes the given sid, executes Search Sid unfolders and returns a sorted list of unique search sids.
+    Takes the given sid, executes Search Sid "unfolders" and returns a sorted list of unique search sids.
 
     Each transformer takes a list of search sids strings, and returns a list of search sids strings.
     :return:
@@ -58,6 +58,8 @@ def unfold_search(search_sid, do_uniquify=False, do_extrapolate=False):
 
     # removing invalid
     for ssid in search_sids[:]:  # make this a search transformer?
+        if not ssid:  # untyped
+            search_sids.remove(ssid)
         if ssid.string.count("?"):
             warn('SearchSid "{}" has un-applied URI and cannot be searched. Skipped'.format(ssid))
             search_sids.remove(ssid)
@@ -93,39 +95,35 @@ if __name__ == "__main__":
     setLevel(FATAL)
 
     searches = dict()
-    searches["FTOT"] = "One project"
+    searches["hamlet"] = "One project"
     searches["*"] = "All projects"
-    searches["FTOT/*"] = "One project, all types "
-    searches["*/S"] = "all project, one type"
-    searches["*/A"] = "all project, one type"
-    searches["*/S,A"] = "all project, some types"
-    searches["FTOT/S,A"] = "one project, some types"
-    searches["*/S,A/*"] = "all project, some types, cats / seqs"
-    searches["FTOT/S,A/*"] = "one project, some types, cats / seqs"
+    searches["hamlet/*"] = "One project, all types "
+    searches["*/s"] = "all project, one type"
+    searches["*/a"] = "all project, one type"
+    searches["*/s,a"] = "all project, some types"
+    searches["hamlet/s,a"] = "one project, some types"
+    searches["*/s,a/*"] = "all project, some types, cats / seqs"
+    searches["hamlet/s,a/*"] = "one project, some types, cats / seqs"
     searches["*/*"] = "all project, all types"
     searches["*/*/*"] = "all project, all types, cats / seqs"
-    searches["FTOT/A,S/*/*"] = "one project, until shots / assets"
+    searches["hamlet/a,s/*/*"] = "one project, until shots / assets"
     searches["*/*/*/*"] = "all project, until shots / assets"
 
-    searches["FTOT/S/*/*/*"] = "one project until shot tasks"
-    searches["FTOT/S/**/movie"] = "one project all shot movies"
-    searches["FTOT/S/**/movie?version=>"] = "one project all shot movies, last version"
-    searches["FTOT/S/**"] = ""
-    searches["FTOT/*/**"] = ""
-    searches["FTOT/*/**/maya"] = ""
-    searches["CBM/A,S/**"] = ""
-    searches["JEV/A,S/**"] = ""
-    searches = dict()
-    searches["JEV/*/**"] = ""
+    searches["hamlet/s/*/*/*"] = "one project until shot tasks"
+    searches["hamlet/s/**/movie"] = "one project all shot movies"
+    searches["hamlet/s/**/movie?version=>"] = "one project all shot movies, last version"
+    searches["hamlet/s/**"] = ""
+    searches["hamlet/*/**"] = ""
+    searches["hamlet/*/**/maya"] = ""
 
     for test in searches.keys():
 
         results = unfold_search(test, do_uniquify=True)
-        print(test + "-->")
+        print(test + " -->")
         pprint(results)
 
         results = unfold_search(test, do_extrapolate=False)
-        print(test + "-->")
+        print(test + " -->")
         pprint(results)
 
         print("*" * 10)

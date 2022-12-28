@@ -14,7 +14,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
-from typing import Iterable, List, Set
+from typing import Iterable, List, Set, Optional
 
 import os
 import glob
@@ -42,7 +42,7 @@ class FindInPaths(FindByGlob):
     Still Alpha.
 
     """
-    def __init__(self, config: str | None = None):
+    def __init__(self, config: Optional[str] = None):
         """
         Config is the desired config_name name, as configured in data_conf.
         If config_name is None, the default config_name (during class instantiation) is used.

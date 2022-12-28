@@ -44,6 +44,3 @@ def first(iterable, default=None):
     except StopIteration as e:
         return default
 
-
-def e_xtrapolate(sids, as_sid=False):
-    raise NotImplementedError("extrapolate was moved to spil.sid.core.utils")

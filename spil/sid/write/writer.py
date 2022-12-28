@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+"""
+
+This file is part of SPIL, The Simple Pipeline Lib.
+
+(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+
+SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with SPIL.
+If not, see <https://www.gnu.org/licenses/>.
+
+"""
+from __future__ import annotations
+from typing import Iterable, List, Set, Optional, Mapping, Any
+
 """
 write.Writer
 
@@ -16,19 +34,12 @@ WriteToDestinations
 WriteToRegistered
 WriteToMultiple... )
 """
-from __future__ import annotations
-
-import shutil
-
-from spil import Sid, SpilException
-from spil import conf
-from spil.util.log import debug
-from pathlib import Path
+from spil import Sid
 
 
 class Writer:
 
-    def create(self, sid: Sid | str, data: dict | None = None) -> bool:
+    def create(self, sid: Sid | str, data: Optional[dict] = None) -> bool:
         """
         Creates the given Sid, with given data.
 
@@ -38,72 +49,18 @@ class Writer:
         """
         return False
 
+    def update(self, sid: Sid | str, data: Mapping[str, Any]) -> bool:
+        return False
 
-class WriteToDestinations(Writer):
-    """
-    Writes to different destinations, depending on the Sids type.
-    Can write to multiple destinations, in given order.
+    def set(self, sid: Sid | str, attribute: str, value: Optional[Any], **kwargs) -> bool:
+        return False
 
-    # TODO: implement transactions across destinations
-    (a failure (False) in create could trigger previous deletes)
-    """
+    def delete(self, sid: Sid | str) -> bool:
+        return False
 
-    def create(self, sid: Sid | str, data: dict | None = None) -> bool:
-        # FIXME: this is a stub.
-        return
-        destination = get_data_destination(sid)
-        if destination:  # and hasattr(destination, 'create'):
-            return destination.create(sid, data=data)
+    def __str__(self):
+        return f"[spil.{self.__class__.__name__}]"
 
 
-class WriteToPaths(Writer):
-
-    def __init__(self, config: str | None):
-        self.config = config or conf.default_path_config
-
-    def _create_parent(self, path: Path) -> bool:
-
-        if not path.parent.exists():
-            path.parent.mkdir(parents=True)
-
-        if path.parent.exists():
-            return True
-
-    def create(self, sid: Sid | str, data: dict | None = None) -> bool:
-
-        _sid = Sid(sid)
-        if not _sid.path(self.config):
-            raise SpilException(f"Cannot Create: sid {sid} has no path.")
-
-        path = _sid.path(self.config)
-        if path.exists():
-            raise SpilException(f"Cannot Create: path already exists for {sid}. Path: {path}.")
-
-        suffix = path.suffix
-        if suffix:
-            debug(f"Path is a file: {path}")
-            template = conf.create_file_using_template.get(suffix[1:])  # we remove the dot of the suffix
-            if template:
-                debug(f"Will be created by copying template: {template}")
-                self._create_parent(path)
-                shutil.copy2(template, path)
-            elif conf.create_file_using_touch:
-                debug(f"Will be created by touch. {path}")
-                self._create_parent(path)
-                path.touch()
-            debug(f"File will not be created: {path}")
-
-        else:
-            debug(f"Path is a directory {path}")
-            path.mkdir(parents=True)
-
-        return path.exists()
-
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    print(Writer())

@@ -13,28 +13,19 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
-from typing import Iterable, List, Mapping, Dict
+from typing import Iterable, List, Mapping, Dict, Optional
 
 from spil import Sid
 from spil.sid.read.finder import Finder
-#from spil.conf import pre_search_update
-from spil.data.data import get_data_source
-from spil.sid.read.tools import unfold_search
 
 from spil.util.log import debug, info, warning, error
-
-
-from spil import Sid
-from spil.sid.read.finder import Finder
-
-from spil.util.log import debug, warning, error
-from spil.conf import get_data_source as data_source, get_attribute_source as attribute_source
+from spil.conf import get_finder_for  # type: ignore
 from spil.util.caching import lru_cache as cache
-
+from spil.sid.read.tools import unfold_search
 
 
 @cache
-def get_data_source(sid: Sid | str) -> Finder | None:
+def get_finder(sid: Sid | str, config: Optional[str] = None) -> Finder | None:
     """
     For a given Sid, looks up the matching data_source, as given by config_name.
     Return value is an instance implementing Finder.
@@ -46,7 +37,7 @@ def get_data_source(sid: Sid | str) -> Finder | None:
     _sid = Sid(sid)
     if not str(_sid) == str(sid):
         warning('Sid could not be instanced, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
-    source = data_source(_sid)
+    source = get_finder_for(_sid, config)
     if source:
         debug('Getting data source for "{}": -> {}'.format(sid, source))
         return source
@@ -55,22 +46,29 @@ def get_data_source(sid: Sid | str) -> Finder | None:
         return None
 
 
-
-class FindByType(Finder):
+class FindInFinders(Finder):
     """
-    Data abstraction Layer.
+    This Finder will call other Finders, as configured, depending on the search sids type.
 
-    On top of the built-in FS, and delegating data access to other custom Data sources.
     """
+    def __init__(self, config: Optional[str] = None):
+        """
+        Config is an argument that will be passed to the config, via get_finder_for(sid, config).
+        Config acts like a key, to allow multiple FindInFinders configurations to co-exist.
+
+
+
+        """
+        self.config = config
 
     def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
         """
         Search dispatcher.
 
-        The read is "unfolded" into atomic searches (from one read sid, split into a list of typed read sids).
-        For each "atomic" typed read, we get the data source.
+        The search is "unfolded" (one possibly untyped search sid is "unfolded" into a list of typed search sids).
+        For each typed search, we get the appropriate Finder.
 
-        We then group the searches by data source, to call each source with a list of searches (instead of each read individually).
+        We then group the searches by Finder, to call each Finder with a list of searches (instead of each search individually).
 
 
         :param search_sid:
@@ -85,7 +83,7 @@ class FindByType(Finder):
 
         for ssid in search_sids:
 
-            source = get_data_source(ssid)
+            source = get_finder(ssid, self.config)
 
             if source:
                 l = sources_to_searches.get(source) or list()
@@ -98,7 +96,7 @@ class FindByType(Finder):
             generator = source.do_find(searches, as_sid=False)
 
             for i in generator:
-                if i not in done:  # FIXME: check why data is so often repeated, this is expensice, optimize
+                if i not in done:  # FIXME: check why data is so often repeated, this is expensive, optimize
                     done.add(i)
                     if as_sid:
                         yield Sid(i)
@@ -106,21 +104,13 @@ class FindByType(Finder):
                         yield i
 
             else:
-                warning('No data source found for "{}"'.format(ssid.full_string))
+                debug('Nothing found for "{}"'.format(ssid.full_string))
 
     def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
         raise NotImplementedError("Find by Type delegates do_find to other Finders, depending on the search type.")
 
-    def find_one(self, search_sid: str | Sid, as_sid: bool = True) -> Sid | str:
-        source = get_data_source(search_sid)
-        if source:
-            return source.find_one(search_sid, as_sid=as_sid)
-
-    def exists(self, search_sid: str | Sid) -> bool:
-        source = get_data_source(search_sid)
-        if source:
-            return source.exists(search_sid)
-
+    def __str__(self):
+        return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'
 
 if __name__ == "__main__":
-    pass
+    print(FindInFinders())
