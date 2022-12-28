@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -10,11 +10,10 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
-from spil.sid.write.draft import WriteToPaths
-from spil import Sid, SpilException
 
+from spil import Sid, SpilException
+from spil.sid.pathops.write_paths import WriteToPaths
 
 """
 Creates all given Sids on the filesystem, as defined in data_conf (template or touch)
@@ -30,8 +29,9 @@ def generate_mock_fs(sids, config='fs_conf', force=False):
     print(root)
     if root.exists() and list(root.iterdir()) and not force:
         raise SpilException(f"Root folder {root} exists and is not empty. "
-                            f"This script is about to fill it with mock data."
-                            f"For safety, the script is aborted.")
+                            f"This script is about to fill it with mock data. "
+                            f"For safety, the script is aborted. "
+                            f"Use force=True to force. ")
 
     writer = WriteToPaths(config)
 
@@ -42,11 +42,9 @@ def generate_mock_fs(sids, config='fs_conf', force=False):
             info(e)
 
 
-
 if __name__ == '__main__':
 
-    from spil.util.log import setLevel, INFO, WARN, DEBUG, error, info
-    from scripts.example_sids import sids
+    from spil.util.log import setLevel, INFO, DEBUG, info
 
     print('')
     print('Tests start')
@@ -56,11 +54,9 @@ if __name__ == '__main__':
     setLevel(INFO)
     # setLevel(DEBUG)  # In case of problems, use DEBUG mode
 
-    print('*' * 60)
-
-    import random
-
-    random.shuffle(sids)
+    sids = ['hamlet/s/sq010/sh0010/layout/v001/w/hip',
+            'hamlet/s/sq010/sh0010/anim/v001/w/ma',
+            'hamlet/s/sq010/sh0010/render/v001/p/mov']
 
     generate_mock_fs(sids, config='server')
 

@@ -20,7 +20,7 @@ log = get_logger("spil_tests", color=False)
 log.setLevel(DEBUG)
 
 
-def test_path_sid(s, reraise=True, replace=None):
+def test_path_sid(s, configs=[], reraise=True, replace=None):
     """
     Test protocol including Path operations: Sid(path=...) and sid.path().
 
@@ -64,6 +64,8 @@ def test_path_sid(s, reraise=True, replace=None):
         params = {
             "path": sid.path(),
         }
+        for config in configs:
+            params[f"path({config})"] = sid.path(config)
 
         log.info("Params: \n" + pformat(params))
         log.info("Fields: \n" + pformat(sid.fields))
@@ -79,7 +81,7 @@ def test_path_sid(s, reraise=True, replace=None):
             raise e
 
 
-def test_path_sids(sids, reraise=True, replace=None):
+def test_path_sids(sids, configs=[], reraise=True, replace=None):
     """
     Loop over test_sid.
     """
@@ -93,7 +95,7 @@ def test_path_sids(sids, reraise=True, replace=None):
     for i, s in enumerate(sids):
         log.info('*' * 75)
         log.info("----------------------------------------- {}".format(i))
-        test_path_sid(s, reraise=reraise, replace=replace)
+        test_path_sid(s, configs=configs, reraise=reraise, replace=replace)
 
 
 if __name__ == "__main__":

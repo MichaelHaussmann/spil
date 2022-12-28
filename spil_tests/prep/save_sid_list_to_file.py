@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -25,7 +25,7 @@ To obtain Example Sids by parsing the existing files, use parse_sid_files.py.
 from pathlib import Path
 
 
-def sid_file_path():
+def get_sid_file_path():
 
     from spil import Sid, SpilException
     from spil.conf import projects
@@ -65,9 +65,12 @@ def write_sids_to_file(sids, sid_file):
 if __name__ == '__main__':
 
     print('Generating Example Sids. This can take some time.')
-    from scripts.example_sids import sids  # generates the sids - potentially long loop
 
-    sid_file = sid_file_path()
+    sids = ['hamlet/s/sq010/sh0010/layout/v001/w/hip',
+            'hamlet/s/sq010/sh0010/anim/v001/w/ma',
+            'hamlet/s/sq010/sh0010/render/v001/p/mov']
+
+    sid_file = get_sid_file_path()
 
     write_sids_to_file(sids, sid_file)
 

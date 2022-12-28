@@ -21,7 +21,7 @@ Searches is a dict with searches as
 
 """
 from codetiming import Timer
-from spil import Sid, FindInPaths
+from spil import Sid, FindInPaths, SpilException
 
 from spil_tests.utils.sid_full_test import test_full_sid
 from spil.util.log import DEBUG, ERROR, get_logger
@@ -30,7 +30,7 @@ log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_searches_in_finder(searches, finder=None, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None):
+def test_searches_in_finder(searches, finder=None, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None, reraise=True):
     """
     Runs given searches on the given Finder.
 
@@ -47,27 +47,33 @@ def test_searches_in_finder(searches, finder=None, as_sid=True, do_log=True, do_
         log.info("{} --> {} (finder: {})".format(search_sid, comment, finder))
         double_check = set()
 
-        f_timer = Timer(name="search_sid", logger=log.info)
-        f_timer.start()
-        count = 0
-        for i in finder.find(search_sid, as_sid=as_sid):
-            if do_log:
-                log.info(i)
-            if do_match_check:
-                match = Sid(i).match(search_sid)
-                if not match:
-                    log.warning('No match "{}" <-> "{}". This is not normal'.format(i, search_sid))
-            count += 1
-            if do_doublon_check:
-                if i in double_check:
-                    log.warning("--------------------------------------> Doublon {}".format(i))
-                double_check.add(i)
-            if do_deep:
-                log.debug("Sid test for {}".format(i))
-                test_full_sid(i, from_search=search_sid)
+        try:
+            f_timer = Timer(name="search_sid", logger=log.info)
+            f_timer.start()
+            count = 0
+            for i in finder.find(search_sid, as_sid=as_sid):
+                if do_log:
+                    log.info(i)
+                if do_match_check:
+                    match = Sid(i).match(search_sid)
+                    if not match:
+                        log.warning('No match "{}" <-> "{}". This is not normal'.format(i, search_sid))
+                count += 1
+                if do_doublon_check:
+                    if i in double_check:
+                        log.warning("--------------------------------------> Doublon {}".format(i))
+                    double_check.add(i)
+                if do_deep:
+                    log.debug("Sid test for {}".format(i))
+                    test_full_sid(i, from_search=search_sid)
 
-        log.info("Total: " + str(count))
-        f_timer.stop()
+            log.info("Total: " + str(count))
+            f_timer.stop()
+
+        except SpilException as e:
+            log.error("SpilException : {} --> {}".format(e, search_sid))
+            if reraise:
+                raise e
 
     global_timer.stop()
 

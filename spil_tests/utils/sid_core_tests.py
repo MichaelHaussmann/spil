@@ -88,8 +88,8 @@ def test_typed_sid(s, reraise=True, replace=None):
             "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.get_uri()))
 
         assert sid == Sid(
-            sid.get("project") + "?" + sid.get_uri()
-        ), "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.get_uri()))
+            sid.get("project") + "?" + sid.as_uri()
+        ), "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_uri()))
         log.info('Passed "URI": sid == Sid(sid.get("project") + "?" + sid.get_uri() ')
 
         if not sid.parent:

@@ -65,18 +65,22 @@ def test_search_ab(searches, finderA, finderB, as_sid=False, replace=None):
 if __name__ == "__main__":
 
     from scripts.example_sids import sids
-    from spil import FindInList, FindInPaths
+    from spil import FindInList, FindInPaths, FindInFinders
     from spil.util.log import setLevel, ERROR, DEBUG
 
     setLevel(ERROR)
 
     searches = {}
-    searches["hamlet/s/*/*"] = ""
+    searches["*"] = "projects"
+    searches["hamlet/*"] = "types"
+    searches["hamlet/a/*"] = "asset types"
+    searches["hamlet/a/*/*"] = "assets"
 
     fpl = FindInPaths('local')
     fps = FindInPaths('server')
     fl = FindInList(sids)
+    ft = FindInFinders()
 
-    test_search_ab(searches, fpl, fps)
+    test_search_ab(searches, ft, fpl)
     # to compare speed, run the test twice and check second time.
-    test_search_ab(searches, fpl, fps)
+    # test_search_ab(searches, fpl, ft)

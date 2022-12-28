@@ -46,5 +46,5 @@ sys.path.append(SPIL_CONF_PATH)
 from pprint import pprint
 # pprint(sys.path)
 
-import sid_conf
-print( sid_conf )
+import spil_sid_conf
+print( spil_sid_conf )
