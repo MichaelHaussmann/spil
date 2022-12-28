@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+This file is part of SPIL, The Simple Pipeline Lib.
+
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+
+SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with SPIL.
+If not, see <https://www.gnu.org/licenses/>.
+"""
 from __future__ import annotations
 from typing import Optional
 import os
@@ -10,13 +23,15 @@ from spil.sid.core.uri_helper import apply_uri
 from spil.sid.pathops import fs_resolver
 
 
-def sid_to_sid(sid: Optional[str] = None) -> Sid:
+def sid_to_sid(sid: str | Sid) -> Sid:
     """
-    Given sid is either a Sid object or a string.
+    Creates a Sid from the given Sid object or string.
 
-    Builds a sid object and returns it.
+    Args:
+        sid: a Sid object or a string.
 
-    :return: Sid
+    Returns: a Sid object
+
     """
     debug(f'Starting with: {sid}')
 
@@ -54,6 +69,15 @@ def sid_to_sid(sid: Optional[str] = None) -> Sid:
 
 
 def dict_to_sid(fields: dict) -> Sid | None:
+    """
+    Creates a Sid from a given Fields dictionary.
+
+    Args:
+        fields: a Sid fields dictionary
+
+    Returns: Sid object
+
+    """
 
     # FIXME: when is this function used, and why don't we have the type at the same time ?
 
@@ -81,8 +105,17 @@ def dict_to_sid(fields: dict) -> Sid | None:
     return new_sid
 
 
-def path_to_sid(path: str | os.Pathlike[str], config: str | None) -> Sid | None:
+def path_to_sid(path: str | os.Pathlike[str], config: Optional[str]) -> Sid | None:  # type: ignore  # (Problem with os.Pathlike)
+    """
+    Creates a Sid from the given path.
 
+    Args:
+        path: a path for a Sid
+        config: config name for the path resolving
+
+    Returns: Sid object
+
+    """
     # resolving
     _type, fields = fs_resolver.path_to_dict(path, config=config)
 
@@ -104,11 +137,11 @@ def path_to_sid(path: str | os.Pathlike[str], config: str | None) -> Sid | None:
 # @lru_kw_cache
 def sid_factory(sid: Optional[str] = None,
                 fields: dict = None,
-                path: os.Pathlike[str] | str | None = None,
+                path: os.Pathlike[str] | str | None = None,  # type: ignore # Problem with os.Pathlike
                 config: Optional[str] = None) -> Sid:
     """
-    Sid factory facade.
-    Depending on input, calls a sid creation function and returns the produced sid.
+    Sid Factory.
+    Depending on input, calls a sid creation function and returns the produced Sid object.
 
     In case of multiple arguments, the first has priority (others are ignored).
     If no param is given, eg. Sid(), returns an empty Sid().
@@ -116,14 +149,16 @@ def sid_factory(sid: Optional[str] = None,
     Important:
     Python always calls __init__ on objects returned by __new__.
     In this factory, we circumvent doubled __init__ calls, by having an empty __init__, and calling an explicit _init() method.
-    To implement a new factory method, it is needed to explicitely call this _init(), or the DataSid object will end up malformed.
+    To implement a new factory method, it is needed to explicitly call this _init(), or the DataSid object will end up malformed.
 
-    :param sid: a Sid object or string
-    :param fields: a fields dictionary
-    :param path: a path for a Sid
-    :param config: config_name name for the path resolving
+    Args:
+        sid: a Sid object or string
+        fields: a Sid fields dictionary
+        path: a path for a Sid
+        config: config name for the path resolving
 
-    :return: Sid
+    Returns: Sid object
+
     """
     debug(f"sid_factory start: {sid} - {fields} - {path}")
     result = None

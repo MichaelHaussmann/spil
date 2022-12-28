@@ -5,7 +5,7 @@ from typing import List, Iterable
 
 from spil.util.log import info, debug
 from spil.util.exception import SpilException
-from spil.conf import sid_templates, sidtype_keytype_sep, leaf_keys
+from spil.conf import sid_templates, leaf_keys  # type: ignore
 from spil.sid.core.sid_resolver import sid_to_dicts
 from spil import Sid
 from spil.util.caching import lru_cache as cache
@@ -64,28 +64,32 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
     This allows for simpler searches on multiple types.
 
     Example:
-        To find all movie files from a shot, we need to search for: roju/s/sq0001/sh0020/*/*/*/mov
-        roju/s/sq0001/sh0020/**/mov is a simpler form.
+        To find all movie files from a shot, we need to search for: hamlet/s/sq010/sh0020/*/*/*/mov
+        hamlet/s/sq010/sh0020/**/mov is a simpler form.
 
     By default, expand only returns leaf types (do_extrapolate=False)
-    roju/s/sq0001/sh0020/** will be expanded to files, eg roju/s/sq0001/sh0020/*/*/*/* and roju/s/sq0001/sh0020/*/*/*/*/*
+    hamlet/s/sq010/sh0020/** will be expanded to files, eg hamlet/s/sq010/sh0020/*/*/*/* and hamlet/s/sq010/sh0020/*/*/*/*/*
 
     If do_extrapolate is True, expand will return all possible intermediate types.
-    Eg. roju/s/sq0001/sh0020/** will also be expanded to roju/s/sq0001/sh0020 (shot), and roju/s/sq0001/sh0020/* (task), etc.
+    Eg. hamlet/s/sq010/sh0020/** will also be expanded to hamlet/s/sq010/sh0020 (shot), and hamlet/s/sq010/sh0020/* (task), etc.
     This is not the default behaviour.
 
     This function expects a string (or sid) and converts to a list of typed Sids.
 
-    Note: if there is nothing to expand (no "/**" in the string), the string is typed as-is, to return a list of typed Sids.
+    Note: if there is nothing to expand (no "/**" in the string),
+    the string is typed as-is (calling "simple_typing(sid)"), to return a list of typed Sids.
 
-    Expand can only recieve "typable" sids.
-    aliases and "or" syntaxes are not allowed (they are handled before)
+    Expand can only receive "typeable" sids:
+    Aliases and "or" syntax are not allowed (they are handled before).
 
-    The expand works like this:
-    - First we get the root of the given Sid, before the "/**". We get the roots basetype ("asset", or "shot", etc).
+    Expand works like this:
 
-    - Then we look up all existing types (sid_templates), until we match the basetype.
-    For this type, we know the amount of keys, and replace "/**" by "/*" x the amount of keys.
+    - First we get the root of the given Sid, before the "/**".
+    We get the roots basetype ("asset", or "shot", etc) and deduce the "leaf" key.
+    The leaf key is the last key we look up.
+
+    - Then we look up all existing types (sid_templates).
+    For each type, we get the amount of keys, and replace "/**" by "/*" x the amount of keys.
     That gives us a test sid, that we use to instantiate valid sids, using all possible templates again.
 
     - we continue with all the types we have not already tested.
@@ -95,7 +99,7 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
     :return: List of typed Sids
     """
 
-    debug('Expanding ' + sid)
+    debug(f'Expanding {sid}')
     sid = str(sid)
 
     if not sid.count('/**'):  # nothing to expand
@@ -118,6 +122,7 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
         raise SpilException('The Search Sids "{}" root "{}" cannot be typed, so it cannot be expanded. This is probably a configuration error.'.format(sid, root))
 
     leaf_key = leaf_keys.get(basetype)
+    # leaf_key = 'version'  # TODO: find an option to edit this depending on the Finder.
     if not do_extrapolate and not leaf_key:
         raise SpilException(f'Leaf key not defined for basetype: "{basetype}". Please check config.')
 
@@ -167,8 +172,11 @@ def simple_typing(sid: str | Sid) -> List[Sid]:
     Takes a given sid string (or Sid), typically containing search symbols, and returns a list of typed Sids.
     If the sid cannot be typed, returns a list with Sid(sid) inside.
 
-    :param sid:
-    :return:
+    Args:
+        sid:
+
+    Returns:
+
     """
     _sid = str(sid)
 
@@ -180,7 +188,7 @@ def simple_typing(sid: str | Sid) -> List[Sid]:
     root = _sid.split('/*')[0]
     basetype = Sid(root).basetype
     if not basetype:  # not typed, returning as is
-        return set([Sid(sid)])
+        return [Sid(sid)]
         # raise SpilException('The Search Sids "{}" root "{}" cannot be typed, so it cannot be expanded. This is probably a configuration error.'.format(sid, root))
 
     result = []
@@ -195,7 +203,7 @@ def simple_typing(sid: str | Sid) -> List[Sid]:
         debug('appending: {}'.format(new_sid.full_string))
         result.append(new_sid)
 
-    return list(set(result)) or set([Sid(sid)])  # FIXME: why a set ?
+    return list(set(result)) or [Sid(sid)]
 
 
 if __name__ == "__main__":

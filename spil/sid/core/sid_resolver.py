@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -10,10 +10,9 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from __future__ import annotations
-from typing import Tuple, List
+from typing import Tuple, List, Optional, Mapping
 
 """
 Sid resolver
@@ -23,16 +22,16 @@ import string
 from collections import OrderedDict
 
 import spil.vendor  # SMELL
-import lucidity
-from lucidity import Template
+import lucidity  # type: ignore
+from lucidity import Template  # type: ignore
 
 from spil.util.caching import lru_kw_cache as cache
 from spil.util.log import debug, info
 from spil.util.exception import SpilException
 
 # sid conf
-from spil.conf import key_types, sidtype_keytype_sep
-from spil.conf import sip, sid_templates  # , meta_items # sid_filters
+from spil.conf import key_types, sidtype_keytype_sep  # type: ignore
+from spil.conf import sip, sid_templates  # type: ignore
 
 
 @cache
@@ -41,17 +40,19 @@ def sid_to_dict(sid: str, _type: str | None = None) -> Tuple[str, dict] | Tuple[
     Parses a given "sid" string using the existing sid_config templates.
     If "_type" is given, only the template named after the given "_type" is parsed.
 
-    Returns a tuple with the type and the parsed data in an OrderedDict.
+    Returns a tuple with the type and the resolved data dict.
     If the parsing failed (no template matching) returns a None, None tuple.
 
     This function parses all templates in one go, so data from the first matching template is returned.
     This is the normal usage (as opposed to sid_to_dicts)
 
-    :param sid:
-    :param _type:
-    :return:
-    """
+    Args:
+        sid: a Sid string
+        _type: a Sid type name, which is the key to the template in spil_sid_conf.
 
+    Returns: a tuple with the type and the resolved data dict.
+
+    """
     if _type:
         template = Template(_type, sid_templates.get(_type),
                             anchor=lucidity.Template.ANCHOR_BOTH,
@@ -93,17 +94,20 @@ def sid_to_dict(sid: str, _type: str | None = None) -> Tuple[str, dict] | Tuple[
     return template.name, ordered
 
 @cache
-def sid_to_dicts(sid: str) -> dict:
+def sid_to_dicts(sid: str) -> Mapping[str, dict]:
     """
-    Parses a given "sid" using the existing sid_config templates.
-    Returns a dict with the types and the parsed data.
+    Parses a given "sid" using the existing spil_sid_config templates.
+    Returns a dict with the types and the resolved data.
 
     This function parses all templates separately, so data from all matching templates are returned.
     This usage is not standard (as opposed to sid_to_dict).
     It makes sense only for broad read sids (including /**) where we want to catch-all types.
 
-    :param sid:
-    :return:
+    Args:
+        sid: a Sid string
+
+    Returns: a dictionary containing types as keys and resolved data as values.
+
     """
     results = {}  # OrderedDict() TODO: check behaviour py2 != py3
 
@@ -139,16 +143,19 @@ def sid_to_dicts(sid: str) -> dict:
     return results
 
 
-def dict_to_sid(data: dict, _type: str | None = None) -> str:
+def dict_to_sid(data: dict, _type: Optional[str] = None) -> str:
     """
     Formats the given "data" dictionary using the given template "_type".
     If "_type" is not given it is detected using "dict_to_type".
 
     Returns the sid string.
 
-    :param data:
-    :param _type:
-    :return:
+    Args:
+        data: a data dictionary with Sid fields
+        _type: a Sid type name, which is the key to the template in spil_sid_conf.
+
+    Returns: a Sid string
+
     """
     if not data:
         raise SpilException('[dict_to_sid] Data is empty')
@@ -156,7 +163,7 @@ def dict_to_sid(data: dict, _type: str | None = None) -> str:
     data = data.copy()
 
     if not _type:
-        _type = dict_to_type(data)
+        _type = dict_to_type(data)  # type: ignore
 
     pattern = sid_templates.get(_type)
 
@@ -179,7 +186,7 @@ def dict_to_sid(data: dict, _type: str | None = None) -> str:
 
 def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - this code is obscure and should be replaced / not be used
     """
-    Retrieves the sid_keytypes for the given dict "data".
+    Retrieves the sid types for the given dict "data".
     "data" can be unsorted.
 
     If "all" is False (default), the first matching type is returned.
@@ -193,9 +200,12 @@ def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - t
     Multiple matching types is a sign for a configuration problem.
     It is logged using debug('Sid multitypes for  =>')
 
-    :param data:
-    :param all:
-    :return:
+    Args:
+        data: a data dictionary with Sid fields
+        all: if set to True, all matching types are returned, else the first matching type is returned (default)
+
+    Returns: the type or types resolved from the given data dictionary.
+
     """
 
     found = []
@@ -233,7 +243,6 @@ def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - t
 if __name__ == '__main__':
 
     from spil.util.log import setLevel, INFO, info, warning
-    from scripts.example_sids import sids
 
     info('Tests start')
 

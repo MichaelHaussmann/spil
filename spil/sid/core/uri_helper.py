@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
 (C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
@@ -11,7 +10,6 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 
 """
@@ -125,22 +123,23 @@ def apply_uri(string, uri=None, type=None, fields=None):
     This is a problem in case of a read Sid, which could be poly-typed.
 
     Examples.
+    (Note that the examples depend on "hamlet_conf" example configuration. Failure may be due to non matching config)
 
     Uri updates the sequence:
-    >>> apply_uri('hamlet/s/sq01', uri='sequence=sq03', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq01'})
-    ('hamlet/s/sq03', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq03'})
+    >>> apply_uri('hamlet/s/sq010', uri='sequence=sq030', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/sq030', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq030'})
 
     Uri adds a shot:
-    >>> apply_uri('hamlet/s/sq01', uri='shot=sh010', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq01'})
-    ('hamlet/s/sq01/sh010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': 'sq01', 'shot': 'sh010'})
+    >>> apply_uri('hamlet/s/sq010', uri='shot=sh0010', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/sq010/sh0010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': 'sq010', 'shot': 'sh0010'})
 
     Uri updates the sequence and adds a shot:
-    >>> apply_uri('hamlet/s/sq01', uri='sequence=*&shot=sh010', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq01'})
-    ('hamlet/s/*/sh010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': '*', 'shot': 'sh010'})
+    >>> apply_uri('hamlet/s/sq010', uri='sequence=*&shot=sh0010', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/*/sh0010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': '*', 'shot': 'sh0010'})
 
     Uri contains undigestable fields (wrong sequence format), and is not applied:
-    >>> apply_uri('hamlet/s/sq01', uri='sequence=fuzz', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq01'})
-    ('hamlet/s/sq01?sequence=fuzz', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq01'})
+    >>> apply_uri('hamlet/s/sq010', uri='sequence=fuzz', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/sq010?sequence=fuzz', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq010'})
     """
     if not type and fields:
         raise SpilException("Uri can only be applied on typed fields.")
