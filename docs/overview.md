@@ -1,6 +1,6 @@
 # Spil, the Simple Pipeline lib.
 
-[![Spil, the simple pipeline lib.](docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
+[![Spil, the simple pipeline lib.](img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
 Spil provides a simple, human-readable, unique, and path-like identifier for every entity or file of a CG production pipeline.    
 An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
@@ -376,12 +376,12 @@ But who are you to have read this far anyway?
 - The configuration is tricky  
 For complex projects, creating the config is not simple, and is lacking tools to help.  
 Complex configurations may not work out of the box    
-<br>
+  
 - Beta stage  
 The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.    
 But this version of "Spil" is a complete rewrite. It is currently used in production, but is still young.  
 It lacks automated code testing, CI/CD, and profiling.  
-<br>  
+  
 - Needs optimisation  
 Core parts, like the resolver, will need a C++ implementation.    
 Searches returning big result sets can be relatively slow.  
