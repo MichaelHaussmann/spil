@@ -1,4 +1,4 @@
-from fs_conf import *
+from spil_fs_conf import *
 
 path_templates = path_templates.copy()
 

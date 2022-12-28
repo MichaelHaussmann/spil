@@ -6,8 +6,8 @@
 sid_cache_path = '/home/mh/PycharmProjects/spil2/hamlet_conf/data/caches'
 sid_cache_folder = sid_cache_path
 
-path_configs = {'local': 'fs_conf',
-                'server': 'fs_server_conf'
+path_configs = {'local': 'spil_fs_conf',
+                'server': 'spil_fs_server_conf'
                 }
 
 default_path_config = 'local'
@@ -24,31 +24,25 @@ create_file_using_touch = True
 # If nothing of these is set, we do not create a file.
 
 
-def get_finder_for(sid):  # get finder by type
+def get_finder_for(sid, config=None):  # get finder by Sid and optional config
     """
     For a given Sid, looks up the Sid type and the matching data_source, as defined in a dict.
     Returned value from the config_name is an instance.
     """
-    from sid_conf import projects, asset_types, asset_tasks, shot_tasks
-    from spil.data.cs import CS
-    from spil import FS
+    # type: ignore
+    from spil_sid_conf import projects, asset_types  # , asset_tasks, shot_tasks
+    from spil import FindInConstants, FindInPaths
 
-    # CS is for a Constant data source.
-    cs_projects = CS('project', projects)
-    cs_types = CS('type', ['a', 's'], parent_source=cs_projects)
-    cs_assettypes = CS('assettype', asset_types, parent_source=cs_types)
-    cs_asset_tasktypes = CS('tasktype', asset_tasks, parent_source= FS())
-    cs_shot_tasktypes = CS('tasktype', shot_tasks, parent_source=FS())
+    fc_projects = FindInConstants("project", projects)
+    fc_types = FindInConstants("type", ["a", "s"], parent_source=fc_projects)
+    fc_assettypes = FindInConstants('assettype', asset_types, parent_source=fc_types)
 
     data_sources = {
-        'project': cs_projects,
-        'asset__type': cs_types,
-        'shot__type': cs_types,
-        'render__type': cs_types,
-        'asset__assettype': cs_assettypes,
-        'asset__tasktype': cs_asset_tasktypes,
-        'shot__tasktype': cs_shot_tasktypes,
-        'default': FS()
+        'project': fc_projects,
+        'asset__type': fc_types,
+        'shot__type': fc_types,
+        'asset__assettype': fc_assettypes,
+        'default': FindInPaths()
     }
 
     source = data_sources.get(sid.type, {}) or data_sources.get('default', {})
@@ -81,6 +75,7 @@ def get_getter_for(sid, attribute):
     else:
         print('Attribute Source not found for Attribute "{}" ({})'.format(attribute, sid))
         return None
+
 
 def get_writer_for(sid):
     pass

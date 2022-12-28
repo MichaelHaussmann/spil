@@ -35,15 +35,16 @@ asset_tasks = ['art', 'model', 'surface', 'rig']
 shot_tasks = ['board', 'layout', 'anim', 'fx', 'render', 'comp']
 asset_types = ['char', 'location', 'prop', 'fx']
 
-extensions_scene = ['ma', 'mb', 'hip', 'blend', 'hou', 'maya', 'psd', 'nk']
+# alias as last value
+extensions_scene = ['ma', 'mb', 'hip', 'blend', 'hou', 'psd', 'nk', 'maya']
 extensions_cache = ['abc', 'json', 'fur', 'grm', 'vdb', 'cache']
 extensions_movie = ['mp4', 'mov', 'avi', 'movie']
 
 extension_alias = {
-    'cache': extensions_cache,
+    'cache': extensions_cache[:-1],  # we remove the last value, which is the alias itself
     'hou': ['hip', 'hipnc'],
     'maya': ['ma', 'mb'],
-    'movie': extensions_movie
+    'movie': extensions_movie[:-1]
 }
 
 key_patterns = {
@@ -109,7 +110,7 @@ basetyped_search_narrowing = {
 
 }
 
-typed_search_narrowing = {
+typed_search_narrowing = {  # type: ignore
     # not implemented yet.
 }
 

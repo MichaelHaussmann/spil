@@ -3,7 +3,7 @@
 Example File System resolver config_name.
 Maps file paths to Sid components.
 """
-from sid_conf import key_patterns
+from spil_sid_conf import key_patterns
 
 path_templates = {
 

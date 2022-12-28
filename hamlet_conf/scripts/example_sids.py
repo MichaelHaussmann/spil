@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 """
 This script generates example Sids, to test the configuration and the SPIL features towards the data.
 
@@ -7,8 +8,8 @@ import random
 from math import ceil
 from time import sleep
 
-from sid_conf import projects, asset_types, asset_tasks
-from sid_conf import extensions_scene, extensions_movie, shot_tasks, extensions_cache
+from spil_sid_conf import projects, asset_types, asset_tasks
+from spil_sid_conf import extensions_scene, extensions_movie, shot_tasks, extensions_cache
 from logging import debug
 
 
