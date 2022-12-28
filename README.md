@@ -350,43 +350,42 @@ The Sid builds upon general concepts, as well as production proven CG pipeline c
 Spil aims to be : flexible, pragmatic, simple - and reliable.   
   
 - flexible  
-Spil is a library, and not a framework.  
-It can be plugged to existing pipelines. It easily blends in, to be used only where it is needed.  
-It can also be planned at a pipelines core - and be a central part of it.    
-<br>  
+  Spil is a library, and not a framework.  
+  It can be plugged to existing pipelines. It easily blends in, to be used only where it is needed.  
+  It can also be planned at a pipelines core - and be a central part of it.    
+  <br>  
 - pragmatic    
-It all starts as files. So does Spil.  
-YAGNI meets WYSIWYG.  
-<br>  
+  It all starts as files. So does Spil.  
+  YAGNI meets WYSIWYG.  
+  <br>  
 - simple    
-Complexity costs money, at all levels of a pipeline, from artist to core developer.    
-Spil aims at simplicity, even at the cost of some universality or adaptability.  
-Once the configuration is done, the complexity is hidden. Usage is intuitive.  
-For example, it is obvious that `hamlet/a/char` is an asset category, and `hamlet/a/chars/ophelia/modeling` is a modeling task.    
-Producers have an overview, artists see clearly, TDs are empowered.   
-That is the goal of Spil.     
-<br>
+  Complexity costs money, at all levels of a pipeline, from artist to core developer.    
+  Spil aims at simplicity, even at the cost of some universality or adaptability.  
+  Once the configuration is done, the complexity is hidden. Usage is intuitive.  
+  For example, it is obvious that `hamlet/a/char` is an asset category, and `hamlet/a/chars/ophelia/modeling` is a modeling task.    
+  Producers have an overview, artists see clearly, TDs are empowered.   
+  That is the goal of Spil.  
+  <br>  
 - reliable  
-This part is yet to prove.  
-"In the face of ambiguity, refuse the temptation to guess."    
-But who are you to have read this far anyway?  
+  This part is yet to prove.  
+  "In the face of ambiguity, refuse the temptation to guess."    
+  But who are you to have read this far anyway?  
 
 ## Main limitations
 
 - The configuration is tricky  
-For complex projects, creating the config is not simple, and is lacking tools to help.  
-Complex configurations may not work out of the box    
-<br>
-- Beta stage  
-The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.    
-But this version of "Spil" is a complete rewrite. It is currently used in production, but is still young.  
-It lacks automated code testing, CI/CD, and profiling.  
-<br>  
-- Needs optimisation  
-Core parts, like the resolver, will need a C++ implementation.    
-Searches returning big result sets can be relatively slow.  
-File sequence support (eg. image sequences using fileseq) is still very slow.   
+  For complex projects, creating the config is not simple, and is lacking tools to help.  
+  Complex configurations may not work out of the box    
 
+- Beta stage  
+  The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.    
+  But this version of "Spil" is a complete rewrite. It is currently used in production, but is still young.  
+  It lacks automated code testing, CI/CD, and profiling.  
+  
+- Needs optimisation  
+  Core parts, like the resolver, will need a C++ implementation.    
+  Searches returning big result sets can be relatively slow.  
+  File sequence support (eg. image sequences using fileseq) is still very slow.   
   
 ## Plans and ongoing development
 
