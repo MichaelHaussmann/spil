@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 """
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -31,9 +32,9 @@ projects = []
 leaf_keys = {}
 
 try:
-    module = importlib.import_module('sid_conf')
+    module = importlib.import_module('spil_sid_conf')
 except ModuleNotFoundError as e:
-    problem = sid_conf_import_error_message.format(module='sid_conf')
+    problem = sid_conf_import_error_message.format(module='spil_sid_conf')
     print(problem)
     raise Exception(problem)
 
