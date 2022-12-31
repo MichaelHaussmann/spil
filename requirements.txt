@@ -2,3 +2,4 @@ Fileseq
 future
 logzero
 codetiming
+typing-extensions

@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spil"
+version = "0.1.0"
+description = "The Simple Pipeline Lib."
+readme = "README.md"
+authors = [{ name = "Michael Haussmann", email = "spil@xeo.info" }]
+license = { file = "LICENSE" }
+classifiers=[
+        "Development Status :: 4 - Beta",
+        'Operating System :: OS Independent',
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "Topic :: Software Development",
+        "Topic :: Software Development :: Libraries",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+]
+keywords=[
+    'vfx', 'cg', 'vfx-pipeline', 'cg-pipeline', 'path templates'
+]
+dependencies = [
+    "Fileseq",
+    "future",
+    "logzero",
+    "typing-extensions"
+]
+requires-python = ">=3.7"
+
+[project.optional-dependencies]
+dev = ["mypy", "black", "codetiming", "pytest"]
+
+[project.urls]
+"Homepage" = "https://github.com/MichaelHaussmann/spil"
+"Documentation" = "https://spil.readthedocs.io"
+
