@@ -28,21 +28,8 @@ default_path_config = ''
 try:
     module = importlib.import_module('spil_data_conf')
 except ModuleNotFoundError as e:
-    problem = """
-    -------------------------------------------------------------------------------------------------------------
-    CONFIGURATION PROBLEM: 
-
-    The configuration module "data_conf" was not found.
-    
-    Ensure to either include "demo_conf" in your python path, 
-    or create your own "data_conf" and add its folder to the python path.    
-
-    (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
-
-    Please see installation and configuration documentation.
-
-    -------------------------------------------------------------------------------------------------------------
-    """
+    from spil.conf import sid_conf_import_error_message
+    problem = sid_conf_import_error_message.format(module='spil_data_conf')
     print(problem)
     raise Exception(problem)
 

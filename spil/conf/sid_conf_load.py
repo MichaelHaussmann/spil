@@ -34,9 +34,19 @@ leaf_keys = {}
 try:
     module = importlib.import_module('spil_sid_conf')
 except ModuleNotFoundError as e:
-    problem = sid_conf_import_error_message.format(module='spil_sid_conf')
-    print(problem)
-    raise Exception(problem)
+
+    try:
+        import sys
+        from spil.conf import default_sid_conf_path, sid_conf_using_demo_configuration_message
+        sys.path.append(default_sid_conf_path)
+        module = importlib.import_module('spil_sid_conf')
+        print(sid_conf_using_demo_configuration_message)
+
+    except Exception as e:
+        from spil.conf import sid_conf_import_error_message
+        problem = sid_conf_import_error_message.format(module='spil_sid_conf')
+        print(problem)
+        raise Exception(problem)
 
 __all__ = []
 for name, value in inspect.getmembers(module):

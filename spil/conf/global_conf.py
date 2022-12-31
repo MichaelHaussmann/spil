@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -12,7 +12,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
-import os
+from pathlib import Path
 
 pysep = "/"  # python path separator
 
@@ -22,9 +22,9 @@ application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(
     __version__, application_codename
 )
 
-application_repo_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-).replace(os.sep, pysep)
+application_path = Path(__file__).parent.parent
+default_sid_conf_path = str(application_path.parent / "hamlet_conf")
+default_sid_conf_data_path = str(application_path.parent / "hamlet_conf" / "data")
 
 # automatic replacement to INFO and WARN in BETA and PROD
 loglevel = 80
@@ -39,13 +39,26 @@ qms = "#"  # question mark read sign (previously '?', thus it's name)
 sidtype_keytype_sep = "__"
 search_symbols = ["*", ",", ">", "<", "**"]
 
+sid_conf_using_demo_configuration_message = f"""
+Spil needs configuration files in the pythonpath.
+("spil_sid_conf.py" and others) 
+
+None were found, so Spil is falling back to the shipped demo configuration.
+The demo configuration is located here: "{default_sid_conf_path}".
+
+You may adapt this demo configuration to your needs, or create a configuration on your own. 
+Once you add this configuration folder to the pythonpath, this message will disappear.
+
+Please see the documentation : https://spil.readthedocs.io 
+"""
+
 sid_conf_import_error_message = """
     -------------------------------------------------------------------------------------------------------------
     CONFIGURATION PROBLEM: 
 
     The configuration module "{module}" was not found.
 
-    Ensure to either include "demo_conf" in your python path, 
+    Ensure to either include the demo "hamlet_conf" in your python path, 
     or create your own "{module}" and add its folder to the python path.    
 
     (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
