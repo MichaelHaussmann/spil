@@ -17,6 +17,7 @@ import traceback
 from spil.conf.global_conf import __version__
 
 try:
+    from spil import conf  # default config bootstrap
     from spil.sid.sid import Sid
 
     from spil.sid.read.finder import Finder
