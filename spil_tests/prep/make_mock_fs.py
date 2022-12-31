@@ -11,7 +11,7 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
 """
-
+from spil.util.log import info
 from spil import Sid, SpilException
 from spil.sid.pathops.write_paths import WriteToPaths
 
@@ -44,7 +44,7 @@ def generate_mock_fs(sids, config='fs_conf', force=False):
 
 if __name__ == '__main__':
 
-    from spil.util.log import setLevel, INFO, DEBUG, info
+    from spil.util.log import setLevel, INFO
 
     print('')
     print('Tests start')

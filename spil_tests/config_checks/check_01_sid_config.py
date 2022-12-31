@@ -19,7 +19,7 @@ Global configuration test.
 Shows what may be duplicate, and what is missing from either config_name (sid, fs)
 
 """
-from spil_tests.utils import init  # import needed before spil.conf
+import spil  # default config bootstrap
 
 from spil.conf import sid_templates  # type: ignore
 
