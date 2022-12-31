@@ -8,6 +8,7 @@ import random
 from math import ceil
 from time import sleep
 
+import spil  # config path bootstrap
 from spil_sid_conf import projects, asset_types, asset_tasks
 from spil_sid_conf import extensions_scene, extensions_movie, shot_tasks, extensions_cache
 from logging import debug
@@ -15,9 +16,9 @@ from logging import debug
 
 do_intermediates = True  # If this is False, only leave paths will be generated. See: LS extrapolate.
 repeat_times = 1  # 3
-num_sequences = 6  # 12
-num_shots = 12  # 24
-num_versions = 4  # 12
+num_sequences = 3  # 12
+num_shots = 4  # 24
+num_versions = 2  # 12
 
 sid_types = ['a', 's']
 

@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 """
 Example File System resolver config_name.
 Maps file paths to Sid components.
 """
 from spil_sid_conf import key_patterns
 
+# for test and demo purposes
+from pathlib import Path
+project_root_path = Path(__file__).parent / "data" / "SPIL_PROJECTS" / "LOCAL" / "PROJECTS"
+# Replace "project_root_path" by your own folder root, eg
+# r'/home/mh/Desktop/SPIL_PROJECTS/LOCAL/PROJECTS'
+
 path_templates = {
 
-    'project_root':            '/home/mh/Desktop/SPIL_PROJECTS/LOCAL/PROJECTS',
+    'project_root':            str(project_root_path),
 
     # type asset
     'asset__file':             '{@project_root}/{project}/PROD/{type:ASSETS}/{assettype}/{asset}/{task}/{version}/{assettype}_{asset}_{task}_{state}_{version}.{ext:scenes}',

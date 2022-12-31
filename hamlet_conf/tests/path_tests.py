@@ -1,5 +1,6 @@
-import spil_data_conf
-from scripts.example_sids import sids
+import spil  # config path bootstrap
+import spil_data_conf  # type: ignore
+from scripts.example_sids import sids  # type: ignore
 from spil_tests.utils.sid_path_test import test_path_sids
 
 if __name__ == "__main__":

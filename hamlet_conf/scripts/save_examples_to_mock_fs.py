@@ -1,4 +1,5 @@
 # type: ignore
+import spil  # default config path bootstrap
 import spil_data_conf
 from scripts.example_sids import sids
 from spil_tests.prep.make_mock_fs import generate_mock_fs

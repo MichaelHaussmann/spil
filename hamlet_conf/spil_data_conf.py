@@ -2,22 +2,23 @@
 # attribute getters
 # cachable_attributes (by getter / by type / with TTL - for example publish file size, date, owner
 
-
-sid_cache_path = '/home/mh/PycharmProjects/spil2/hamlet_conf/data/caches'
-sid_cache_folder = sid_cache_path
+# sid_cache_path = '/home/mh/PycharmProjects/spil2/hamlet_conf/data/caches'
+# sid_cache_folder = sid_cache_path
 
 path_configs = {'local': 'spil_fs_conf',
                 'server': 'spil_fs_server_conf'
                 }
+
+path_data_suffix = '.data.json'
 
 default_path_config = 'local'
 
 # WriteToPath: create
 # When a Sid that has a suffix (an extension), we want to create a file.
 # If a template exists for the suffix, we copy it.
-create_file_using_template = {
-    'ma': '/home/mh/PycharmProjects/spil2/hamlet_conf/data/templates/empty.ma',
-    'mb': '/home/mh/PycharmProjects/spil2/hamlet_conf/data/templates/empty.mb'
+create_file_using_template = {  # type: ignore
+    # 'ma': '.../empty.ma',
+    # 'mb': '.../empty.mb'
 }
 # if no template exists, we create an empty file with path.touch(), if create_using_touch is True
 create_file_using_touch = True
@@ -33,15 +34,15 @@ def get_finder_for(sid, config=None):  # get finder by Sid and optional config
     from spil_sid_conf import projects, asset_types  # , asset_tasks, shot_tasks
     from spil import FindInConstants, FindInPaths
 
-    fc_projects = FindInConstants("project", projects)
-    fc_types = FindInConstants("type", ["a", "s"], parent_source=fc_projects)
-    fc_assettypes = FindInConstants('assettype', asset_types, parent_source=fc_types)
+    finder_projects = FindInConstants("project", projects)
+    finder_types = FindInConstants("type", ["a", "s"], parent_source=finder_projects)
+    finder_assettypes = FindInConstants('assettype', asset_types, parent_source=finder_types)
 
     data_sources = {
-        'project': fc_projects,
-        'asset__type': fc_types,
-        'shot__type': fc_types,
-        'asset__assettype': fc_assettypes,
+        'project': finder_projects,
+        'asset__type': finder_types,
+        'shot__type': finder_types,
+        'asset__assettype': finder_assettypes,
         'default': FindInPaths()
     }
 
@@ -59,7 +60,7 @@ def get_getter_for(sid, attribute):
     For a given attribute, looks up the matching attribute_sources, as defined in a dict.
     Returned value is a function.
 
-    Currently the sid argument is not used.
+    Currently, the sid argument is not used.
     """
     # from pipe_action.libs.files import get_comment, get_size, get_time
 
@@ -77,5 +78,5 @@ def get_getter_for(sid, attribute):
         return None
 
 
-def get_writer_for(sid):
-    pass
+def get_writer_for(sid):  # TODO: implement separate source and destination objects.
+    return conf.get_writer_for(sid)

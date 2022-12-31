@@ -1,3 +1,4 @@
+import spil  # config path bootstrap
 from scripts.example_sids import sids  # type: ignore
 # from spil_plugins.sg.find_sg import FindInSG
 from spil_tests.prep.build_searches import from_sid_build_searches

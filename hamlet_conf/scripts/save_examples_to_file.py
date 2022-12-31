@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import spil  # default config path bootstrap
 from scripts.example_sids import sids  # type: ignore
 from spil_tests.prep.save_sid_list_to_file import write_sids_to_file
 

@@ -1,6 +1,8 @@
 
 sip = '/'  # sid separator
 
+projects = ['hamlet']
+
 sid_templates = {
 
     # type asset
@@ -28,8 +30,6 @@ sid_templates = {
 
 to_extrapolate = ['asset__file', 'shot__file']
 extrapolation_leaf_subtype = 'file'
-
-projects = ['hamlet']
 
 asset_tasks = ['art', 'model', 'surface', 'rig']
 shot_tasks = ['board', 'layout', 'anim', 'fx', 'render', 'comp']
