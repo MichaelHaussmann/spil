@@ -1,6 +1,6 @@
 # Spil, the Simple Pipeline lib.
 
-[![Spil, the simple pipeline lib.](docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
+[![Spil, the simple pipeline lib.](https://raw.githubusercontent.com/MichaelHaussmann/spil/py3/docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
 Spil provides a simple, human-readable, hierarchical, path-like unique identifier for every entity or file of a CG production pipeline.      
 An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
@@ -258,7 +258,7 @@ It is planned to implement other Finders, for example for MongoDB and CGWire kit
  
 Spil can be used with the spil_ui.browser.  
 
-[![Spil Qt UI](docs/img/spil_ui.png)](https://github.com/MichaelHaussmann/spil_ui)
+[![Spil Qt UI](https://raw.githubusercontent.com/MichaelHaussmann/spil/py3/docs/img/spil_ui.png)](https://github.com/MichaelHaussmann/spil_ui)
   
 **Spil_UI** is a Qt browser UI, built on top of Qt.py (PySide/PySide2).   
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
