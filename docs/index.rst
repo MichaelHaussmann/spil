@@ -6,6 +6,7 @@
    :hidden:
 
    overview
+   background
    faq
 
 .. toctree::
@@ -33,9 +34,9 @@
    :maxdepth: 2
    :hidden:
 
-   api
    glossary
+   api
    genindex
 
 .. include:: overview.md
-   :parser: myst_parser.sphinx_
+   :parser: myst_parser.docutils_

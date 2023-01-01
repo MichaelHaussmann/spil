@@ -5,13 +5,21 @@
 Spil provides a simple, human-readable, hierarchical, path-like unique identifier for every entity or file of a CG production pipeline.      
 An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
 
-Documentation: [spil.readthedocs.io](https://spil.readthedocs.io).
+## Motivation
+
+Spil was created to 
+- uniquely and intuitively identify all entities of a pipeline.
+- aggregate different data sources (file systems, asset manager, DCCs, etc.)
+- have a universal, versatile and lightweight "Entity" object for pipeline operations, at a higher abstraction level than a file path.   
+- propose an easy and intuitive API, to empower TDs and technical artists to connect to the pipeline.  
 
 ## Usage
 
+Full documentation: [spil.readthedocs.io](https://spil.readthedocs.io).
+
 ### Unique Hierarchical Identifier
 
-This identifier is called the "**Sid**" - for "Scene Identifier".
+The identifier is called the "**Sid**" - for "Scene Identifier".
 
 Examples: 
 
@@ -256,7 +264,7 @@ Spil can be used with the spil_ui.browser.
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
 It is possible to run actions on the currently selected Sid.  
  
-**spil_ui** is a separate repository (in the process of being open sourced and released).   
+**spil_ui** is a separate repository (in the process of being released).   
 
 
 ## Flexible and configurable

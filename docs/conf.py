@@ -39,7 +39,7 @@ extensions = ['myst_parser',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
 	# 'sphinx.ext.todo',
-	# 'sphinx.ext.viewcode',
+	'sphinx.ext.viewcode',
 ]
 
 templates_path = ['_templates']

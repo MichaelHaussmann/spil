@@ -5,11 +5,20 @@
 Spil provides a simple, human-readable, hierarchical, path-like unique identifier for every entity or file of a CG production pipeline.<br>      
 An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
 
+## Motivation
+
+Spil was created to:
+- uniquely and intuitively identify all entities of a pipeline.
+- aggregate different data sources (file systems, asset manager, DCCs, etc.)
+- have a universal, versatile and lightweight "Entity" object for pipeline operations, at a higher abstraction level than a file path.   
+- propose an easy and intuitive API, to empower TDs and technical artists to connect to the pipeline.  
+
+
 ## Usage
 
 ### Unique Hierarchical Identifier
 
-This identifier is called the "**Sid**" - for "Scene Identifier".
+The identifier is called the "**Sid**" - for "Scene Identifier".
 
 Examples: 
 
@@ -254,7 +263,7 @@ Spil can be used with the spil_ui.browser.
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
 It is possible to run actions on the currently selected Sid.  
  
-**spil_ui** is a separate repository (in the process of being open sourced and released).   
+**spil_ui** is a separate repository (in the process of being released).   
 
 
 ## Flexible and configurable
@@ -293,127 +302,6 @@ Spil is available on pypi and can be installed using `pip install spil`,
 or from github `pip install git+https://github.com/MichaelHaussmann/spil.git`
 
 More about installation, configuration and testing: [spil.readthedocs.io](https://spil.readthedocs.io).
-
-
-## Performance
-
-Spil thrives to be used interactively. 
-It's performance depends on the data sources that are used.
-
-- Spil ships with a configurable FindInCache to handle data that changes rarely (projects, sequences, asset types). 
-- String / Sid Resolves are internally stored in a lru_cache
-- searches use generators
-
-
-## Concepts  
-
-Spil builds upon general concepts, as well as production proven CG pipeline concepts.  
-
-### General concepts
-
-- Unique Identifier - Human readable Identifier - "Natural Key"  
-  [dzone.com/articles/7-strategies-for-assigning-ids-to-microservices](https://dzone.com/articles/7-strategies-for-assigning-ids-to-microservices)  
-  [medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575](https://medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575)
-  
-- Python File system path  
-  [www.python.org/dev/peps/pep-0428](https://www.python.org/dev/peps/pep-0428)
-  
-- Query by Example  
-  A query technique where "example" entities, with search values, are used to retrieve "matching" results.  
-  [en.wikipedia.org/wiki/Query_by_Example](https://en.wikipedia.org/wiki/Query_by_Example#As_a_general_technique)
-  
-- URI / URL  
-  [en.wikipedia.org/wiki/Uniform_Resource_Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
-  
-- Node tree & hierarchy
-
-
-### Pipeline concepts
-
-- Unique Identifier & Resource Locator  
-  Examples: "SPREF" (Sony Pictures), or the "Pipeline Resource Identifier - PRI" (Blue Sky)  
-  [medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers](https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432776da6ab)  
-  Also OpenAssetIO's [Entity Reference](https://openassetio.github.io/OpenAssetIO/glossary.html#entity_reference)  
-  
-- Resource description and "Context" (Shotgrid Toolkit)  
-  [developer.shotgridsoftware.com/tk-core/core.html#context](https://developer.shotgridsoftware.com/tk-core/core.html#context)  
-  
-- the "TypedContext", an entity for hierarchical types in Ftrack
-  
-- Template based path resolving  
-  As implemented in Shotgrid Toolkit:  
-  [github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml](https://github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml)   
-  Or by CGWire's kitsu [zou.cg-wire.com/file_trees](https://zou.cg-wire.com/file_trees)   
-  Or by Lucidity : [Lucidity](https://gitlab.com/4degrees/lucidity)  
-  
-- Middleware between Asset consumers or producers  
-  [OpenAssetIO](https://github.com/OpenAssetIO/OpenAssetIO)  
-  [Katana Asset API](https://learn.foundry.com/katana/4.0/Content/tg/asset_management_system_plugin_api/concepts.html)  
-
-- Asset Resolution - ArResolver - in USD    
-  [graphics.pixar.com/usd/release/wp_ar2.html](https://graphics.pixar.com/usd/release/wp_ar2.html)  
-  
-- The Sid itself    
-  The Sid has been used in general and fx pipelines since 2011, in various implementations and at various degrees.    
-
-## Philosophy
-
-Spil aims to be : flexible, pragmatic, simple - and reliable.   
-  
-- flexible  
-  Spil is a library, and not a framework.  
-  It can be plugged to existing pipelines. It easily blends in, to be used only where it is needed.  
-  It can also be planned at a pipelines core - and be a central part of it.    
-  <br>  
-- pragmatic    
-  It all starts as files. So does Spil.  
-  YAGNI meets WYSIWYG.  
-  <br>  
-- simple
-  Complexity costs money, at all levels of a pipeline.    
-  Spil aims at simplicity, even at the price of some universality or adaptability.  
-  Usage is intuitive: it is obvious that `hamlet/a/char` is an asset category, 
-  and `hamlet/a/chars/ophelia/modeling` is a modeling task.      
-  Producers have an overview, artists see clearly, TDs are empowered.   
-  That is the goal of Spil.     
-  <br>
-- reliable  
-  This part is yet to prove.  
-  "In the face of ambiguity, refuse the temptation to guess."    
-  But who are you to have read this far anyway?  
-
-## Limitations
-
-- The configuration is tricky  
-  For complex projects, creating the config is not simple, and is lacking tools to help.  
-  Complex configurations may not work out of the box    
-  
-- Beta stage  
-  The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.    
-  But this version of "Spil" is a rewrite. It is currently used in production, but is still young.  
-  It lacks automated code testing, CI/CD, and profiling.  
-  
-- Needs optimisation  
-  Core parts, like the resolver, will need a C++ implementation.      
-  Searches returning big result sets can be relatively slow.  
-  File sequence support (eg. image sequences using fileseq) is still very slow.     
-
-  
-## Plans and ongoing development
-
-The priority is to make the current feature set more robust, efficient, and easy to deploy.
-- tools to help create and verify the configuration files
-- adding a C++ resolver is planned, but not scheduled yet 
-
-To take profit from the Sids universality, we plan on building reusable open source bricks and pipeline tools.
-
-For example:
-- connectors to Shotgrid, CGWire, Ftrack and Relational Databases
-- using the sid as a USD Asset Resolver / In a USD pipeline
-- protocol for pipeline actions, for example `sid://play?hamlet/s/sq030/**/>/p/movie`
-- GraphQL and/or rest API  
-- file system style navigation and context handling    
-For example `cd hamlet/s/sq010`
 
 
 ## Interested ?

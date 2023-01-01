@@ -9,17 +9,18 @@ An intuitive API is built around this identifier, including glob-like query, CRU
 ## Can Spil be useful to me ?
 
 If ...
-- you work on a CG or VFX pipeline 
+- you work on a CG or VFX pipeline  
+- the pipeline is using an unambiguous naming convention
 - the pipeline is file system based, or uses multiple file system configurations
 - there are multiple data sources (file system, database, asset management system, etc.)
 - there is no data access api, or multiple apis, or an overcomplicated api
 
-If you check two or three of these statements, Spil may be for you.
+If you check two or three of these statements, Spil might be for you.
 
 ## Can I get it ? 
 
 Spil is open source and can be used for free.  
-It can be installed using `pip install spil` or forked from [github](https://github.com/MichaelHaussmann/spil)
+It can be installed using `pip install spil` or forked from [github](https://github.com/MichaelHaussmann/spil).
 See [installation](installation.md).
 
 Spil is released under Lesser GPL and is usable in **closed source commercial applications**.  
@@ -43,7 +44,7 @@ Please see also the blue sky tech blog on the subject:
 
 **Note:** 
 If Spil is used as a pure data abstraction layer, it is only a transient, non-permanent, data source.
-In that case, the name locking is not a limitation anymore.
+In that case, name locking is not a limitation.
 
 
 ## Usage seems simple, but configuration is a nightmare.
@@ -56,6 +57,24 @@ Complexity is hidden - but it's still there.
 
 Clearly, efforts need to be put in tools assisting the configuration process, better documentation, more examples. etc.
 In the meantime, please do not hesitate to get in touch at [spil@xeo.info](mailto:spil@xeo.info).
+
+
+## Naming is completely free in my pipeline, there are no rules. Will Spil work ?
+
+A string Sid, eg. `hamlet/s/sq010/sh0010` uses positional information and string patterns to infer the type.
+
+The resolver uses rules to make templates match data types.
+The tighter the rules, the better it can do so.
+
+Let's consider these naming options for a "sequence":
+- `sq010`: very tight rule (word `sq` followed by 3 digits), easy to match.
+- `010`: tight rule (3 digits), easy to match
+- `hamlet_and_skull`: freely named sequence, no rule. Difficult to match. 
+  Can be matched thanks to the context, eg `hamlet/s/hamlet_and_skull/sh010`.
+  But what about this search: `hamlet/*/hamlet_and_skull`? It may be an asset (which would still work).
+  
+With loose rules, the configuration becomes tricky. Some cases may not work out of the box.
+
 
 ## Who makes Spil ?
 

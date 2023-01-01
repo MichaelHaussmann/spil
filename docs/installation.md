@@ -52,8 +52,16 @@ print(sid.as_uri())
 
 ### Test with FindInPaths
 
-To play with the Finder and Sid paths, run **hamlet_conf/scripts/save_examples_to_mock_fs.py**.
+To play with the Finder and Sid paths, run `hamlet_conf/scripts/save_examples_to_mock_fs.py`.
 This will create dummy project files and folders on disk, inside the `hamlet_conf/data` folder.
+
+Make sure `spil` is in your python path. 
+From the installation folder type:
+```shell
+$ python hamlet_conf/scripts/save_examples_to_mock_fs.py 
+```
+
+If you are in a python editor, with `spil` in the python path, you can also run it directly.
 
 Now in python try:
 ```python
@@ -73,7 +81,7 @@ Found: hamlet/a/char/ghost
 Found: hamlet/a/char/gertrude
 ```
 
-From here you can experiment with Spil.
+You are all set, and can experiment with Spil.
 
 ## Install Spil_ui
 

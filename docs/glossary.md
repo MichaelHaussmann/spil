@@ -1,5 +1,7 @@
 # Spil Glossary
 
+*This page is work in progress.*
+
 ## Sid
 
 The Sid a structure containing:
@@ -245,6 +247,4 @@ Name of a production.
 ### version
 
 
-## DCC
-
-Stands for *Digital Content Creation* tool, eg. Maya, Houdini, Nuke, Substance Painter, to name a few. 
+*This page is work in progress.*
