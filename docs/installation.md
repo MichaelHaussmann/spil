@@ -86,10 +86,3 @@ Found: hamlet/a/char/gertrude
 
 You are all set, and can experiment with Spil.
 
-## Install Spil_ui
-
-**Spil UI** is a Qt User interface to browse Sids and launch actions.
-
-[![Spil Qt UI](img/spil_ui.png)](https://github.com/MichaelHaussmann/spil_ui)
- 
-spil_ui is a separate repository (in the process of being open sourced and released).   
