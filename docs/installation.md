@@ -1,7 +1,7 @@
 # Installation
 
 ## Prerequisites
-- python 3.7
+- python 3.7+
 
 ## pip
 
@@ -13,14 +13,17 @@ $ pip install spil
 $ pip install git+https://github.com/MichaelHaussmann/spil.git
 ```
 
-To be able to use Spil, the configuration folder must be added to the python path.
-Spil ships with an example configuration named `hamlet_conf`, including a demo *Hamlet* project.   
-To try Spil, just add the `hamlet_conf` to the python path.
+### Default configuration
 
+To be able to use Spil, the configuration must be added to the python path.  
+Spil ships with an example configuration folder named `hamlet_conf`.
+If no configuration is found, the `hamlet_conf` folder is added to the python path during spil import.
+
+Learn more at the [configuration documentation](configuration.md).
 
 ## rez package
 
-You could either install using rez pip: 
+Installation using rez pip: 
 ```shell
 # Install latest release
 $ rez pip -i spil
@@ -28,21 +31,29 @@ $ rez pip -i spil
 # Or install latest version
 $ rez pip -i git+https://github.com/MichaelHaussmann/spil.git
 ```
-Or use the package.py file is contained in Spil.
 
 It is recommended to create a distinct rez package for the configuration files, to be able to create evolving and potentially project dependent configurations.  
 The config package could be versioned by current year, for example 2023.0.1
-
 
 ## Testing the install
 
 You can test the installation with the shipped demo config `hamlet_conf`.
 
-To do so:
-- add the `hamlet_conf` folder to the python path
-- open **spil_fs_conf.py** and edit the `project_root` entry to give a usable path on your system (will be written to).
-- open **spil_fs_server_onf.py** and edit the `project_root` entry to give a usable path on your system (will be written to).
-- run **save_examples_to_mock_fs.py**: this will create dummy project files and folders on disk
+In python, type
+```python
+from spil import Sid
+
+sid = Sid("hamlet/a/char/ophelia/model/v001/w/ma")
+print(sid)   # should print "hamlet/a/char/ophelia/model/v001/w/ma"
+print(sid.type)
+print(sid.path())
+print(sid.as_uri())
+```
+
+### Test with FindInPaths
+
+To play with the Finder and Sid paths, run **hamlet_conf/scripts/save_examples_to_mock_fs.py**.
+This will create dummy project files and folders on disk, inside the `hamlet_conf/data` folder.
 
 Now in python try:
 ```python
@@ -62,3 +73,12 @@ Found: hamlet/a/char/ghost
 Found: hamlet/a/char/gertrude
 ```
 
+From here you can experiment with Spil.
+
+## Install Spil_ui
+
+**Spil UI** is a Qt User interface to browse Sids and launch actions.
+
+[![Spil Qt UI](img/spil_ui.png)](https://github.com/MichaelHaussmann/spil_ui)
+ 
+spil_ui is a separate repository (in the process of being open sourced and released).   

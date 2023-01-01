@@ -6,6 +6,7 @@
    :hidden:
 
    overview
+   faq
 
 .. toctree::
    :caption: Installation & Configuration
@@ -15,6 +16,7 @@
 
    installation
    configuration
+   configuration_advanced
 
 .. toctree::
    :caption: User Guides
