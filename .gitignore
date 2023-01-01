@@ -11,3 +11,6 @@ venv27
 .pytest_cache
 .mypy_cache
 /.limbo/
+/docs-wip
+/docs/_build
+/hamlet_conf/data/SPIL_PROJECTS
