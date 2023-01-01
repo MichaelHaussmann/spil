@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -12,17 +12,26 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, List, Set, Optional
+from typing import Optional, Mapping, Any
 
 import shutil
+import json
 
 from spil import Sid, SpilException, Writer
-from spil.conf import default_path_config, create_file_using_template, create_file_using_touch
-from spil.util.log import debug
+from spil.conf import default_path_config, create_file_using_template, create_file_using_touch, path_data_suffix  # type: ignore
+from spil.util.log import debug, warning
 from pathlib import Path
 
 
 def _create_parent(path: Path) -> bool:
+    """
+    Creates parent folder(s) of given Path.
+
+    Args:
+        path: path for which parent should be created.
+
+    Returns: True on success, False on failure.
+    """
 
     if not path.parent.exists():
         path.parent.mkdir(parents=True)
@@ -30,12 +39,63 @@ def _create_parent(path: Path) -> bool:
     return path.parent.exists()
 
 
+def _write_data(sid_path: Path, data: Mapping[str, Any]) -> bool:
+    """
+    Writes given data to json.
+    To get the jsons file path, the suffix is replaced, as per config.
+
+    If the json already exists, it is loaded, updated, and dumped.
+    Else the json is created.
+
+    Args:
+        sid_path: path from a valid sid
+        data: data dictionary
+
+    Returns: True on success, False on failure
+    """
+    # FIXME: This is work in progress.
+    # TODO: add Exception handling and file rotation
+    data_path = sid_path.with_suffix(path_data_suffix)
+
+    # if there is already data, we load and update it
+    if data_path.exists():
+        with open(data_path) as f:
+            previous_data = json.load(f) or dict()
+            previous_data.update(data)
+            data = previous_data
+
+    # dumping data
+    with open(data_path, "w") as f:
+        f.write(json.dumps(data))
+
+    return data_path.exists()
+
+
 class WriteToPaths(Writer):
+    """
+    Writer to Paths.
+    "Writers" implement the CRUD's Create/Update/Delete functions.
+
+    WriteToPaths edits Sids and Sid data at the file system.
+
+    This class should be considered an example implementation.
+    Although it can be considered useful, it is not by itself production ready.
+    It is used to create mock/test files and folders for Sid testing purposes.
+
+    As FindInPaths and the sid.path() it is possible to instantiate this Writer with a fs config name.
+    The config name points to the path templates config file.
+
+    Sids are created at the configured path.
+    Sid File creation is either done by copy of a template file (if exists as configured),
+    or by "touch", which creates an empty file.
+
+    Data is created and updated in the form of a json file, at the same path, with a specific configured suffix.
+    """
 
     def __init__(self, config: Optional[str] = None):
         self.config = config or default_path_config  # type: ignore
 
-    def create(self, sid: Sid | str, data: dict | None = None) -> bool:
+    def create(self, sid: Sid | str, data: Optional[dict] = None) -> bool:
 
         _sid = Sid(sid)
         if not _sid.path(self.config):
@@ -64,12 +124,70 @@ class WriteToPaths(Writer):
             debug(f"Path is a directory {path}")
             path.mkdir(parents=True)
 
+        if not path.exists():
+            warning(f"Creation of {sid} has failed. Path was not created: {path}")
+            return False
+
+        # Now creating optional data
+        if data:
+            return _write_data(path, data)
+
         return path.exists()
+
+    def update(self, sid: Sid | str, data: Mapping[str, Any]) -> bool:
+        """
+        Updates given data on given Sid.
+
+        Args:
+            sid: Sid string or instance
+            data: data dictionary
+
+        Returns: True on success, False on failure
+        """
+        _sid = Sid(sid)
+        if not _sid.path(self.config):
+            raise SpilException(f"[WriteToPaths] Cannot update: sid {sid} has no path (config: {self.config}).")
+
+        path = _sid.path(self.config)
+        if not path.exists():
+            raise SpilException(f"[WriteToPaths] Cannot Update: Sid {sid} does not exist at path: {path} (config: {self.config}).")
+
+        return _write_data(path, data)
+
+    def set(self, sid: Sid | str, attribute: Optional[str] = None, value: Optional[Any] = None, **kwargs) -> bool:
+        """
+        Sets given attribute with given value, and / or given kwargs, for given Sid.
+        Updates the data if it already exists.
+
+        Internally calls update().
+
+        Args:
+            sid: Sid string or instance
+            attribute: attribute name, data key
+            value: value for data
+            **kwargs: key / value pairs.
+
+        Returns: True on success, False on failure
+        """
+        if attribute:
+            kwargs[attribute] = value
+        return self.update(sid, data=kwargs)
 
     def __str__(self):
         return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'
 
 
 if __name__ == "__main__":
-    print(WriteToPaths())
 
+    sid = 'hamlet/a'
+    data = {"author": "John"}
+    print(WriteToPaths())
+    writer = WriteToPaths()
+    done = writer.update(sid, data)
+    print(f"Update: {done}")
+
+    done = writer.set(sid, bill=25, random_attribute='random value')
+    print(f"Set: {done}")
+
+    done = writer.set(sid, attribute='bill', value=299)
+    print(f"Set: {done}")
