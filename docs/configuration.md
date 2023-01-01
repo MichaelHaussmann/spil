@@ -27,7 +27,13 @@ Spil ships with an example configuration folder named `hamlet_conf`, for a hypot
 
 If no configuration is found, the `hamlet_conf` folder is added to the python path during spil import.
 
+### Adapting the demo config 
+
 The easiest way to start, is to adapt the existing config to your needs.
+
+- Copy or move the `hamlet_conf` folder to a location of your choice, and add it to your python path.
+- You can rename it. 
+- The configuration files inside the folder, `spil_*_conf.py`,  must keep the same naming.
 
 ### Included config files
 

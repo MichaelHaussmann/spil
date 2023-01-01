@@ -12,6 +12,7 @@ $ pip install spil
 # Or install latest version
 $ pip install git+https://github.com/MichaelHaussmann/spil.git
 ```
+This installs `spil`, `spil_tests`, `spil_plugins`, and `hamlet_conf`, the demo configuration.
 
 ### Default configuration
 
@@ -37,9 +38,9 @@ The config package could be versioned by current year, for example 2023.0.1
 
 ## Testing the install
 
-You can test the installation with the shipped demo config `hamlet_conf`.
+Spil works out of the box with the shipped demo config `hamlet_conf`.
 
-In python, type
+In python, type:
 ```python
 from spil import Sid
 
@@ -52,16 +53,18 @@ print(sid.as_uri())
 
 ### Test with FindInPaths
 
-To play with the Finder and Sid paths, run `hamlet_conf/scripts/save_examples_to_mock_fs.py`.
+To play with the Finder and Sid paths, files need to exist on the file system.
+
+To generate test files, run `hamlet_conf/scripts/save_examples_to_mock_fs.py`.
 This will create dummy project files and folders on disk, inside the `hamlet_conf/data` folder.
 
-Make sure `spil` is in your python path. 
 From the installation folder type:
 ```shell
 $ python hamlet_conf/scripts/save_examples_to_mock_fs.py 
 ```
+*If you didn't configure Spil, it prints the location of the `hamlet_conf` path when you use it. For example when you `import spil`.*
+*Make sure `spil` is in your python path, which should be the case after installation.*
 
-If you are in a python editor, with `spil` in the python path, you can also run it directly.
 
 Now in python try:
 ```python
