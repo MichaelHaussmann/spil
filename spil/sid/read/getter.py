@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -16,11 +16,7 @@ from __future__ import annotations
 from typing import Iterator, Mapping, Any, List, Optional
 
 from spil import Sid
-from spil import conf
 from spil.sid.read.util import first
-from spil.util.caching import lru_cache as cache
-
-from spil.util.log import debug, info, warning, error
 
 
 class Getter:
@@ -45,6 +41,7 @@ class Getter:
         Getter retrieves data related to these Sids, whereas the Finder only the existing Sids themselves.
 
         Args:
+            as_sid:
             search_sid:
             attribute:
 
@@ -84,6 +81,25 @@ class Getter:
         """
         found = first(self.get(search_sid, attribute=attribute, as_sid=as_sid))
         return found
+
+    def get_attr(self, search_sid: str | Sid, attribute: Optional[str] = None) -> Any | dict[str, Any] | None:
+        """
+        Returns the result from get_one(), but without the Sid as key.
+        Returns directly the data dictionary, or the value of the attribute, if given.
+
+        Args:
+            search_sid:
+            attribute:
+
+        Returns:
+        """
+        result = self.get_one(search_sid=search_sid, attribute=attribute, as_sid=False)
+        if result is None:
+            return
+        if result.values():
+            return list(result.values())[0]
+        else:
+            return
 
     def __str__(self):
         return f"[spil.{self.__class__.__name__}]"
