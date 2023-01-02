@@ -13,33 +13,41 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 from __future__ import annotations
-from typing import Iterable, List
+from typing import Iterable, List, overload
+from typing_extensions import Literal
 
 from spil.sid.sid import Sid
 from spil.sid.read.util import first
 from spil.sid.read.tools import unfold_search
 
-from spil.util.log import debug, info, warning, error
 
 class Finder:
     """
     Interface for Sid Finder.
 
     Implements common public Sid Search methods "find", "find_one", and "exists"
+
+    The search process is as follows:
+        find():
+        - the search sid string is "unfolded" into a list of typed search Sids.
+
+        do_find()
+        - runs the actual search on each typed search sid
     """
 
     def __init__(self):
         pass
 
+    @overload
+    def find(self, search_sid: str | Sid, as_sid: Literal[True]) -> Iterable[Sid]: pass
+
+    @overload
+    def find(self, search_sid: str | Sid, as_sid: Literal[False]) -> Iterable[str]: pass
+
     def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
         """
         gets the Sids found using the given search_sid.
         Returns a generator over Sids, if as_sid is True (default), or over Sid strings.
-
-        The search process is as follows:
-        - the search sid string is "unfolded" into a list of typed search Sids.
-        - depending on the types of searches, defined by the search symbols ('>', ...), the search is delegated to a finder function.
-        (currently either "sorted_search" or "star_search").
 
         :param search_sid: string or Sid
         :param as_sid:
