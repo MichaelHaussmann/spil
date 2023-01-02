@@ -7,11 +7,12 @@ An intuitive API is built around this identifier, including glob-like query, CRU
 
 ## Motivation
 
-Spil was created to 
+Spil was created to:
 - uniquely and intuitively identify all entities of a pipeline.
 - aggregate different data sources (file systems, asset manager, DCCs, etc.)
 - have a universal, versatile and lightweight "Entity" object for pipeline operations, at a higher abstraction level than a file path.   
 - propose an easy and intuitive API, to empower TDs and technical artists to connect to the pipeline.  
+
 
 ## Usage
 
@@ -231,7 +232,7 @@ To launch queries, Spil implements `Finder` classes that access different data s
 - **FindInPaths**: to search the file system
 - **FindInList**: to search a list
 - **FindInCache**: to search a cache
-- **FindInFinders**: to search other Finders, depending on a configuration
+- **FindInAll**: to search other Finders, depending on a configuration
 - **FindInShotgrid**: to search Shotgrid
 
 All Finders implement `find()`, `find_one()` and `exists()`.
@@ -379,11 +380,11 @@ Spil aims to be : flexible, pragmatic, simple - and reliable.
   It all starts as files. So does Spil.  
   YAGNI meets WYSIWYG.  
   <br>  
-- simple
+- simple  
   Complexity costs money, at all levels of a pipeline.    
   Spil aims at simplicity, even at the price of some universality or adaptability.  
   Usage is intuitive: it is obvious that `hamlet/a/char` is an asset category, 
-  and `hamlet/a/chars/ophelia/modeling` is a modeling task.      
+  and `hamlet/a/char/ophelia/modeling` is a modeling task.      
   Producers have an overview, artists see clearly, TDs are empowered.   
   That is the goal of Spil.     
   <br>
@@ -413,14 +414,15 @@ Spil aims to be : flexible, pragmatic, simple - and reliable.
 
 The priority is to make the current feature set more robust, efficient, and easy to deploy.
 - tools to help create and verify the configuration files
+- automated testing and profiling
 - adding a C++ resolver is planned, but not scheduled yet 
 
 To take profit from the Sids universality, we plan on building reusable open source bricks and pipeline tools.
 
 For example:
-- connectors to Shotgrid, CGWire, Ftrack and Relational Databases
-- using the sid as a USD Asset Resolver / In a USD pipeline
 - protocol for pipeline actions, for example `sid://play?hamlet/s/sq030/**/>/p/movie`
+- connectors to Shotgrid, CGWire Kitsu, Ftrack and Databases
+- using the sid as a USD Asset Resolver / In a USD pipeline
 - GraphQL and/or rest API  
 - file system style navigation and context handling    
 For example `cd hamlet/s/sq010`
@@ -429,9 +431,10 @@ For example `cd hamlet/s/sq010`
 ## Interested ?
 
 We'd love to hear from you.  
-We are interested in any kind of feedback or questions.  
+We are interested in any kind of feedback: comments, questions, issues, pull requests.  
 
-Spil is released under Lesser GPL and is usable in closed source commercial applications.  
+Spil is released under Lesser GPL and is usable in closed source commercial applications.
+Other licensing is possible, please get in touch.
 
 Don't hesitate to contact us : [spil@xeo.info](mailto:spil@xeo.info).  
 We will be happy to respond.  

@@ -26,6 +26,21 @@ See [installation](installation.md).
 Spil is released under Lesser GPL and is usable in **closed source commercial applications**.  
 (Only modifications to Spil itself must be open sourced).
 
+
+## Why does Spil print the message "USING DEMO CONFIGURATION ...." ?
+
+Spil needs configuration files in the pythonpath.
+("spil_sid_conf.py" and others named "spil_*_conf.py") 
+
+If none are found, Spil falls back to the shipped demo configuration.
+It prints the message "USING DEMO CONFIGURATION... ".
+
+You can adapt this demo configuration to your needs, or create a configuration on your own. 
+Once you add your configuration folder (or the demo configuration folder) to the pythonpath, this message will disappear.
+
+Please check the documentation for "Adapting the demo config" [configuration](configuration.md).
+
+
 ## Use the name of an item as it's unique Id - really ? 
 
 Human-readable Identifier ("Natural Key") vs Generated Unique ID (UUID).  

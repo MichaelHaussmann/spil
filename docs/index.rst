@@ -27,6 +27,7 @@
 
    user_guide
    dev_guide
+   testing
    tutorials
 
 .. toctree::

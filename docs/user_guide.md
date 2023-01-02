@@ -1,5 +1,10 @@
 
-# User Guide to Spil
+# User Guide
+
+This guide is for TDs and technical artists who want to use Spil.  
+
+The guide to modify spil is here [developer guide](dev_guide.md).  
+See also the [glossay](glossary.md).
 
 ## Introduction to the Sid
 
@@ -245,10 +250,10 @@ To launch queries, Spil implements `Finder` classes that access different data s
 - **FindInPaths**: to search the file system
 - **FindInList**: to search a list
 - **FindInCache**: to search a cache
-- **FindInFinders**: to search other Finders, depending on a configuration
+- **FindInAll**: to search other Finders, depending on a configuration
 - **FindInShotgrid**: to search Shotgrid
 
-All Finders implement `find()`, `find_one()` and `exists()`.
+Finders implement `find()`, `do_find()` find_one()` and `exists()`.
 
 ```python
 # Look up the last published versions for given shot, on the File System 

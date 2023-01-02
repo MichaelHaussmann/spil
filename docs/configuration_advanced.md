@@ -63,6 +63,7 @@ For all templates that exist in `spil_sid_conf` and that have a path representat
 So, you are about to create a new pipeline ? :)
 
 ### Some tips/questions to guide your configuration decisions:
+
 - build a strong naming convention with short, industry proven terms.
   Eg. use Shotgrid terminology, check out the [spil glossary](glossary.md)
 - define the data you need, and structure it in a hierarchy
@@ -74,7 +75,7 @@ So, you are about to create a new pipeline ? :)
             - named or numbered shots and sequences
             - state over version (cgwire)
             - publish/work version matching
-            - push or pull updates (publish permalinks or explicit dependent version update)
+            - push or pull updates ? (publish permalinks, eg. a "valid version" or explicit dependent version update)
 
 (See also questions for an existing pipeline)
 
@@ -98,6 +99,6 @@ So, you are about to create a new pipeline ? :)
 - Testing the Sids
 - Testing the Finders
 
-Check out: [Testing the configuration](configuration.md). 
+Check out: [Testing the configuration](testing.md). 
 
 *This documentation is work in progress. Do not hesitate to get in touch if you are interested in using Spil.*

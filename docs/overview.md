@@ -230,7 +230,7 @@ To launch queries, Spil implements `Finder` classes that access different data s
 - **FindInPaths**: to search the file system
 - **FindInList**: to search a list
 - **FindInCache**: to search a cache
-- **FindInFinders**: to search other Finders, depending on a configuration
+- **FindInAll**: to search other Finders, depending on a configuration
 - **FindInShotgrid**: to search Shotgrid
 
 All Finders implement `find()`, `find_one()` and `exists()`.
@@ -307,9 +307,10 @@ More about installation, configuration and testing: [spil.readthedocs.io](https:
 ## Interested ?
 
 We'd love to hear from you.  
-We are interested in any kind of feedback or questions.  
+We are interested in any kind of feedback: comments, questions, issues, pull requests.  
 
-Spil is released under Lesser GPL and is usable in closed source commercial applications.  
+Spil is released under Lesser GPL and is usable in closed source commercial applications.
+Other licensing is possible, please get in touch.
 
 Don't hesitate to contact us : [spil@xeo.info](mailto:spil@xeo.info).  
 We will be happy to respond.  

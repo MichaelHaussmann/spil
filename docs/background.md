@@ -27,7 +27,7 @@ Spil builds upon general concepts, as well as production proven CG pipeline conc
 
 - Unique Identifier & Resource Locator  
   Examples: "SPREF" (Sony Pictures), or the "Pipeline Resource Identifier - PRI" (Blue Sky)  
-  [medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers](https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432776da6ab)    
+  [medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers](https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432776da6ab)  
   Also OpenAssetIO's [Entity Reference](https://openassetio.github.io/OpenAssetIO/glossary.html#entity_reference)  
   
 - Resource description and "Context" (Shotgrid Toolkit)  
@@ -107,13 +107,14 @@ It's performance depends on the data sources that are used.
 
 The priority is to make the current feature set more robust, efficient, and easy to deploy.
 - tools to help create and verify the configuration files
+- automated testing and profiling
 - adding a C++ resolver is planned, but not scheduled yet 
 
 To take profit from the Sids universality, we plan on building reusable open source bricks and pipeline tools.
 
 For example:
 - protocol for pipeline actions, for example `sid://play?hamlet/s/sq030/**/>/p/movie`
-- connectors to Shotgrid, CGWire Kitsu, Ftrack and Relational Databases
+- connectors to Shotgrid, CGWire Kitsu, Ftrack and Databases
 - using the sid as a USD Asset Resolver / In a USD pipeline
 - GraphQL and/or rest API  
 - file system style navigation and context handling    
