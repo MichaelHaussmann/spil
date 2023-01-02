@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -64,8 +64,7 @@ def test_search_ab(searches, finderA, finderB, as_sid=False, replace=None):
 
 if __name__ == "__main__":
 
-    from scripts.example_sids import sids
-    from spil import FindInList, FindInPaths, FindInFinders
+    from spil import FindInList, FindInPaths, FindInAll
     from spil.util.log import setLevel, ERROR, DEBUG
 
     setLevel(ERROR)
@@ -78,8 +77,8 @@ if __name__ == "__main__":
 
     fpl = FindInPaths('local')
     fps = FindInPaths('server')
-    fl = FindInList(sids)
-    ft = FindInFinders()
+    # fl = FindInList(sids)
+    ft = FindInAll()
 
     test_search_ab(searches, ft, fpl)
     # to compare speed, run the test twice and check second time.
