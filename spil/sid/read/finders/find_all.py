@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -46,7 +46,7 @@ def get_finder(sid: Sid | str, config: Optional[str] = None) -> Finder | None:
         return None
 
 
-class FindInFinders(Finder):
+class FindInAll(Finder):
     """
     This Finder will call other Finders, as configured, depending on the search sids type.
 
@@ -54,7 +54,7 @@ class FindInFinders(Finder):
     def __init__(self, config: Optional[str] = None):
         """
         Config is an argument that will be passed to the config, via get_finder_for(sid, config).
-        Config acts like a key, to allow multiple FindInFinders configurations to co-exist.
+        Config acts like a key, to allow multiple FindInAll configurations to co-exist.
 
 
 
@@ -113,4 +113,4 @@ class FindInFinders(Finder):
         return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'
 
 if __name__ == "__main__":
-    print(FindInFinders())
+    print(FindInAll())

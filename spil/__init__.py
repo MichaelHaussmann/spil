@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -11,9 +10,7 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
-import traceback
 from spil.conf.global_conf import __version__
 
 try:
@@ -24,7 +21,7 @@ try:
     from spil.sid.read.finders.find_paths import FindInPaths
     from spil.sid.read.finders.find_list import FindInList
     from spil.sid.read.finders.find_constants import FindInConstants
-    from spil.sid.read.finders.find_finders import FindInFinders
+    from spil.sid.read.finders.find_all import FindInAll
 
     from spil.sid.read.getter import Getter
     from spil.sid.write.writer import Writer
@@ -36,6 +33,7 @@ try:
 
     setLevel(ERROR)
 except Exception as e:
+    import traceback
     traceback.print_exc()
     raise Exception(
         "Spil is imported, but impossible to import spil packages. \n Please check compatibility of your sid_conf and fs_conf files."

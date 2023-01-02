@@ -1,4 +1,4 @@
-import spil  # config path bootstrap
+import spil  # default config path bootstrap
 from scripts.example_sids import sids  # type: ignore
 # from spil_plugins.sg.find_sg import FindInSG
 from spil_tests.prep.build_searches import from_sid_build_searches
@@ -11,7 +11,7 @@ log = get_logger("spil_tests", color=False)
 
 if __name__ == "__main__":
 
-    from spil import FindInList, FindInPaths, FindInFinders
+    from spil import FindInList, FindInPaths, FindInAll
 
     from spil.util.log import setLevel, INFO
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # finder = FindInList(sids)
     # finder = FindInPaths('local')
     # finder = FindInPaths('server')
-    finder = FindInFinders()
+    finder = FindInAll()
 #     finder = FindInSG()
 
     for sid in sids[0:1]:
