@@ -28,7 +28,6 @@
    user_guide
    dev_guide
    testing
-   tutorials
 
 .. toctree::
    :caption: Reference Documentation
