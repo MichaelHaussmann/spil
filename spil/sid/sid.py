@@ -102,9 +102,10 @@ class StringSid(BaseSid):
         Returns the long string representation of a Sid.
         The form is "type:string" if typed, else just the sid string.
 
+        (This property is overriden in TypedSid)
+
         Returns:
             The long string representation.
-
         """
         return self._string
 
@@ -225,19 +226,21 @@ class TypedSid(StringSid):
     def basetype(self) -> str | None:
         """
         The basetype is the first part of the type.
-        Example:
-            for type "shot__file"  -> basetype = "shot"
 
-        Example:
+        Examples:
 
             >>> Sid("hamlet/s/sq030/sh0100/anim").basetype
             'shot'
 
+            >>> Sid("hamlet/a/prop/dagger").basetype
+            'asset'
+
+            >>> Sid("bla/bla").basetype
+
+
         Returns
             string basetype
         """
-        # raise PendingDeprecationWarning("basetype may be deprecated in the future")
-
         result = None
         if not self._type:
             info('This Sid has no type. ({})'.format(self))
@@ -255,7 +258,7 @@ class TypedSid(StringSid):
 
         Note that this is not necessarily the second part of the "type".
 
-        Examples:
+        ```
         Sid("hamlet/a/char/claudius/model/v001/w/blend")
         type: 'asset__file'
         keytype: 'ext'
@@ -270,6 +273,7 @@ class TypedSid(StringSid):
         type: 'project'
         keytype: 'project'
         basetype: 'project'
+        ```
 
         Examples:
 
@@ -540,11 +544,17 @@ class PathSid(TypedSid):
 
         Example:
 
+            >>> sid = Sid('hamlet/a/char/ophelia/model/v001/w/ma')
+            >>> path = sid.path()
+            >>> new_sid = Sid(path=path)
+            >>> sid == new_sid
+            True
+
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').path()
             Path("/productions/hamlet/assets/characters/ophelia/3d/model/works/romeo_v001.ma")
 
             >>> Sid('bla/bla').path()
-            None
+
 
         Args:
             config: Name of the path config to be used, as configured.
