@@ -62,6 +62,22 @@ If Spil is used as a pure data abstraction layer, it is only a transient, non-pe
 In that case, name locking is not a limitation.
 
 
+## My pipeline doesn't look like any other, all the names are different than in the Spil example codes...
+
+The naming is fully configurable.
+We are all-in for the famous [ubiquitous language](https://www.lullabot.com/articles/naming-content-types-using-ubiquitous-language).
+
+For example, if your pipeline has episodes that you name "EP", and sequences are named "SEQ", 
+they are integers, and all is uppercase, then your code will more look like:
+
+```python
+from spil import Sid
+
+sid = Sid("HAMLET/S/010/0020")
+print(sid.get("EP"))  # print the episode
+```
+
+
 ## Usage seems simple, but configuration is a nightmare.
 
 *“Simple things should be simple, complex things should be possible.”*  
