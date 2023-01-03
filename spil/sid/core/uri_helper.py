@@ -15,7 +15,7 @@ If not, see <https://www.gnu.org/licenses/>.
 """
 URI style string handling helper functions.
 
-TODO: Sid URI handling needs to be streamlined and documented.
+TODO: Sid URI handling needs to be cleaned up, typed and documented.
 """
 from urllib.parse import urlencode
 from urllib import parse as urlparse
@@ -91,6 +91,9 @@ def update(data, uri, option_prefix='~'):
     >>> update({'keyA': 'valueA'}, 'keyB=valueB')
     {'keyA': 'valueA', 'keyB': 'valueB'}
     """
+    if not data:  # may be None
+        data = dict()
+
     data = data.copy()
     new_data = to_dict(uri)
 
@@ -113,12 +116,15 @@ def update(data, uri, option_prefix='~'):
 
 def apply_uri(string, uri=None, type=None, fields=None):
     """
-    Uri integration algorithm:
-    - the URI key/values are applied to the existing fields dict --> uri_helper.update
-    - the fields dictionary is submitted to type resolve --> sid_resolver.dict_to_type(fields, all=True)
+    "Uri application" algorithm:
+    - the URI key/values update the existing fields dict --> uri_helper.update
+    - the updated fields dictionary is sent to the resolver to be typed --> sid_resolver.dict_to_type(fields, all=True)
     - if a single type is resolved, it is now used, integration done.
     - else if no type is resolved, the URI is not applied (kept in the string, the fields and type are unchanged)
-    - else if multiple types are resolved, the URI is not applied (kept in the string, the previous fields and type are unchanged)
+    - else if multiple types are resolved:
+        * if the original type is amongs the new types, it is used, integration done.
+        * else if the sid is a search, the first type is used, integration done (#FIXME: this behaviour should change)
+        * else the URI is not applied (kept in the string, the previous fields and type are unchanged)
 
     This is a problem in case of a read Sid, which could be poly-typed.
 
@@ -140,9 +146,13 @@ def apply_uri(string, uri=None, type=None, fields=None):
     Uri contains undigestable fields (wrong sequence format), and is not applied:
     >>> apply_uri('hamlet/s/sq010', uri='sequence=fuzz', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
     ('hamlet/s/sq010?sequence=fuzz', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq010'})
+
+    Works with empty string, fields and type
+    >>> apply_uri('', uri='project=hamlet', type=None, fields=None)
+    ('hamlet', 'project', {'project': 'hamlet'})
     """
     if not type and fields:
-        raise SpilException("Uri can only be applied on typed fields.")
+        raise SpilException("Uri can only be applied on typed fields (or empty fields).")
 
     if not uri:
         return string, type, fields
@@ -163,6 +173,7 @@ def apply_uri(string, uri=None, type=None, fields=None):
                 debug(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
                       f'But it is a Search, so URI will be applied.')
                 # URI will be applied, using the first new_types (# FIXME: refuse the temptation to guess)
+                # In this case we should check if all the types result in the same Sid string, and return it, untyped.
             else:
                 warning(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
                         f'URI will not be applied.')
@@ -179,10 +190,7 @@ def apply_uri(string, uri=None, type=None, fields=None):
 
 if __name__ == '__main__':
     """
-    Test block.
-    Launches doc test (test in the doc).
-    
-    In PY2 the test does not pass, because the dict is not sorted by default.
+    Launches doctest (test in the doc).
     """
     from spil.util.log import info, setLevel, INFO
 

@@ -29,12 +29,13 @@ Examples:
 
 - Sid for the maya mb file of character Ophelia's modeling, published version v002:
 ```
-"hamlet/a/chars/ophelia/modeling/v002/p/mb" 
+"hamlet/a/char/ophelia/modeling/v002/p/mb" 
 ```
 
 ### Data Dictionary with a Type 
 
 Once resolved, the Sid is a dictionary associated to a type.
+Keys and types are fully configurable.
 
 Examples:
 
@@ -69,7 +70,7 @@ Sid creation and manipulation
 from spil import Sid
 
 # create a Sid from scratch
-task = Sid("hamlet/s/sq030/sh0010/render")      
+task = Sid("hamlet/s/sq030/sh0010/render")
 # a task sid: hamlet/s/sq030/sh0010/render
 
 # create a Sid by changing values
@@ -83,6 +84,13 @@ sequence = task.get_as('sequence')
 # another way
 shot = task.parent                              
 # shot sid: hamlet/s/sq030/sh0010 
+```
+
+Creation with a URI or dictionary
+```python
+from spil import Sid
+seq = Sid(uri="project=hamlet&type=s&sequence=sq010")  # uri        
+seq = Sid(fields={'project': 'hamlet', 'type': 's', 'sequence': 'sq010'})  # dict
 ```
 
 Data can be accessed in multiple ways: by key, as a complete dictionary, as string or URI.

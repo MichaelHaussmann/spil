@@ -8,6 +8,19 @@ if __name__ == '__main__':
     from spil.util.log import debug, setLevel, INFO, DEBUG, info
     setLevel(INFO)
 
+    # method chaining.
+    s = (Sid()
+         .get_with(project="hamlet", type="s")
+         .get_with(uri="sequence=sq010&shot=sh0010&task=anim")
+         .get_as('project'))
+    pprint(s)
+
+    s = Sid(uri="project=hamlet&type=s&sequence=sq010&shot=sh0010&task=anim")
+    pprint(s)
+
+    s = Sid("shot__sequence:hamlet/s/sq010")
+    print(s.fields)
+
     for sid in Finder().find('hamlet/a/char/*'):
         print(f"Found: {sid}")
 

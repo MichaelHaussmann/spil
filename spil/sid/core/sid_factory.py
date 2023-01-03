@@ -43,25 +43,20 @@ def sid_to_sid(sid: str | Sid) -> Sid:
         uri = ''
 
     # resolving
-    if string.count(':'):
+    if string.count(':'):  # a fullstring
         _type, string = string.split(':')
         _type, fields = sid_resolver.sid_to_dict(string, _type)
-    else:
-        _type, fields = sid_resolver.sid_to_dict(string)
+    else:  # a simple string
+        _type, fields = sid_resolver.sid_to_dict(string)  # The string might be empty
 
-    new_sid = Sid(from_factory=True)
-
-    if not fields:
-        info(f'[Sid] Sid "{sid}" / {string} did not resolve to valid Sid fields.')
-        new_sid._init(string=string)
-        return new_sid
+    new_sid = Sid(from_factory=True)  # empty instance
 
     # no uri to handle, we return
     if not uri:
         new_sid._init(string=string, type=_type, fields=fields)
         return new_sid
 
-    # applying the uri, and updating the type
+    # applying the uri (applying the uri may update the type)
     else:
         string, _type, fields = apply_uri(string, uri=uri, type=_type, fields=fields)
         new_sid._init(string=string, type=_type, fields=fields)
@@ -78,9 +73,6 @@ def dict_to_sid(fields: dict) -> Sid | None:
     Returns: Sid object
 
     """
-
-    # FIXME: when is this function used, and why don't we have the type at the same time ?
-
     # TODO: make a fast version when the fields comes from an internal trusted and already typed call.
 
     debug(f'Starting with: {fields}')
@@ -136,6 +128,7 @@ def path_to_sid(path: str | os.Pathlike[str], config: Optional[str]) -> Sid | No
 
 # @lru_kw_cache
 def sid_factory(sid: Optional[str] = None,
+                uri: Optional[str] = None,
                 fields: Optional[dict] = None,
                 path: os.Pathlike[str] | str | None = None,  # type: ignore # Problem with os.Pathlike
                 config: Optional[str] = None) -> Sid:
@@ -143,8 +136,8 @@ def sid_factory(sid: Optional[str] = None,
     Sid Factory.
     Depending on input, calls a sid creation function and returns the produced Sid object.
 
-    In case of multiple arguments, the first has priority (others are ignored).
-    If no param is given, eg. Sid(), returns an empty Sid().
+    In case of multiple arguments, the first has priority (others are ignored). Except for path and config, that are used together.
+    If no param is given, eg. Sid(), returns an empty Sid('').
 
     Important:
     Python always calls __init__ on objects returned by __new__.
@@ -153,6 +146,7 @@ def sid_factory(sid: Optional[str] = None,
 
     Args:
         sid: a Sid object or string
+        uri: a string with "&" separated key=value pairs, eg. "?project=hamlet&type=s"
         fields: a Sid fields dictionary
         path: a path for a Sid
         config: config name for the path resolving
@@ -160,10 +154,13 @@ def sid_factory(sid: Optional[str] = None,
     Returns: Sid object
 
     """
-    debug(f"sid_factory start: {sid} - {fields} - {path}")
+    debug(f"sid_factory start: {sid} - {uri} - {fields} - {path} - {config}")
     result = None
     if sid:
         result = sid_to_sid(sid)
+
+    elif uri:
+        result = sid_to_sid(f"?{uri}")
 
     elif fields:
         result = dict_to_sid(fields=fields)

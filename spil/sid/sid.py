@@ -197,10 +197,42 @@ class TypedSid(StringSid):
 
     @property
     def type(self) -> str:
+        """
+        Returns the Sids type.
+        If the Sid has no type, an empty string is returned.
+
+        Examples:
+
+            >>> Sid("hamlet/a/char/ophelia/rig").type
+            'asset__task'
+
+            >>> Sid("hamlet/a/char/*").type
+            'asset__asset'
+
+            >>> Sid("blabla").type
+            ''
+
+        Returns:
+            The Sid type
+
+        """
         return self._type
 
     @property
     def fields(self) -> dict:
+        """
+        Returns the Sids data dictionary.
+        The fields match what is defined in the Sid template.
+
+        >>> Sid("hamlet/a/char/*").fields
+        OrderedDict([('project', 'hamlet'), ('type', 'a'), ('assettype', 'char'), ('asset', '*')])
+
+        >>> Sid("hamlet/s/sq010/sh0010/anim").fields
+        OrderedDict([('project', 'hamlet'), ('type', 's'), ('sequence', 'sq010'), ('shot', 'sh0010'), ('task', 'anim')])
+
+        Returns:
+            Sids data dictionary.
+        """
         return self._fields.copy()
 
     @property
@@ -408,10 +440,12 @@ class TypedSid(StringSid):
         - updated using given key and value, eg. get_with(key='task', value='rendering') and
         - updated using **kwargs where keys are sid keys, eg. get_with(task='rendering')
 
-        Depending on the update, the type of the returned Sid can change, or the Sid can be untyped.
+        Depending on the update, the type of the returned Sid can change, or the Sid can end up untyped.
 
         A key set to None will be removed.
         To empty a keys value, set it to an empty string "".
+
+        Note: only works on typed or empty Sids.
 
         Examples:
 
@@ -420,6 +454,9 @@ class TypedSid(StringSid):
 
             >>> Sid("hamlet/a/prop/dagger").get_with(uri='asset=skull')
             Sid('asset__asset:hamlet/a/prop/skull')
+
+            >>> Sid().get_with(project="hamlet")
+            Sid('project:hamlet')
 
         Args:
             uri: s tring uri, in the format ?key=value&key2=value2
@@ -430,7 +467,7 @@ class TypedSid(StringSid):
         Returns:
             A new Sid. Depending on the update, the type of the returned Sid can change.
         """
-        if not self._fields:
+        if self._string and not self._fields:
             warning(f'[Sid][get_with] Asked for a Sid operation on an undefined Sid "{self.string}"')
             return Sid()  # Return type is always Sid.
 
@@ -803,16 +840,50 @@ class DataSid(PathSid):
         search = self / '*'
         return list(FindInAll().find(search, as_sid=True))
 
-    # def get_first, get_next, get_previous,
+    # def get_first, get_previous,
     # define "complete / incomplete" sid.is_leaf ? (root / anchor / parent / parents )
 
 
 class Sid(DataSid):
     """
     Sid class.
-    Only defines the factory to be used.
 
-    Implementation may change, but API will remain the same.
+    Multiple ways to create a Sid:
+    - Sid string, fullstring, uri string (starting with "?"), Sid object, or empty string
+    - uri string
+    - fields dictionary
+    - path (with optional config)
+
+    Examples:
+
+        >>> Sid("hamlet/s/sq010")                                   # string
+        Sid('shot__sequence:hamlet/s/sq010')
+
+        >>> Sid(sid="hamlet/s/sq010")                               # parameter + string
+        Sid('shot__sequence:hamlet/s/sq010')
+
+        >>> Sid(Sid("hamlet/s/sq010"))                              # Sid object
+        Sid('shot__sequence:hamlet/s/sq010')
+
+        >>> Sid("shot__sequence:hamlet/s/sq010")                    # fullstring
+        Sid('shot__sequence:hamlet/s/sq010')
+
+        >>> Sid("?project=hamlet&type=s&sequence=sq010")             # empty string with uri
+        Sid('shot__sequence:hamlet/s/sq010')
+
+        >>> Sid(uri="project=hamlet&type=s&sequence=sq010")          # uri
+        Sid('shot__sequence:hamlet/s/sq010')
+
+        >>> Sid(fields={'project': 'hamlet', 'sequence': 'sq010', 'type': 's'})  # fields dict
+        Sid('shot__sequence:hamlet/s/sq010')
+
+        >>> Sid(path="/root/projects/hamlet/shots/sq010")           # path (default config)
+        >>> Sid(path="c:/projects/hamlet/shots/sq010", config='local')   # path (config "local")
+
+
+    This class inherits all functionality from the class hierarchy.
+    It only defines the factory to be used to create the Sid.
+    Note that this implementation may change, but API will remain the same.
     """
 
     _factory = ('spil.sid.core.sid_factory', 'sid_factory')  # TODO: config_name, or better system.
