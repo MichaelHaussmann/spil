@@ -12,9 +12,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, Any, Optional, Dict, List
+from typing import Any, Optional, List
 
-from os import PathLike
 import importlib
 from functools import total_ordering
 
@@ -214,7 +213,6 @@ class TypedSid(StringSid):
 
         Returns:
             The Sid type
-
         """
         return self._type
 
