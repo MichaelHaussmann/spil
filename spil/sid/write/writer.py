@@ -16,11 +16,7 @@ from typing import Optional, Mapping, Any
 from spil import Sid
 
 """
-As FindInFinders, a configurable Writer is planned.
-(TBD:
-WriteToDestinations
-WriteToRegistered
-WriteToMultiple... )
+As FindInAll, a configurable "WriteToAll" Writer is planned.
 Note: if a FindInCache Finder is used, FindInCache.create() should also be a registered data destination.
 """
 

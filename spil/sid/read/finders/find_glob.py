@@ -28,6 +28,13 @@ class FindByGlob(Finder):
     Parent class for glob type searches:
     FindInFiles, FindInList, FindInConstants
 
+    The search process is as follows:
+        find():
+        - the search sid string is "unfolded" into a list of typed search Sids.
+
+        do_find()
+        - depending on the types of searches, defined by the search symbols ('>', ...), the search is delegated to a finder function.
+        (currently either "sorted_search" or "star_search").
     """
     def do_find(self, search_sids: List[Sid],
                 as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:

@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -46,12 +46,24 @@ class Finder:
 
     def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
         """
-        gets the Sids found using the given search_sid.
+        Yields the Sids found using the given search_sid.
         Returns a generator over Sids, if as_sid is True (default), or over Sid strings.
 
-        :param search_sid: string or Sid
-        :param as_sid:
-        :return: Sid or string
+        Example:
+
+            >>> for sid in Finder().find('hamlet/a/*'):
+            >>>     print(f"Found: {sid}")
+            Found: hamlet/a/char
+            Found: hamlet/a/prop
+            Found: hamlet/a/location
+            Found: hamlet/a/fx
+
+        Args:
+            search_sid: typed or untyped Sid or string
+            as_sid: if the result should be Sid objects or strings
+
+        Returns:
+            Generator over Sids or strings
         """
         # shortcut if Sid is not a search
         sid = Sid(search_sid)
@@ -75,11 +87,19 @@ class Finder:
 
         Internally calls "first" on "find".
 
-        :param search_sid: string
-        :param as_sid:
-        :return: Sid or string
-        """
+        Example:
 
+            >>> Finder().find_one('hamlet/a/char/ophelia')
+            Sid("hamlet/a/char/ophelia")
+
+        Args:
+            search_sid: typed or untyped Sid or string
+            as_sid: if the result should be a Sid object or string
+
+        Returns:
+            first found Sid or string
+
+        """
         found = first(self.find(search_sid, as_sid=False))  # read is faster if as_sid is False
         if as_sid:
             return Sid(found)
@@ -93,8 +113,19 @@ class Finder:
 
         Internally calls "bool" on "find_one".
 
-        :param search_sid: string or Sid
-        :return: True or False
+        Example:
+
+            >>> Finder().exists('hamlet/a/char/ophelia')
+            True
+
+            >>> Finder().exists('hamlet/a/char/jimmy')
+            False
+
+        Args:
+            search_sid: search_sid: typed or untyped Sid or string
+
+        Returns:
+            True if search_sid returns a result, else False
         """
         return bool(self.find_one(search_sid, as_sid=False))
 

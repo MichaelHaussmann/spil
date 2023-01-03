@@ -40,6 +40,9 @@ sidtype_keytype_sep = "__"
 search_symbols = ["*", ",", ">", "<", "**"]
 
 sid_conf_using_demo_configuration_message = f"""
+-------------------------------------------------------------------------------------------------------------
+USING DEMO CONFIGURATION
+
 Spil needs configuration files in the pythonpath.
 ("spil_sid_conf.py" and others) 
 
@@ -47,9 +50,10 @@ None were found, so Spil is falling back to the shipped demo configuration.
 The demo configuration is located here: "{default_sid_conf_path}".
 
 You may adapt this demo configuration to your needs, or create a configuration on your own. 
-Once you add this configuration folder to the pythonpath, this message will disappear.
+Once you add your configuration folder to the pythonpath, this message will disappear.
 
-Please see the documentation : https://spil.readthedocs.io 
+Please see the documentation : https://spil.readthedocs.io
+------------------------------------------------------------------------------------------------------------- 
 """
 
 sid_conf_import_error_message = """

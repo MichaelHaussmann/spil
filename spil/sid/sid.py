@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -12,7 +12,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, Any, Optional, Dict
+from typing import Iterable, Any, Optional, Dict, List
 
 from os import PathLike
 import importlib
@@ -69,12 +69,11 @@ class BaseSid:
 @total_ordering
 class StringSid(BaseSid):
     """
-    StringSid is the barest type of Sids.
-
+    StringSid is the barest form of Sids.
     It only has a string.
     It is not typed.
     """
-    _string = ''
+    _string = ""
 
     @property
     def string(self) -> str:
@@ -87,10 +86,10 @@ class StringSid(BaseSid):
         Examples:
 
             >>> Sid('hamlet/s/sq030/sh0100/anim').string
-            "hamlet/s/sq030/sh0100/anim"
+            'hamlet/s/sq030/sh0100/anim'
 
             >>> Sid('blablabla').string
-            "blablabla"
+            'blablabla'
 
         Returns:
             The string representation.
@@ -103,7 +102,8 @@ class StringSid(BaseSid):
         Returns the long string representation of a Sid.
         The form is "type:string" if typed, else just the sid string.
 
-        Returns: The long string representation.
+        Returns:
+            The long string representation.
 
         """
         return self._string
@@ -115,12 +115,11 @@ class StringSid(BaseSid):
 
         Example:
 
-            >>> Sid('hamlet/a/char/romeo/modeling')
-            Sid('hamlet/a/char/romeo/modeling')
+            >>> Sid('hamlet/a/char/ophelia/model').copy()
+            Sid('asset__task:hamlet/a/char/ophelia/model')
 
         Returns:
             A Sid copy.
-
         """
         return Sid(self.full_string)  # self.get_with()
 
@@ -132,8 +131,12 @@ class StringSid(BaseSid):
         The Sid may not be typed.
 
         Examples:
-            >>> Sid('hamlet/a/char/*/*')
+
+            >>> Sid('hamlet/a/char/*/*').is_search()
             True
+
+            >>> Sid('hamlet/a/char/ophelia').is_search()
+            False
 
         Returns:
             True if the Sid contains search symbols, else False.
@@ -145,7 +148,7 @@ class StringSid(BaseSid):
         return self._string
 
     def __repr__(self) -> str:
-        return 'Sid("{0}")'.format(self.full_string)
+        return "Sid('{0}')".format(self.full_string)
 
     def __hash__(self, *args, **kwargs) -> int:
         return hash(repr(self))
@@ -164,17 +167,26 @@ class StringSid(BaseSid):
         Override the division operator, to compose a Sid from another one.
         Inspired by pathlib.Path.
 
+        The get_with() method is prefered, since it generally is less "volatile".
+
         Examples:
 
             >>> Sid('hamlet') / 's' / 'sq030'
-            "hamlet/s/sq030"
+            Sid('shot__sequence:hamlet/s/sq030')
 
+            >>> sid = Sid("hamlet/s/sq030")
             >>> sid.parent / sid.get(sid.keytype) == sid
+            True
+
         """
         return Sid(str(self) + conf.sip + str(other))
 
 
 class TypedSid(StringSid):
+    """
+    The TypedSid class implements a Sid that has been resolved successfully.
+    It has a "type" and a "field" data dictionary.
+    """
 
     def _init(self, string: Optional[str] = None, type: Optional[str] = None, fields: Optional[dict] = None):
         # print(f"DataSid._init {string}, {type}, {fields}")
@@ -199,10 +211,13 @@ class TypedSid(StringSid):
         Examples:
 
             >>> Sid('hamlet/s/sq030/sh0100/anim').full_string
-            "shot__task:hamlet/s/sq030/sh0100/anim"
+            'shot__task:hamlet/s/sq030/sh0100/anim'
 
             >>> Sid('blablabla').full_string
-            "blablabla"
+            'blablabla'
+
+        Returns
+            the long string representation of a Sid.
         """
         return '{}{}'.format(self._type + ':' if self._type else '', self.string)
 
@@ -215,8 +230,8 @@ class TypedSid(StringSid):
 
         Example:
 
-            >>> Sid('hamlet/s/sq030/sh0100/anim').basetype
-            "shot"
+            >>> Sid("hamlet/s/sq030/sh0100/anim").basetype
+            'shot'
 
         Returns
             string basetype
@@ -257,13 +272,18 @@ class TypedSid(StringSid):
         basetype: 'project'
 
         Examples:
-        >>>Sid('hamlet/a/char/romeo/model').keytype
-        "task"
 
-        >>>Sid('hamlet/s/sq001/sh0010').keytype
-        "shot"
+            >>> Sid("hamlet/a/char/claudius/model/v001/w/blend").keytype
+            'ext'
 
-        :return: string keytype
+            >>> Sid("hamlet/a/char/ophelia/model").keytype
+            'task'
+
+            >>> Sid("hamlet/s/sq001/sh0010").keytype
+            'shot'
+
+        Returns:
+             string keytype
         """
         if not self._fields:
             warning('[Sid][keytype] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
@@ -274,13 +294,24 @@ class TypedSid(StringSid):
     def parent(self) -> Sid:
         """
         Returns the parent Sid.
-
-        If the
         Returns an empty Sid, if the Sid is not "defined", or self if the Sid is already the root (has no parent).
 
-        Example:
-        >>> Sid('hamlet/s/sq030/sh0100').parent
-        Sid('hamlet/s/sq030')
+        Note that this is a logical operation, without data access.
+
+        Examples:
+
+            >>> Sid('hamlet/s/sq030/sh0100').parent
+            Sid('shot__sequence:hamlet/s/sq030')
+
+            >>> Sid('hamlet').parent
+            Sid('project:hamlet')
+
+            >>> Sid('bla/bla/bla').parent
+            Sid('')
+
+        Returns:
+            Returns an empty Sid, if the Sid is not "defined", or self if the Sid is already the root (has no parent).
+
         """
         if not self._fields:
             warning('[Sid][parent] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
@@ -291,18 +322,31 @@ class TypedSid(StringSid):
         return self.get_as(parent_key)
 
     def __len__(self) -> int:
+        """
+        Returns the "length" of a Sid, which is the number of keys in its "fields" data dictionary.
+
+        Returns:
+            The amount of keys in the "fields" dictionary.
+        """
         return len(self._fields)
 
     def get(self, key: str) -> str | None:
         """
         Returns the value of given key.
-        As defined in the internal "fields" dictionary.
+        As defined in the internal "fields" data dictionary.
 
         Example:
-        >>> Sid('hamlet/s/sq030/sh0100/anim').get('shot')
-        "sh0100"
-        """
 
+            >>> Sid("hamlet/s/sq030/sh0100/anim").get("shot")
+            'sh0100'
+
+        Args:
+            key: retrieved key
+
+        Returns:
+            Value of given key, in the "fields" data dictionary.
+
+        """
         if not self._fields:
             warning('[Sid][get] Asked for a Sid operation on an undefined Sid: "{}"'.format(self.string))
             return None
@@ -312,12 +356,26 @@ class TypedSid(StringSid):
     def get_as(self, key: str) -> Sid:
         """
         Returns a new Sid built of the fields until (and including) the given key.
+        If the Sid is not typed or the key is not found, an empty Sid is returned.
 
         Example:
-        >>> Sid('hamlet/a/char/romeo/model/v001/w/ma').get_as('task')
-        Sid('hamlet/a/char/romeo/model')
-        """
 
+            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_as('task')
+            Sid('asset__task:hamlet/a/char/ophelia/model')
+
+            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_as('something')
+            Sid('')
+
+            >>> Sid('hamlet/bla/bla').get_as('shot')
+            Sid('')
+
+        Args:
+            key: key until which the new Sid should be built
+
+        Returns:
+            Sid as given key
+
+        """
         if not self._fields:
             warning('[Sid][get_as] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
             return Sid()  # Return type is always Sid.
@@ -340,29 +398,33 @@ class TypedSid(StringSid):
                  value: Optional[str] = None,
                  **kwargs) -> Sid:
         """
-        Returns a new Sid with
-        - the given uri applied (see details in documentation)
+        Returns a new Sid
+        - with the given uri applied (see details about uri application in documentation)
         or
-        - updated using given key and value, eg get_with(key='task', value='rendering') and
-        - updated using **kwargs where keys are sid keys, eg get_with(task='rendering')
+        - updated using given key and value, eg. get_with(key='task', value='rendering') and
+        - updated using **kwargs where keys are sid keys, eg. get_with(task='rendering')
 
-        Depending on the update, the type of the returned Sid can change.
+        Depending on the update, the type of the returned Sid can change, or the Sid can be untyped.
 
         A key set to None will be removed.
         To empty a keys value, set it to an empty string "".
 
         Examples:
-        >>> Sid('hamlet/s/sq030/sh0010/animation').get_with(task='rendering')
-        Sid('hamlet/s/sq030/sh0010/rendering')
 
-        >>> Sid("hamlet/a/props/dagger").get_with(uri='asset=skull')
-        Sid('hamlet/a/props/skull')
+            >>> Sid('hamlet/s/sq030/sh0010/anim').get_with(task='rendering')
+            Sid('hamlet/s/sq030/sh0010/rendering')
 
-        :param uri: a uri string
-        :param key: a key name
-        :param value: a value for attribute
-        :param kwargs: a key/value dictionary
-        :return:
+            >>> Sid("hamlet/a/prop/dagger").get_with(uri='asset=skull')
+            Sid('asset__asset:hamlet/a/prop/skull')
+
+        Args:
+            uri: s tring uri, in the format ?key=value&key2=value2
+            key: a key name, for example "shot", "sequence", or "task"
+            value: a new value for given key. May be None (removes the key) or "" (empty value).
+            **kwargs: a key/value dictionary
+
+        Returns:
+            A new Sid. Depending on the update, the type of the returned Sid can change.
         """
         if not self._fields:
             warning(f'[Sid][get_with] Asked for a Sid operation on an undefined Sid "{self.string}"')
@@ -391,13 +453,15 @@ class TypedSid(StringSid):
 
     def is_leaf(self):
         """
-        Returns True if the current Sid is a leaf node.
+        Returns True if the current Sid is a "leaf" node.
+        A leaf node has no children (and cannot have children).
 
-        Current implementation checks if the keytype is set as a leaf type in the config_name.
+        Current implementation checks if the keytype is set as a "leaf type" in the config_name.
         For example: "ext" (file extension) is the keytype of leaf nodes.
         This is configured per basetype.
 
-        This method is experimental. Implementation and concept to be clarified.
+        This implementation is still experimental.
+        Implementation and concept needs to be clarified.
 
         Note: A leaf should be dependent on the context and type.
         For example, in searching for render files,
@@ -405,7 +469,8 @@ class TypedSid(StringSid):
         to avoid going too deep in the hierarchy.
         This is done in the browser, to browse render files by the pass folder, not individually by default.
 
-        :return: bool
+        Returns:
+            True if this Sid is a leaf, else False.
         """
         return bool(self.get(conf.leaf_keys.get(self.basetype)))
         # TODO:
@@ -416,12 +481,14 @@ class TypedSid(StringSid):
         """
         Returns the fields as a key value string, as in an URI.
 
-
         Example:
-        >>>Sid('hamlet/a/char/ophelia/model').as_uri()
-        "project=hamlet&type=a&cat=char&name=ophelia&task=model"
 
-        :return: string uri
+            >>> Sid('hamlet/a/char/ophelia/model').as_uri()
+            'project=hamlet&type=a&assettype=char&asset=ophelia&task=model'
+
+        Returns:
+            string uri
+
         """
         return uri_helper.to_string(self._fields)
 
@@ -432,15 +499,19 @@ class TypedSid(StringSid):
 
         This method is useful to create filters matching groups of Sids, more precise than types.
 
-        Example:
-        >>>Sid('hamlet/a/char/romeo/model').match('hamlet/a/*/*/model')
-        True
-        >>>Sid('hamlet/s/sq030/sh0100/anim').match('hamlet/s/*/*/*')
-        True
-        >>>Sid('hamlet/a/char/romeo').match('hamlet/a/prop/*')
-        False
+        Examples:
 
-        :return: bool
+            >>> Sid('hamlet/a/char/ophelia/model').match('hamlet/a/*/*/model')
+            True
+
+            >>> Sid('hamlet/s/sq030/sh0100/anim').match('hamlet/s/*/*/*')
+            True
+
+            >>> Sid('hamlet/a/char/ophelia').match('hamlet/a/prop/*')
+            False
+
+        Returns
+            True if match, else False
         """
         # Identicals always match
         if Sid(search_sid) == self:
@@ -458,14 +529,22 @@ class TypedSid(StringSid):
 class PathSid(TypedSid):
 
     @cache
-    def path(self, config: Optional[str] = None) -> Pathlike[str]:  # type: ignore
+    def path(self, config: Optional[str] = None) -> Pathlike[str] | None:  # type: ignore
         """
         Returns the file path for the current Sid, as a pathlib.Path.
         Returns None if the Sid has no path, or if it cannot be resolved.
 
+        This method is cached.
+        A path for a Sid is configured (not the result of a data lookup),
+        and is not supposed to change during runtime.
+
         Example:
-            >>> Sid('hamlet/a/char/romeo/model/v001/w/ma').path()
-            Path("/productions/hamlet/assets/characters/romeo/3d/modeling/works/romeo_v001.ma")
+
+            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').path()
+            Path("/productions/hamlet/assets/characters/ophelia/3d/model/works/romeo_v001.ma")
+
+            >>> Sid('bla/bla').path()
+            None
 
         Args:
             config: Name of the path config to be used, as configured.
@@ -473,6 +552,9 @@ class PathSid(TypedSid):
         Returns:
             A path, if the Sid has a path, else None.
         """
+        if not self._fields:
+            debug(f'Sid is undefined: "{self.string}". Returning None.')
+            return None
         from spil.sid.pathops.fs_resolver import dict_to_path
         result = None
         try:
@@ -483,36 +565,49 @@ class PathSid(TypedSid):
 
 
 class DataSid(PathSid):
+    """
+    The DataSid implements operations that delegate calls to data sources, Finders and Getters.
+    By default FindInAll is used.
 
-    # TODO: make configurable which Finder is used for DataSid operations (FindInFinders per default).
+    # TODO: make configurable which Finder is used for DataSid operations (FindInAll per default).
     # Could be handled using a default config_name, and/or be changed at runtime.
+    """
 
     def get_last(self, key: Optional[str] = None) -> Sid:
         """
         Returns a new Sid object, with the same fields as self, and the last existing match for given key.
         If key is not given, the keytype is used.
+        If the Sid is untyped, returns an empty Sid.
 
         Examples:
-            >>>Sid('hamlet/a/char/romeo/model/v001/w/ma').get_last('version')
-            Sid('hamlet/a/char/romeo/model/v008/w/ma')
 
-            >>>Sid('hamlet/a/char/romeo/model').get_last()
-            Sid('hamlet/a/char/romeo/shading')
+            >>> Sid('hamlet/a/char/ophelia/model/v001/p/ma').get_last('version')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v001/p/ma')
 
-        This method calls Finder internally, and is a shortcut to:
-            Finder().find_one(self.get_with(key=key, value='>'), as_sid=True)
+            >>> Sid('hamlet/a/char/ophelia/model').get_last()
+            Sid('asset__task:hamlet/a/char/ophelia/surface')
+
+            >>> Sid('bla/bla').get_last('whatever')
+            Sid('')
+
+        This method calls FindinAll internally, and is a shortcut to:
+            FindInAll().find_one(self.get_with(key=key, value='>'), as_sid=True)
 
         Note: Sid sorting is currently limited to string values, which usually works with versions.
-        A meaningful sorting (eg. "render" after "animation") is planned.
+        A meaningful sorting of tasks (eg. "render" after "animation") is planned.
 
         (implementation is experimental)
 
-        :return: Sid
+        Returns:
+            Sid or None
         """
+        if not self._fields:
+            debug(f'Sid is undefined: "{self.string}". Returning Emptu Sid..')
+            return Sid()
         if not key:
             key = self.keytype
-        from spil import FindInFinders
-        found = FindInFinders().find_one(self.get_with(key=key, value='>'), as_sid=True)
+        from spil import FindInAll
+        found = FindInAll().find_one(self.get_with(key=key, value='>'), as_sid=True)
         if found.get(key):  # little failsafe. #SMELL
             return found
         else:
@@ -525,9 +620,12 @@ class DataSid(PathSid):
         Shortcut to data.find(sid, attribute), which is called internally.
 
         Example:
-        >>> Sid('hamlet/a/char/romeo/model/v001/w/ma').get_attr('comment')
-        "first version"
+
+            >>> Sid('hamlet/a/char/ophelia/model/v003/w/ma').get_attr('comment')
+            "Updated topology"
         """
+        raise NotImplemented("This method needs re-implementation")  # type: ignore
+
         from spil.data.data import get  # FIXME: WIP
         value = get(self, attribute)
         if value:
@@ -535,7 +633,7 @@ class DataSid(PathSid):
         else:
             return None
 
-    def get_next(self, key):  # FIXME: delegate to Data framework
+    def get_next(self, key: str) -> Sid:  # FIXME: delegate to Data framework
         """
         This method is experimental. Do not use.
 
@@ -544,8 +642,19 @@ class DataSid(PathSid):
 
         If the result is not a valid Sid (not typed, no fields), returns an empty Sid.
 
-        :return: Sid
+        Example:
+
+            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_next('version')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v002/w/ma')
+
+        Args:
+            key:
+
+        Returns:
+            Sid
         """
+        raise NotImplemented("This method needs re-implementation")  # type: ignore
+
         if key != 'version':
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
         current = self.get('version')
@@ -561,16 +670,27 @@ class DataSid(PathSid):
         result = self.get_with(version=version)
         return result if result else Sid()
 
-    def get_new(self, key):  # FIXME: delegate to Data framework
+    def get_new(self, key: str) -> Sid:  # FIXME: delegate to Data framework
         """
         This implementation is experimental.
 
         Returns self with next of last version, or first version if there is no version.
-
         If the result is not a valid Sid (not typed, no fields), returns an empty Sid.
 
-        :return: Sid
+        Example:
+
+            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_new('version')
+            Sid('hamlet/a/char/ophelia/model/v005/w/ma')
+
+        Args:
+            key:
+
+        Returns:
+            Sid
+
         """
+        raise NotImplemented("This method needs re-implementation")  # type: ignore
+
         if key != 'version':
             raise NotImplementedError("get_new() support only 'version' key for the moment.")
         if self.get('version'):
@@ -592,42 +712,97 @@ class DataSid(PathSid):
     def exists(self) -> bool:
         """
         Returns True if the current Sid exists.
-        Shortcut to Finder().exists(sid), which is called internally.
+        Shortcut to FindInAll().exists(self), which is called internally.
 
-        :return: bool
+        Examples:
+
+            >>> Sid('hamlet/a/char/ophelia').exists()
+            True
+
+            >>> Sid('hamlet/a/prop/computer').exists()
+            False
+
+            >>> Sid('bla/bla').exists()
+            False
+
+        Returns:
+            True if Sid exists, else False
         """
-        from spil import FindInFinders
-        return FindInFinders().exists(self)
+        if not self._fields:
+            debug(f'Sid is undefined: "{self.string}". Returning False')
+            return False
+        from spil import FindInAll
+        return FindInAll().exists(self)
 
-    def siblings_as(self, key: str) -> Iterable[Sid]:
+    def siblings_as(self, key: str) -> List[Sid]:
+        """
+        Returns existing siblings, in other words children of parent, as Sid of given keytype.
+
+        Example:
+
+            >>> Sid('hamlet/a/fx/blood/surface/v002/p/ma').siblings_as('asset')
+            [Sid('asset__asset:hamlet/a/fx/blood'), Sid('asset__asset:hamlet/a/fx/rain'), Sid('asset__asset:hamlet/a/fx/water'), Sid('asset__asset:hamlet/a/fx/mist'), Sid('asset__asset:hamlet/a/fx/thunder')]
+
+        Args:
+            key: keytype we want siblings from
+
+        Returns:
+            List of sibling Sids
+
+        """
         if key not in self._fields:
             info(f'[Sid][siblings_as] Key "{key}" not found in fields "{self._fields}"')
             return []
         search = self.get_as(key).get_with(key=key, value='*')
-        from spil import FindInFinders as FT
-        for i in FT().find(search, as_sid=True):
-            yield i
+        from spil import FindInAll
+        return list(FindInAll().find(search, as_sid=True))
 
-    def siblings(self) -> Iterable[Sid]:
+    def siblings(self) -> List[Sid]:
+        """
+        Returns existing siblings, in other words children of parent.
+
+        Example:
+
+            >>> Sid('hamlet/a/fx/blood/surface').siblings()
+            [Sid('asset__task:hamlet/a/fx/blood/model'), Sid('asset__task:hamlet/a/fx/blood/surface'), Sid('asset__task:hamlet/a/fx/blood/art'), Sid('asset__task:hamlet/a/fx/blood/rig')]
+
+        Returns:
+            List of sibling Sids.
+        """
         return self.siblings_as(self.keytype)
 
-    def children(self) -> Iterable[Sid]:
+    def children(self) -> List[Sid]:
+        """
+        Returns existing children.
+        Shortcut to:  `FindInAll().find(self / '*', as_sid=True)`
+
+        Examples:
+
+            >>> Sid('hamlet/a/char/ophelia/rig').children()
+            [Sid('asset__version:hamlet/a/char/ophelia/rig/v001')]
+
+            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').children()
+            []
+
+        Returns:
+            Children Sids
+        """
         if self.is_leaf():  # per definition, leafs have no children.
             return []
-        from spil import FindInFinders as FT
+        from spil import FindInAll
         search = self / '*'
-        for i in FT().find(search, as_sid=True):
-            yield i
+        return list(FindInAll().find(search, as_sid=True))
 
-    # def get_first, get_next, get_previous, get_parent, get_children, project / thing / thing
-    # implement URIs: Sid('FTOT').get_with(uri='type=A') <==> FTOT?type=A  ==>  FTOT/A
-    # define "complete / incomplete" sid.is_leaf ? (root / anchor / parent / parents /
-    # https://docs.python.org/3/library/pathlib.html#pathlib.PurePath.parent
+    # def get_first, get_next, get_previous,
+    # define "complete / incomplete" sid.is_leaf ? (root / anchor / parent / parents )
 
 
 class Sid(DataSid):
     """
     Sid class.
+    Only defines the factory to be used.
+
+    Implementation may change, but API will remain the same.
     """
 
     _factory = ('spil.sid.core.sid_factory', 'sid_factory')  # TODO: config_name, or better system.

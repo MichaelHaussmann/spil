@@ -136,7 +136,7 @@ def path_to_sid(path: str | os.Pathlike[str], config: Optional[str]) -> Sid | No
 
 # @lru_kw_cache
 def sid_factory(sid: Optional[str] = None,
-                fields: dict = None,
+                fields: Optional[dict] = None,
                 path: os.Pathlike[str] | str | None = None,  # type: ignore # Problem with os.Pathlike
                 config: Optional[str] = None) -> Sid:
     """
