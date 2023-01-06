@@ -27,38 +27,58 @@ def extrapolate_templates(sid_templates, key_types, to_extrapolate=[], leaf_subt
     """
     Templates are extrapolated: leave type entries are looped downwards to create subtypes.
 
+     # type asset
+    >>> sid_templates = {'asset__file': '{project}/{type:a}/{assettype}/{asset}/{task}/{version}/{state}/{ext:scenes}'}
+    >>> extrapolate_types = {'asset': ['project', 'type', 'assettype', 'asset', 'task', 'version', 'state', 'ext']}
+    >>> to_extrapolate = ['asset__file']
+    >>> extrapolation_leaf_subtype = 'file'
+    >>> extrapolate_templates(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
+    OrderedDict([('asset__file', '{project}/{type:a}/{assettype}/{asset}/{task}/{version}/{state}/{ext:scenes}'), ('asset__state', '{project}/{type:a}/{assettype}/{asset}/{task}/{version}/{state}'), ('asset__version', '{project}/{type:a}/{assettype}/{asset}/{task}/{version}'), ('asset__task', '{project}/{type:a}/{assettype}/{asset}/{task}'), ('asset__asset', '{project}/{type:a}/{assettype}/{asset}'), ('asset__assettype', '{project}/{type:a}/{assettype}'), ('asset__type', '{project}/{type:a}'), ('asset__project', '{project}')])
+
+    >>> sid_templates = {'asset__version': '{project}/{type:a}/{assettype}/{asset}/{step}/{task}/{state}/{version}',}
+    >>> extrapolate_types = {'asset': ['project', 'type', 'assettype', 'asset', 'step', 'task', 'state', 'version', 'ext'],}
+    >>> to_extrapolate = ['asset__version']
+    >>> extrapolation_leaf_subtype = 'version'
+    >>> extrapolate_templates(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
+    OrderedDict([('asset__version', '{project}/{type:a}/{assettype}/{asset}/{step}/{task}/{state}/{version}'), ('asset__state', '{project}/{type:a}/{assettype}/{asset}/{step}/{task}/{state}'), ('asset__task', '{project}/{type:a}/{assettype}/{asset}/{step}/{task}'), ('asset__step', '{project}/{type:a}/{assettype}/{asset}/{step}'), ('asset__asset', '{project}/{type:a}/{assettype}/{asset}'), ('asset__assettype', '{project}/{type:a}/{assettype}'), ('asset__type', '{project}/{type:a}'), ('asset__project', '{project}')])
+
     """
 
     generated = OrderedDict()
     skipped = OrderedDict()
 
     # first we copy all the full paths, they have to match first
-    for keytype, template in sid_templates.items():
-        if keytype.endswith(leaf_subtype):
-            generated[keytype] = template
+    for sid_type, template in sid_templates.items():
+        if sid_type.endswith(leaf_subtype):
+            print("adding {sid_type} ?")
+            generated[sid_type] = template
 
     # then we start over to generate the subtypes
-    for keytype, template in sid_templates.items():
+    for sid_type, template in sid_templates.items():
 
         # adding the current found
-        if keytype not in generated.keys():
-            generated[keytype] = template
+        if sid_type not in generated.keys():
+            print("adding {sid_type} ?")
+            generated[sid_type] = template
 
         # if there is an explicit list of types to extrapolate we use only these
-        if to_extrapolate and keytype not in to_extrapolate:
+        if to_extrapolate and (sid_type not in to_extrapolate):
+            print(f"skipping {sid_type}")
             continue
 
         # generating sub keys
-        if keytype.endswith(leaf_subtype):
+        if sid_type.endswith(leaf_subtype):
             parts = template.split('/')
-            # keys = get_keys(template)
-            # print(type.split(sidtype_keytype_sep)[0])
-            keys = key_types.get(keytype.split(sidtype_keytype_sep)[0])
-            # print(keys)
-            for i, key in enumerate(reversed(keys[:-1]), 1):
-                new_type = keytype.replace(leaf_subtype, key)
-                new_template = '/'.join(parts[:-1 * i])
+            #keys = get_keys(template)
+            basetype = sid_type.split(sidtype_keytype_sep)[0]
+            keys = key_types.get(basetype)
+            print(f"Handling {basetype} / {keys}")
 
+            for i, key in enumerate(reversed(keys[:-1]), 1):
+
+                new_type = sid_type.replace(leaf_subtype, key)
+                new_template = '/'.join(parts[:-1 * i])
+                print(f"New Type: {key} / {new_type} -> {new_template}")
                 # new_template = template.split('/{' + key)[0]  # for paths
 
                 # we skip if template is already defined by another type
@@ -116,3 +136,34 @@ def pattern_replacing(sid_templates, key_patterns):
                     template = template.replace(find, replace)
 
         sid_templates[_keytype] = template
+
+
+
+if __name__ == '__main__':
+
+    from pprint import pprint
+
+    sid_templates = {'asset__version': '{project}/{type:a}/{assettype}/{asset}/{step}/{task}/{state}/{version}', }
+    extrapolate_types = {
+        'asset': ['project', 'type', 'assettype', 'asset', 'step', 'task', 'state', 'version', 'ext'], }
+    to_extrapolate = ['asset__version']
+    extrapolation_leaf_subtype = 'version'
+    result = extrapolate_templates(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
+
+    pprint(result)
+
+    import doctest
+    #doctest.testmod()
+    """
+    log.debug('Starting')
+    log.debug('Path Templates: ')
+    for k, v in path_templates.items():
+        log.info('{} -> {}'.format(k, v))
+
+    log.debug('')
+    log.debug('Tests:')
+    test_fs_duplicates()
+    test_missing()
+
+    log.debug('Done')
+    """
