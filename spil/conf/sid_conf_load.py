@@ -56,7 +56,7 @@ for name, value in inspect.getmembers(module):
     globals()[name] = value
     __all__.append(name)
 
-sid_templates = extrapolate_templates(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
+sid_templates = extrapolate_templates(sid_templates, to_extrapolate)
 pattern_replacing(sid_templates, key_patterns)
 
 if __name__ == '__main__':
