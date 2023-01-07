@@ -55,16 +55,16 @@ def test_data_sid(s, reraise=True, replace=None, from_search=None):
 
         key = sid.keytype
 
-        if not sid.get_last(key):
-            log.warning('Sid "{}" does not return get_last("{}") - probably bad.'.format(sid, key))
+        if sid.siblings() and not sid.get_last(key):
+            log.warning('Sid "{}" has siblings but does not return get_last("{}") - probably bad.'.format(sid, key))
 
         params = {
             "exists": sid.exists(),
             "get_last": sid.get_last(),
+            "get_last (version)": sid.get_last("version"),
             "children": list(sid.children()),
             "siblings": list(sid.siblings()),
             "uncles": list(sid.parent.siblings()),
-            #"get_last (version)": sid.get_last("version"),
             # "get_next": sid.get_next("version"),
             # "get_new": sid.get_new("version"),
         }
@@ -127,6 +127,6 @@ if __name__ == "__main__":
 
     setLevel(INFO)
 
-    from scripts.example_sids import sids
+    sids = ["hamlet/a/char/gertrude/model/v000/w/blend", "hamlet/a/char/gertrude/model/v001/w/blend"]
 
     test_data_sids(sids)
