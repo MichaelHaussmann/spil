@@ -46,7 +46,7 @@ Please check the documentation for "Adapting the demo config" [configuration](co
 Human-readable Identifier ("Natural Key") vs Generated Unique ID (UUID).  
 That is the (tough) question.
 
-For the Sid, the name of an item becomes its unique ID.  
+In Spil, the name of an item becomes its unique ID.  
 `hamlet/s/sq010/sh0010/layout/v012/p/mov` instead of `74fbd636–4fc5–11e9–91a2-ecb1d74481b4`.  
 
 While this has an obvious advantage on readability and simplicity, it comes at a price.  
@@ -88,6 +88,17 @@ Complexity is hidden - but it's still there.
 
 Clearly, efforts need to be put in tools assisting the configuration process, better documentation, more examples. etc.
 In the meantime, please do not hesitate to get in touch at [spil@xeo.info](mailto:spil@xeo.info).
+
+
+## The UI looks like an ugly thing from the 90's 
+
+For Spil, **"The API is the first UI".**
+
+The Qt GUI is just one simple example on how to use Spil's query mechanism.
+It proofed its usability and versatility in production, is easy to deploy, and works in all major DCCs.
+
+But one can do way better. 
+We will welcome any proposal, idea, pull request or rewrite from scratch to make it look and feel nicer! :)
 
 
 ## Naming is completely free in my pipeline, there are no rules. Will Spil work ?
