@@ -10,6 +10,8 @@ sid_templates = {
     'asset__movie_file':      '{project}/{type:a}/{assettype}/{asset}/{task}/{version}/{state}/{ext:movies}',
     'asset__cache_file':      '{project}/{type:a}/{assettype}/{asset}/{task}/{version}/{state}/{ext:caches}',
 
+    'asset__state':           '{project}/{type:a}/{assettype}/{asset}/{task}/{version}/{state}',  # extrapolated
+
     'asset':                  '{project}/{type:a}',
 
     # type shot
@@ -19,17 +21,16 @@ sid_templates = {
     'shot__cache_node_file':  '{project}/{type:s}/{sequence}/{shot}/{task}/{version}/{state}/{node}/{ext:caches}',
     'shot__cache_node':       '{project}/{type:s}/{sequence}/{shot}/{task}/{version}/{state}/{node}',
 
-    'shot__shot':              '{project}/{type:s}/{sequence}/{shot}',
-    'shot__sequence':          '{project}/{type:s}/{sequence}',
-    'shot':                    '{project}/{type:s}',
+    'shot__state':            '{project}/{type:s}/{sequence}/{shot}/{task}/{version}/{state}',  # extrapolated
+
+    'shot':                   '{project}/{type:s}',
 
     # type project
-    'project':                 '{project}',
+    'project':                '{project}',
 
 }
 
-to_extrapolate = ['asset__file', 'shot__file']
-extrapolation_leaf_subtype = 'file'
+to_extrapolate = ['asset__state', 'shot__state']
 
 asset_tasks = ['art', 'model', 'surface', 'rig']
 shot_tasks = ['board', 'layout', 'anim', 'fx', 'render', 'comp']
@@ -80,13 +81,6 @@ key_patterns = {
 key_types = {
     'asset': ['project', 'type', 'assettype', 'asset', 'task', 'version', 'state', 'ext'],
     'shot': ['project', 'type', 'sequence', 'shot', 'task', 'version', 'state', 'node', 'ext'],
-    'project': ['project'],
-}
-
-# These keytypes are used during "extrapolation" (filling intermediate types from leave to root)
-extrapolate_types = {
-    'asset': ['project', 'type', 'assettype', 'asset', 'task', 'version', 'state', 'ext'],
-    'shot': ['project', 'type', 'sequence', 'shot', 'task', 'version', 'state', 'ext'],
     'project': ['project'],
 }
 
