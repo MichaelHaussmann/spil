@@ -42,9 +42,19 @@ dependencies = [
 requires-python = ">=3.7"
 
 [project.optional-dependencies]
-dev = ["mypy", "black", "codetiming", "pytest"]
+dev = ["mypy", "black", "codetiming", "pytest", "flake8", "isort", "refurb"]
 
 [project.urls]
 "Homepage" = "https://github.com/MichaelHaussmann/spil"
 "Documentation" = "https://spil.readthedocs.io"
 
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 100
+target-version = ['py37']
+
+[tool.refurb]
+python-version = 3.7
+ignore = [126]
