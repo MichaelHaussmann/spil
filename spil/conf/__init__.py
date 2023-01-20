@@ -55,6 +55,8 @@ def get(key):
 
 
 user_conf = ConfigIO()
+if user_conf.read():
+    print(f"User config updates: {list(user_conf.read().keys())}")
 globals().update(user_conf.read())
 
 if __name__ == '__main__':
