@@ -24,6 +24,16 @@ from spil.util.log import debug, info, warning
 from spil import conf
 from spil.util.exception import SpilException
 
+"""
+TODO:
+
+Notes.
+We need a STRICT mode, where type changes are warned, or changes to untyped are errored.
+Example:
+an erroneous usage of get_with() can silently change the Sid type to an unexpected one, or loose the type, and the error goes undetected.
+We could use a target type for Sids operations.
+We could use a global data validation framework (pydantic, apischema or so).
+"""
 
 class BaseSid:
     """Base class for Sids.
@@ -484,9 +494,9 @@ class TypedSid(StringSid):
 
         data_copy.update(kwargs)
         new_sid = Sid(fields=data_copy)
-        # If the resulting Sid is not typed, we try return as StringSid, matching the Sid dictionary.
-        # This is useful for search Sids.
-        if not new_sid:
+        # If the resulting Sid is not typed, and is a search, we try return as StringSid, matching the Sid dictionary.
+        # This is useful but may have unexpected side effects.
+        if new_sid.is_search() and not new_sid:
             new_sid = Sid('/'.join(list(data_copy.values())))
         return new_sid
 
