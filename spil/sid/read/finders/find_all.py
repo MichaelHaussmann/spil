@@ -10,10 +10,9 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from __future__ import annotations
-from typing import Iterable, List, Mapping, Dict, Optional
+from typing import Iterable, List, Dict, Optional
 
 from spil import Sid
 from spil.sid.read.finder import Finder
@@ -27,22 +26,35 @@ from spil.sid.read.tools import unfold_search
 @cache
 def get_finder(sid: Sid | str, config: Optional[str] = None) -> Finder | None:
     """
-    For a given Sid, looks up the matching data_source, as given by config_name.
-    Return value is an instance implementing Finder.
+    Calls spil.conf.get_finder_for() which is implemented in the spil_data_conf.
+
+    Retrieves, for a given Search Sid and configuration name, the appropriate Finder and returns it.
+
+    This typically returns a Finder depending on the Type of the Sid.
+    For example: projects come from a FindInConstant, Assets and Shots may come from FindInPaths or FindInShotgrid.
+    See the example spil_data_conf.get_finder_for()
 
     Technical note: the result is cached.
-    This means that the choice of the data source is cached, not the resulting data itself.
-    The data source is called again each time a Finder() method is called.
+    This means that the choice of the Finder is cached, not the resulting data itself.
+    The Finder is called again each time a query method (find(), find_one(), exists()) is called.
+
+    Args:
+        sid: the Search Sid for which we want to get the appropriate Finder instance
+        config: an optional configuration name, to be able to have mutliple configs co-existing.
+
+    Returns:
+        the Finder to use for this Search Sid
+
     """
     _sid = Sid(sid)
     if not str(_sid) == str(sid):
-        warning('Sid could not be instanced, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
+        warning(f'Sid could not be instanced, likely a configuration error. "{sid}" -> {_sid}')
     source = get_finder_for(_sid, config)
     if source:
-        debug('Getting data source for "{}": -> {}'.format(sid, source))
+        debug(f'Getting data source for "{sid}": -> {source}')
         return source
     else:
-        warning('Data Source not found for Sid "{}" ({})'.format(sid, _sid.type))
+        warning(f'Data Source not found for Sid "{sid}" ({_sid.type})')
         return None
 
 
@@ -56,9 +68,10 @@ class FindInAll(Finder):
         Config is an argument that will be passed to the config, via get_finder_for(sid, config).
         Config acts like a key, to allow multiple FindInAll configurations to co-exist.
 
-
-
+        Args:
+            config: name of a configuration
         """
+
         self.config = config
 
     def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
@@ -66,34 +79,36 @@ class FindInAll(Finder):
         Search dispatcher.
 
         The search is "unfolded" (one possibly untyped search sid is "unfolded" into a list of typed search sids).
-        For each typed search, we get the appropriate Finder.
+        For each typed sid, we get the appropriate Finder.
 
         We then group the searches by Finder, to call each Finder with a list of searches (instead of each search individually).
 
+        Args:
+            search_sid: Sid to search
+            as_sid: result will be returned as a Sid object if True, as a string otherwise.
 
-        :param search_sid:
-        :param as_sid:
-        :return:
+        Returns:
+            Generator over the found Sids, as Sid or string instances.
         """
         # we start by transforming
         search_sids = unfold_search(search_sid)
 
         done = set()  #TEST
-        sources_to_searches: Dict[Finder, List[Sid]] = dict()
+        finder_for_searches: Dict[Finder, List[Sid]] = dict()
 
-        for ssid in search_sids:
+        for search_sid in search_sids:
 
-            source = get_finder(ssid, self.config)
+            finder = get_finder(search_sid, self.config)  # TODO: allow multiple finders for the same search (eg.
 
-            if source:
-                l = sources_to_searches.get(source) or list()
-                l.append(ssid)
-                sources_to_searches[source] = l
+            if finder:
+                l = finder_for_searches.get(finder) or list()
+                l.append(search_sid)
+                finder_for_searches[finder] = l
 
-        for source, searches in sources_to_searches.items():
+        for finder, searches in finder_for_searches.items():
 
-            debug('Searching "{}" --> "{}"'.format(source, searches))
-            generator = source.do_find(searches, as_sid=False)
+            debug(f'Searching "{finder}" --> "{searches}"')
+            generator = finder.do_find(searches, as_sid=False)
 
             for i in generator:
                 if i not in done:  # FIXME: check why data is so often repeated, this is expensive, optimize
@@ -104,13 +119,14 @@ class FindInAll(Finder):
                         yield i
 
             else:
-                debug('Nothing found for "{}"'.format(ssid.full_string))
+                debug(f'Nothing found for "{search_sid.full_string}"')
 
     def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
         raise NotImplementedError("Find by Type delegates do_find to other Finders, depending on the search type.")
 
     def __str__(self):
         return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'
+
 
 if __name__ == "__main__":
     print(FindInAll())
