@@ -29,7 +29,7 @@ default_sid_conf_data_path = str(application_path.parent / "hamlet_conf" / "data
 # automatic replacement to INFO and WARN in BETA and PROD
 loglevel = 80
 
-user_app_folder_name = "spil/conf"
+user_app_folder_name = ".spil/conf"
 user_conf_file_name = "user_conf.json"
 
 # TODO: move these into sid_conf

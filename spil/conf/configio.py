@@ -36,6 +36,8 @@ def get_user_config_path():
     Returns a Path object.
     """
     home = Path.home()
+    if home.name == "Documents" and home.parent.exists():
+        home = home.parent  # fix for maya
     user_config_path = home / user_app_folder_name / user_conf_file_name
 
     return user_config_path
@@ -93,6 +95,8 @@ class ConfigIO(Singleton):
 
 if __name__ == '__main__':
 
+    from spil import logging
+    logging.setLevel(logging.INFO)
     info('Path is : {}'.format(user_config_path))
     cfio = ConfigIO()
     info(cfio.read())
