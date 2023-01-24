@@ -22,6 +22,7 @@ try:
     from spil.sid.read.finders.find_list import FindInList
     from spil.sid.read.finders.find_constants import FindInConstants
     from spil.sid.read.finders.find_all import FindInAll
+    from spil.sid.read.finders.find_cache import FindInCache
 
     from spil.sid.read.getter import Getter
     from spil.sid.write.writer import Writer
@@ -33,7 +34,7 @@ try:
 
     setLevel(ERROR)
 except Exception as e:
-    import traceback
+    import traceback  # fmt: skip
     traceback.print_exc()
     raise Exception(
         "Spil is imported, but impossible to import spil packages. \n Please check compatibility of your sid_conf and fs_conf files."

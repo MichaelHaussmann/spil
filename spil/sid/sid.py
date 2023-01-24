@@ -30,10 +30,12 @@ TODO:
 Notes.
 We need a STRICT mode, where type changes are warned, or changes to untyped are errored.
 Example:
-an erroneous usage of get_with() can silently change the Sid type to an unexpected one, or loose the type, and the error goes undetected.
+an erroneous usage of get_with() can silently change the Sid type to an unexpected one, 
+or loose the type, and the error goes undetected.
 We could use a target type for Sids operations.
 We could use a global data validation framework (pydantic, apischema or so).
 """
+
 
 class BaseSid:
     """Base class for Sids.
@@ -82,6 +84,7 @@ class StringSid(BaseSid):
     It only has a string.
     It is not typed.
     """
+
     _string = ""
 
     @property
@@ -198,10 +201,14 @@ class TypedSid(StringSid):
     It has a "type" and a "field" data dictionary.
     """
 
-    def _init(self, string: Optional[str] = None, type: Optional[str] = None, fields: Optional[dict] = None):
-        # print(f"DataSid._init {string}, {type}, {fields}")
-        self._string = string or ''
-        self._type = type or ''
+    def _init(
+        self,
+        string: Optional[str] = None,
+        type: Optional[str] = None,
+        fields: Optional[dict] = None,
+    ):
+        self._string = string or ""
+        self._type = type or ""
         self._fields = fields or dict()
 
     @property
@@ -260,7 +267,7 @@ class TypedSid(StringSid):
         Returns
             the long string representation of a Sid.
         """
-        return '{}{}'.format(self._type + ':' if self._type else '', self.string)
+        return "{}{}".format(self._type + ":" if self._type else "", self.string)
 
     @property
     def basetype(self) -> str | None:
@@ -283,12 +290,12 @@ class TypedSid(StringSid):
         """
         result = None
         if not self._type:
-            info('This Sid has no type. ({})'.format(self))
+            info(f"This Sid has no type. ({self})")
             return None
         try:
             result = self._type.split(conf.sidtype_keytype_sep)[0]
         except Exception as e:
-            info('[sid][basetype] Unable to get basetype. Sid: {} ("{}")'.format(self, e))
+            info(f'[sid][basetype] Unable to get basetype. Sid: {self} ("{e}")')
         return result
 
     @property
@@ -330,7 +337,7 @@ class TypedSid(StringSid):
              string keytype
         """
         if not self._fields:
-            warning('[Sid][keytype] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
+            warning(f'Sid operation on an undefined Sid "{self.string}"')
             return None
         return list(self._fields.keys() or [None])[-1]
 
@@ -358,7 +365,7 @@ class TypedSid(StringSid):
 
         """
         if not self._fields:
-            warning('[Sid][parent] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
+            warning(f'Sid operation on an undefined Sid "{self.string}"')
             return Sid()
         if len(self._fields.keys()) == 1:
             return self.copy()
@@ -392,7 +399,7 @@ class TypedSid(StringSid):
 
         """
         if not self._fields:
-            warning('[Sid][get] Asked for a Sid operation on an undefined Sid: "{}"'.format(self.string))
+            warning(f'Sid operation on an undefined Sid "{self.string}"')
             return None
 
         return self._fields.get(key)
@@ -421,11 +428,11 @@ class TypedSid(StringSid):
 
         """
         if not self._fields:
-            warning('[Sid][get_as] Asked for a Sid operation on an undefined Sid "{}"'.format(self.string))
+            warning(f'Sid operation on an undefined Sid "{self.string}"')
             return Sid()  # Return type is always Sid.
 
         if key not in self._fields:
-            info(f'[Sid][get_as] Key "{key}" not found in fields "{self._fields}"')
+            info(f'Key "{key}" not found in fields "{self._fields}"')
             return Sid()
 
         fields = dict()
@@ -434,13 +441,15 @@ class TypedSid(StringSid):
             if k == key:
                 return Sid(fields=fields)
 
-        raise SpilException(f"[Sid][get_as] Something unexpected happened during {self}.get_as({key})")
+        raise SpilException(f"[Sid][get_as] Unexpected error during {self}.get_as({key})")
 
-    def get_with(self,
-                 uri: Optional[str] = None,
-                 key: Optional[str] = None,
-                 value: Optional[str] = None,
-                 **kwargs) -> Sid:
+    def get_with(
+        self,
+        uri: Optional[str] = None,
+        key: Optional[str] = None,
+        value: Optional[str] = None,
+        **kwargs,
+    ) -> Sid:
         """
         Returns a new Sid
         - with the given uri applied (see details about uri application in documentation)
@@ -476,18 +485,20 @@ class TypedSid(StringSid):
             A new Sid. Depending on the update, the type of the returned Sid can change.
         """
         if self._string and not self._fields:
-            warning(f'[Sid][get_with] Asked for a Sid operation on an undefined Sid "{self.string}"')
+            warning(f'Sid operation on an undefined Sid "{self.string}"')
             return Sid()  # Return type is always Sid.
 
         # if we have a uri
         if uri:
-            return Sid('{}?{}'.format(self.full_string, uri))
+            return Sid("{}?{}".format(self.full_string, uri))
 
         data_copy = self._fields.copy()
 
         if key:
             kwargs[key] = value
-        for key, value in kwargs.copy().items():  # removing a key if the value is None. Use '' for empty values.
+
+        for key, value in kwargs.copy().items():
+            # removing a key if the value is None. Use '' for empty values.
             if value is None:
                 data_copy.pop(key)
                 kwargs.pop(key)
@@ -497,7 +508,7 @@ class TypedSid(StringSid):
         # If the resulting Sid is not typed, and is a search, we try return as StringSid, matching the Sid dictionary.
         # This is useful but may have unexpected side effects.
         if new_sid.is_search() and not new_sid:
-            new_sid = Sid('/'.join(list(data_copy.values())))
+            new_sid = Sid("/".join(list(data_copy.values())))
         return new_sid
 
     def is_leaf(self):
@@ -523,7 +534,8 @@ class TypedSid(StringSid):
         """
         return bool(self.get(conf.leaf_keys.get(self.basetype)))
         # TODO:
-        # Better define "complete". Also in regard to a search Sid. For example Sids containing /** are "complete".
+        # Better define "complete". Also in regard to a search Sid.
+        # For example Sids containing /** are "complete".
         # or if a Sid has no children, it is leaf.
 
     def as_uri(self) -> str:
@@ -541,7 +553,8 @@ class TypedSid(StringSid):
         """
         return uri_helper.to_string(self._fields)
 
-    def match(self, search_sid: Sid | str) -> bool:  # IDEA: match_as(search_sid, key) for example, do the "seq" of both sids match (like is_relative_to ?)
+    # IDEA: match_as(search_sid, key) for example, do the "seq" of both sids match (like is_relative_to ?)
+    def match(self, search_sid: Sid | str) -> bool:
         """
         Returns True if a given search_sid matches the current Sid.
         Else False.
@@ -565,18 +578,18 @@ class TypedSid(StringSid):
         # Identicals always match
         if Sid(search_sid) == self:
             return True
-        if not self._fields:  # Should untyped sids be able to match ? Identical strings could match.
-            warning('[Sid][match] Asked for a match check on an undefined Sid: "{}". Returning False.'.format(self.string))
+        # Should untyped sids be able to match ? Identical strings could match.
+        if not self._fields:
+            warning(f'Cannot match check an undefined Sid: "{self.string}". Returning False.')
             return False
         # To check the match, we search in a list with self as single element,
         # and expect self to be found using given search_sid.
-        from spil import FindInList
+        from spil import FindInList  # fmt: skip
         fl = FindInList([self.string])
         return fl.find_one(search_sid, as_sid=False) == self.string
 
 
 class PathSid(TypedSid):
-
     @cache
     def path(self, config: Optional[str] = None) -> Pathlike[str] | None:  # type: ignore
         """
@@ -610,7 +623,7 @@ class PathSid(TypedSid):
         if not self._fields:
             debug(f'Sid is undefined: "{self.string}". Returning None.')
             return None
-        from spil.sid.pathops.fs_resolver import dict_to_path
+        from spil.sid.pathops.fs_resolver import dict_to_path  # fmt: skip
         result = None
         try:
             result = dict_to_path(self._fields, self._type, config=config)
@@ -661,8 +674,8 @@ class DataSid(PathSid):
             return Sid()
         if not key:
             key = self.keytype
-        from spil import FindInAll
-        found = FindInAll().find_one(self.get_with(key=key, value='>'), as_sid=True)
+        from spil import FindInAll  # fmt: skip
+        found = FindInAll().find_one(self.get_with(key=key, value=">"), as_sid=True)
         if found.get(key):  # little failsafe. #SMELL
             return found
         else:
@@ -679,14 +692,13 @@ class DataSid(PathSid):
             >>> Sid('hamlet/a/char/ophelia/model/v003/w/ma').get_attr('comment')
             "Updated topology"
         """
-        raise NotImplemented("This method needs re-implementation")  # type: ignore
-
-        from spil.data.data import get  # FIXME: WIP
-        value = get(self, attribute)
-        if value:
-            return value
-        else:
-            return None
+        raise NotImplementedError("This method needs re-implementation")  # type: ignore
+        # from spil.data.data import get  # FIXME: WIP
+        # value = get(self, attribute)
+        # if value:
+        #     return value
+        # else:
+        #     return None
 
     def get_next(self, key: str) -> Sid:  # FIXME: delegate to Data framework
         """
@@ -708,20 +720,22 @@ class DataSid(PathSid):
         Returns:
             Sid
         """
-        raise NotImplemented("This method needs re-implementation")  # type: ignore
+        raise NotImplementedError("This method needs re-implementation")  # type: ignore
 
-        if key != 'version':
+        if key != "version":
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
-        current = self.get('version')
+        current = self.get("version")
         if current:
-            if current in ['*', '>']:  #FIXME: point to "searcher signs" config_name
-                version = (self.get_last('version').get('version') or 'v000').split('v')[-1] or 0
+            if current in ["*", ">"]:  # FIXME: point to "searcher signs" config_name
+                version = (self.get_last("version").get("version") or "v000").split("v")[-1] or 0
             else:
-                version = self.get('version').split('v')[-1]  # temporary workaround for "v001" FIXME
+                version = self.get("version").split("v")[
+                    -1
+                ]  # temporary workaround for "v001" FIXME
         else:
             version = 0  # allow non existing version #RULE: starts with V001 (#FIXME)
-        version = (int(version) + 1)
-        version = 'v' + str('%03d' % version)
+        version = int(version) + 1
+        version = "v" + str("%03d" % version)
         result = self.get_with(version=version)
         return result if result else Sid()
 
@@ -744,24 +758,24 @@ class DataSid(PathSid):
             Sid
 
         """
-        raise NotImplemented("This method needs re-implementation")  # type: ignore
+        raise NotImplementedError("This method needs re-implementation")  # type: ignore
 
-        if key != 'version':
+        if key != "version":
             raise NotImplementedError("get_new() support only 'version' key for the moment.")
-        if self.get('version'):
-            if self.get_last('version'):
-                result = self.get_last('version').get_next('version')
+        if self.get("version"):
+            if self.get_last("version"):
+                result = self.get_last("version").get_next("version")
                 return result if result else Sid()
             else:
-                result = self.get_next('version')  # Returns a first version
+                result = self.get_next("version")  # Returns a first version
                 return result if result else Sid()
         else:
-            with_added_version = self.get_with(version='*').get_last('version')
+            with_added_version = self.get_with(version="*").get_last("version")
             if with_added_version:
-                result = with_added_version.get_next('version')
+                result = with_added_version.get_next("version")
                 return result if result else Sid()
             else:
-                result = self.get_next('version')  # Returns a first version
+                result = self.get_next("version")  # Returns a first version
                 return result if result else Sid()
 
     def exists(self) -> bool:
@@ -786,7 +800,7 @@ class DataSid(PathSid):
         if not self._fields:
             debug(f'Sid is undefined: "{self.string}". Returning False')
             return False
-        from spil import FindInAll
+        from spil import FindInAll  # fmt: skip
         return FindInAll().exists(self)
 
     def siblings_as(self, key: str) -> List[Sid]:
@@ -808,8 +822,8 @@ class DataSid(PathSid):
         if key not in self._fields:
             info(f'[Sid][siblings_as] Key "{key}" not found in fields "{self._fields}"')
             return []
-        search = self.get_as(key).get_with(key=key, value='*')
-        from spil import FindInAll
+        search = self.get_as(key).get_with(key=key, value="*")
+        from spil import FindInAll  # fmt: skip
         return list(FindInAll().find(search, as_sid=True))
 
     def siblings(self) -> List[Sid]:
@@ -844,8 +858,8 @@ class DataSid(PathSid):
         """
         if self.is_leaf():  # per definition, leafs have no children.
             return []
-        from spil import FindInAll
-        search = self / '*'
+        from spil import FindInAll  # fmt: skip
+        search = self / "*"
         return list(FindInAll().find(search, as_sid=True))
 
     # def get_first, get_previous,
@@ -894,14 +908,15 @@ class Sid(DataSid):
     Note that this implementation may change, but API will remain the same.
     """
 
-    _factory = ('spil.sid.core.sid_factory', 'sid_factory')  # TODO: config_name, or better system.
+    _factory = ("spil.sid.core.sid_factory", "sid_factory")  # TODO: config_name, or better system.
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from spil_tests import stop
     from pprint import pprint
     from spil.util.log import debug, setLevel, INFO, DEBUG, info
+
     setLevel(INFO)
 
     s = Sid("hamlet/s/sq010/sh0010/anim")

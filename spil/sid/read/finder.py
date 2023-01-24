@@ -10,7 +10,6 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from __future__ import annotations
 from typing import Iterable, List, overload
@@ -39,10 +38,12 @@ class Finder:
         pass
 
     @overload
-    def find(self, search_sid: str | Sid, as_sid: Literal[True]) -> Iterable[Sid]: pass
+    def find(self, search_sid: str | Sid, as_sid: Literal[True]) -> Iterable[Sid]:
+        ...
 
     @overload
-    def find(self, search_sid: str | Sid, as_sid: Literal[False]) -> Iterable[str]: pass
+    def find(self, search_sid: str | Sid, as_sid: Literal[False]) -> Iterable[str]:
+        ...
 
     def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
         """
@@ -77,7 +78,9 @@ class Finder:
             yield i
 
     def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
-        raise NotImplementedError(f"[Finder.do_find] is abstract, and seams not implemented. Class: {self.__class__}")
+        raise NotImplementedError(
+            f"[Finder.do_find] is abstract, and seams not implemented. Class: {self.__class__}"
+        )
 
     def find_one(self, search_sid: str | Sid, as_sid: bool = True) -> Sid | str:
         """
