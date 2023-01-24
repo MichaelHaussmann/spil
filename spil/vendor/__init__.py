@@ -37,5 +37,7 @@ if __name__ == '__main__':
     from pprint import pprint
     pprint(sys.path)
 
-    import lucidity
-    print(lucidity)
+    import lucidity160
+    print(lucidity160)
+
+    from lucidity160 import template

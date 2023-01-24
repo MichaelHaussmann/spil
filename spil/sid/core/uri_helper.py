@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
 (C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
@@ -11,22 +10,20 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 
 """
 URI style string handling helper functions.
 
-TODO: Sid URI handling needs to be streamlined and documented.
+TODO: Sid URI handling needs to be cleaned up, typed and documented.
 """
-import six
+from urllib.parse import urlencode
+from urllib import parse as urlparse
 
-if six.PY2:
-    from urllib import urlencode
-    import urlparse as urlparse
-else:
-    from urllib.parse import urlencode
-    from urllib import parse as urlparse
+from spil.sid.core import sid_resolver
+from spil import conf
+from spil.util.log import warning, debug
+from spil.util.exception import SpilException
 
 
 def to_dict(uri_string):
@@ -72,12 +69,6 @@ def to_string(uri_dict):
     def encode(x, *args, **kwargs):
         return x.replace(' ', '')
 
-    if six.PY2:
-        l = []
-        for k, v in six.iteritems(uri_dict):
-            l.append(encode(k) + '=' + encode(v))
-        return '&'.join(sorted(l))
-
     return urlencode(uri_dict, quote_via=encode)
 
 
@@ -100,10 +91,13 @@ def update(data, uri, option_prefix='~'):
     >>> update({'keyA': 'valueA'}, 'keyB=valueB')
     {'keyA': 'valueA', 'keyB': 'valueB'}
     """
+    if not data:  # may be None
+        data = dict()
+
     data = data.copy()
     new_data = to_dict(uri)
 
-    for key, value in six.iteritems(new_data):
+    for key, value in new_data.items():
 
         if option_prefix:
             if str(value).startswith(str(option_prefix)):
@@ -120,12 +114,83 @@ def update(data, uri, option_prefix='~'):
     return data
 
 
+def apply_uri(string, uri=None, type=None, fields=None):
+    """
+    "Uri application" algorithm:
+    - the URI key/values update the existing fields dict --> uri_helper.update
+    - the updated fields dictionary is sent to the resolver to be typed --> sid_resolver.dict_to_type(fields, all=True)
+    - if a single type is resolved, it is now used, integration done.
+    - else if no type is resolved, the URI is not applied (kept in the string, the fields and type are unchanged)
+    - else if multiple types are resolved:
+        * if the original type is amongs the new types, it is used, integration done.
+        * else if the sid is a search, the first type is used, integration done (#FIXME: this behaviour should change)
+        * else the URI is not applied (kept in the string, the previous fields and type are unchanged)
+
+    This is a problem in case of a read Sid, which could be poly-typed.
+
+    Examples.
+    (Note that the examples depend on "hamlet_conf" example configuration. Failure may be due to non matching config)
+
+    Uri updates the sequence:
+    >>> apply_uri('hamlet/s/sq010', uri='sequence=sq030', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/sq030', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq030'})
+
+    Uri adds a shot:
+    >>> apply_uri('hamlet/s/sq010', uri='shot=sh0010', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/sq010/sh0010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': 'sq010', 'shot': 'sh0010'})
+
+    Uri updates the sequence and adds a shot:
+    >>> apply_uri('hamlet/s/sq010', uri='sequence=*&shot=sh0010', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/*/sh0010', 'shot__shot', {'project': 'hamlet', 'type': 's', 'sequence': '*', 'shot': 'sh0010'})
+
+    Uri contains undigestable fields (wrong sequence format), and is not applied:
+    >>> apply_uri('hamlet/s/sq010', uri='sequence=fuzz', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})
+    ('hamlet/s/sq010?sequence=fuzz', 'shot__sequence', {'project': 'hamlet', 'type': 's', 'sequence': 'sq010'})
+
+    Works with empty string, fields and type
+    >>> apply_uri('', uri='project=hamlet', type=None, fields=None)
+    ('hamlet', 'project', {'project': 'hamlet'})
+    """
+    if not type and fields:
+        raise SpilException("Uri can only be applied on typed fields (or empty fields).")
+
+    if not uri:
+        return string, type, fields
+
+    _type = type
+
+    new_data = update(fields, uri)
+    new_types = sid_resolver.dict_to_type(new_data, all=True)
+
+    if not new_types:
+        warning(f'[Sid] After URI apply, Sid "{string}" has no type. URI will not be applied.')
+        string = '{}?{}'.format(string, uri)
+        return string, _type, fields
+
+    if len(new_types) > 1:
+        if _type not in new_types:
+            if any(s in '{}?{}'.format(string, uri) for s in conf.search_symbols):
+                debug(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
+                      f'But it is a Search, so URI will be applied.')
+                # URI will be applied, using the first new_types (# FIXME: refuse the temptation to guess)
+                # In this case we should check if all the types result in the same Sid string, and return it, untyped.
+            else:
+                warning(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
+                        f'URI will not be applied.')
+                string = '{}?{}'.format(string, uri)
+                return string, _type, fields
+
+    # fields updated by URI is OK
+    new_string = sid_resolver.dict_to_sid(new_data, new_types[0])
+    if new_string:
+        return new_string, new_types[0], new_data
+    else:
+        raise SpilException(f"Sid: [{string}?{uri}] : Uri was correctly applied, but unable to resolve back to Sid")
+
+
 if __name__ == '__main__':
     """
-    Test block.
-    Launches doc test (test in the doc).
-    
-    In PY2 the test does not pass, because the dict is not sorted by default.
+    Launches doctest (test in the doc).
     """
     from spil.util.log import info, setLevel, INFO
 
@@ -139,6 +204,6 @@ if __name__ == '__main__':
     doctest.testmod()
 
     r = to_dict('&keyA=valueA&keyB=valueB&')
-    print(r)
+    # print(r)
 
     info('Tests done.')

@@ -3,7 +3,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -13,35 +13,23 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+from typing import Dict
 import importlib
 import inspect
 
-import six
-if six.PY2:
-    ModuleNotFoundError = ImportError
-
 # stubs that are replaced by imports
-get_data_source = None
-get_attribute_source = None
+get_finder_for = None
+get_getter_for = None
+sid_cache_folder = ''
+sid_cache_path = ''
+path_configs: Dict[str, str] = {}
+default_path_config = ''
 
 try:
-    module = importlib.import_module('data_conf')
+    module = importlib.import_module('spil_data_conf')
 except ModuleNotFoundError as e:
-    problem = """
-    -------------------------------------------------------------------------------------------------------------
-    CONFIGURATION PROBLEM: 
-
-    The configuration module "data_conf" was not found.
-    
-    Ensure to either include "demo_conf" in your python path, 
-    or create your own "data_conf" and add its folder to the python path.    
-
-    (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
-
-    Please see installation and configuration documentation.
-
-    -------------------------------------------------------------------------------------------------------------
-    """
+    from spil.conf import sid_conf_import_error_message
+    problem = sid_conf_import_error_message.format(module='spil_data_conf')
     print(problem)
     raise Exception(problem)
 

@@ -18,7 +18,7 @@ import tempfile
 
 def is_filename(path):
     """
-    if the given string ends with an extension, eg. a dot followed by 2 to 5 signs, we suppose it's a file name.
+    if the given string ends with an extension, e.g. a dot followed by 2 to 5 signs, we suppose it's a file name.
 
     :param path: path string
     :return:
@@ -83,7 +83,7 @@ def get_key(adict, value, default=None):
 
 def is_fs_case_sensitive():  # FIXME: not used, clean up.
     """
-    Checks if the file system is case sensitive.
+    Checks if the file system is case-sensitive.
 
     https://stackoverflow.com/questions/7870041/check-if-file-system-is-case-insensitive-in-python
     @author Steve Cohen, https://stackoverflow.com/users/6194443/steve-cohen

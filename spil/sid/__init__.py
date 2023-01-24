@@ -1,2 +1,2 @@
 
-from spil.sid.sid import Sid
+# from spil.sid.sid import Sid
