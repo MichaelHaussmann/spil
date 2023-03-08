@@ -19,7 +19,7 @@ from spil import Sid
 from spil.sid.read.finder import Finder
 
 from spil.util.log import debug, info, warning, error
-from spil.conf import get_finder_for  # type: ignore
+from spil.conf import get_finder_for, find_next  # type: ignore
 from spil.util.caching import lru_cache as cache
 from spil.sid.read.tools import unfold_search
 
@@ -114,7 +114,7 @@ class FindInAll(Finder):
             finder = get_finder(search_sid, self.config)  # TODO: allow multiple finders for the same search (eg.
 
             if finder:
-                l = finder_for_searches.get(finder) or {}
+                l = finder_for_searches.get(finder) or []
                 l.append(search_sid)
                 finder_for_searches[finder] = l
 
@@ -136,6 +136,28 @@ class FindInAll(Finder):
 
     def do_find(self, search_sids: List[Sid], as_sid: Optional[bool] = True) -> Iterable[Sid] | Iterable[str]:
         raise NotImplementedError("Find by Type delegates do_find to other Finders, depending on the search type.")
+
+    @overload
+    def find_next(self, search_sid: str | Sid, key: str, as_sid: Literal[True]) -> Sid:
+        ...
+
+    @overload
+    def find_next(self, search_sid: str | Sid, key: str, as_sid: Literal[False]) -> str:
+        ...
+
+    def find_next(self, search_sid: str | Sid, key: str, as_sid: Optional[bool] = True) -> Sid | str:  # noqa
+        """
+        # FIXME: refactor.
+
+        Args:
+            search_sid:
+            key:
+            as_sid:
+
+        Returns:
+
+        """
+        return find_next(search_sid, key=key, as_sid=as_sid)
 
     def __str__(self):
         return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'

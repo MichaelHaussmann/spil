@@ -8,7 +8,7 @@ It is ingested by spil.conf.data_conf_load, which reads it into spil.conf.
 *This is work in progress*
 
 The data config specification is subject to change.
-(without affecting spils API).
+(without affecting spil's API).
 
 """
 # attribute getters
@@ -109,4 +109,41 @@ def get_writer_for(sid):
     *This is work in progress*
     """
     raise NotImplemented()
+
+
+# Direct callback. TODO: move implementation
+def find_next(sid, key, as_sid=True):
+    """
+    Note: This function will be moved.
+    Documentation and test are in Sid().get_next() which callbacks this function.
+    """
+    if key != "version":
+        raise NotImplementedError("next() supports only 'version' key for the moment.")
+
+    from spil import Sid
+    _sid = Sid(sid)
+    current = _sid.get("version")
+
+    # extracts current version
+    if current:
+        if current in ["*", ">"]:
+            version = (_sid.get_last("version").get("version") or "v000").split("v")[-1] or 0
+        else:
+            version = _sid.get("version").split("v")[
+                -1
+            ]  # temporary workaround for "v001"
+    # or 0 if no current version
+    else:
+        version = 0  # starts with v001
+
+    # increments and formats
+    version = int(version) + 1
+    version = "v" + str("%03d" % version)
+
+    # builds Sid and returns
+    result = _sid.get_with(version=version) or Sid()
+    if as_sid:
+        return result
+    else:
+        return str(result)
 

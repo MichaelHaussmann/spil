@@ -17,7 +17,8 @@ from typing import Optional, Mapping, Any
 import shutil
 import json
 
-from spil import Sid, SpilException, Writer
+from spil import Sid, Writer
+from spil.util.exception import SpilException
 from spil.conf import default_path_config, create_file_using_template, create_file_using_touch, path_data_suffix  # type: ignore
 from spil.util.log import debug, warning
 from pathlib import Path

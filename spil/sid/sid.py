@@ -642,7 +642,7 @@ class PathSid(TypedSid):
 
 class DataSid(PathSid):
     """
-    The DataSid implements operations that delegate calls to data sources, Finders and Getters.
+    The DataSid implements operations that delegate calls to data sources: Finders and Getters.
     By default FindInAll and GetFromAll are used.
 
     # TODO: make configurable which Finder is used for DataSid operations (FindInAll per default).
@@ -657,9 +657,9 @@ class DataSid(PathSid):
 
         Example:
 
-            >>> from spil import WriteToAll
-            >>> sid = Sid('hamlet/a/char/ophelia/model/v003/w/ma')
-            >>> WriteToAll().set(sid, comment="Updated topology")
+            >>> from spil import WriteToPaths
+            >>> sid = Sid('hamlet/a/char/ophelia/model/v001/p/ma')
+            >>> WriteToPaths().set(sid, comment="Updated topology")
             >>> sid.get_attr('comment')
             "Updated topology"
 
@@ -715,42 +715,38 @@ class DataSid(PathSid):
 
     def get_next(self, key: str) -> Sid:  # FIXME: delegate to Data framework
         """
-        This method is experimental. Do not use.
-
-        Returns self with version incremented, or first version if there is no version.
-        If version is '*', returns "new" version (next of last)
+        Returns self with key's value incremented, or first value if there is none.
+        If value is '*', returns "get_new" (next of last)
 
         If the result is not a valid Sid (not typed, no fields), returns an empty Sid.
 
-        Example:
+        Note:
+            Currently limited to version.
+            The implementation will be moved.
+
+        Examples:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_next('version')
             Sid('asset__file:hamlet/a/char/ophelia/model/v002/w/ma')
 
+            >>> Sid('hamlet/a/char/ophelia/model/*/w/ma').get_next('version')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v001/w/ma')
+
+            >>> Sid('hamlet/a/char/ophelia/model').get_next('version')
+            Sid('asset__version:hamlet/a/char/ophelia/model/v001')
+
         Args:
-            key:
+            key: the key for which we want to increment the value. Typically a version.
 
         Returns:
-            Sid
-        """
-        raise NotImplementedError("This method needs re-implementation")  # type: ignore
+            A Sid with key's value incremented, or an empty Sid.
 
+        """
         if key != "version":
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
-        current = self.get("version")
-        if current:
-            if current in ["*", ">"]:  # FIXME: point to "searcher signs" config_name
-                version = (self.get_last("version").get("version") or "v000").split("v")[-1] or 0
-            else:
-                version = self.get("version").split("v")[
-                    -1
-                ]  # temporary workaround for "v001" FIXME
-        else:
-            version = 0  # allow non existing version #RULE: starts with V001 (#FIXME)
-        version = int(version) + 1
-        version = "v" + str("%03d" % version)
-        result = self.get_with(version=version)
-        return result or Sid()
+
+        from spil import FindInAll
+        return FindInAll().find_next(self, key=key, as_sid=True)
 
     def get_new(self, key: str) -> Sid:  # FIXME: Needs testing and documentation
         """
@@ -764,7 +760,7 @@ class DataSid(PathSid):
         Example:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_new('version')
-            Sid('hamlet/a/char/ophelia/model/v005/w/ma')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v002/w/ma')
 
         Args:
             key:
