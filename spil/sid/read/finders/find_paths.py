@@ -27,8 +27,8 @@ from spil.util.exception import SpilException
 from spil.util.log import warn, debug, error
 
 try:
-    import fileseq
-except:
+    import fileseq  # type: ignore
+except ImportError:
     fileseq = None
     error('fileseq could not be imported. File sequence search will not work.')
 
@@ -49,7 +49,7 @@ class FindInPaths(FindByGlob):
 
 
         """
-        self.config_name = config or conf.default_path_config
+        self.config_name = config or conf.default_path_config  # type: ignore
         self.conf = get_path_config(self.config_name)
 
     def star_search(self, search_sids: List[Sid],
@@ -70,7 +70,7 @@ class FindInPaths(FindByGlob):
             debug('do_sort not implemented in FindInPaths')
 
         # depending on input, select the right generator
-        is_framed_search = any([ssid.get('frame') == '*' for ssid in search_sids])  #FIXME: hardcoded "frame"
+        is_framed_search = any([ssid.get('frame') == '*' for ssid in search_sids])  # FIXME: hardcoded "frame"
 
         if is_framed_search and fileseq:
             generator = self.star_search_framed(search_sids, as_sid=as_sid)
@@ -166,7 +166,7 @@ class FindInPaths(FindByGlob):
 
             search = search_sid  # TODO: handle also strings ?
 
-            if search.get('frame') == '*':  #FIXME: hardcoded "frame"
+            if search.get('frame') == '*':  # FIXME: hardcoded "frame"
                 search = search.get_with('frame', '@')  # for usage in fileseq
 
             debug('Search : ' + str(search))

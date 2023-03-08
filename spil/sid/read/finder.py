@@ -12,7 +12,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, List, overload
+from typing import Iterable, List, overload, Optional
 from typing_extensions import Literal
 
 from spil.sid.sid import Sid
@@ -45,7 +45,11 @@ class Finder:
     def find(self, search_sid: str | Sid, as_sid: Literal[False]) -> Iterable[str]:
         ...
 
-    def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+    @overload
+    def find(self, search_sid: str | Sid, as_sid: Optional[bool]) -> Iterable[Sid] | Iterable[str]:
+        ...
+
+    def find(self, search_sid: str | Sid, as_sid: Optional[bool] = True) -> Iterable[Sid] | Iterable[str]:
         """
         Yields the Sids found using the given search_sid.
         Returns a generator over Sids, if as_sid is True (default), or over Sid strings.
@@ -77,12 +81,24 @@ class Finder:
         for i in generator:
             yield i
 
-    def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+    def do_find(self, search_sids: List[Sid], as_sid: Optional[bool] = True) -> Iterable[Sid] | Iterable[str]:
         raise NotImplementedError(
             f"[Finder.do_find] is abstract, and seams not implemented. Class: {self.__class__}"
         )
 
-    def find_one(self, search_sid: str | Sid, as_sid: bool = True) -> Sid | str:
+    @overload
+    def find_one(self, search_sid: str | Sid, as_sid: Literal[True]) -> Sid:
+        ...
+
+    @overload
+    def find_one(self, search_sid: str | Sid, as_sid: Literal[False]) -> str:
+        ...
+
+    @overload
+    def find_one(self, search_sid: str | Sid, as_sid: Optional[bool]) -> Sid | str:
+        ...
+
+    def find_one(self, search_sid: str | Sid, as_sid: Optional[bool] = True) -> Sid | str:
         """
         Returns the first Sid found using the given search_sid.
 

@@ -12,7 +12,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, List, Dict, Optional
+from typing import Iterable, List, Dict, Optional, overload
+from typing_extensions import Literal
 
 from spil import Sid
 from spil.sid.read.finder import Finder
@@ -74,7 +75,19 @@ class FindInAll(Finder):
 
         self.config = config
 
-    def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+    @overload
+    def find(self, search_sid: str | Sid, as_sid: Literal[True]) -> Iterable[Sid]:
+        ...
+
+    @overload
+    def find(self, search_sid: str | Sid, as_sid: Literal[False]) -> Iterable[str]:
+        ...
+
+    @overload
+    def find(self, search_sid: str | Sid, as_sid: Optional[bool]) -> Iterable[Sid] | Iterable[str]:
+        ...
+
+    def find(self, search_sid: str | Sid, as_sid: Optional[bool] = True) -> Iterable[Sid] | Iterable[str]:
         """
         Search dispatcher.
 
@@ -94,14 +107,14 @@ class FindInAll(Finder):
         search_sids = unfold_search(search_sid)
 
         done = set()  #TEST
-        finder_for_searches: Dict[Finder, List[Sid]] = dict()
+        finder_for_searches: Dict[Finder, List[Sid]] = {}
 
         for search_sid in search_sids:
 
             finder = get_finder(search_sid, self.config)  # TODO: allow multiple finders for the same search (eg.
 
             if finder:
-                l = finder_for_searches.get(finder) or list()
+                l = finder_for_searches.get(finder) or {}
                 l.append(search_sid)
                 finder_for_searches[finder] = l
 
@@ -121,7 +134,7 @@ class FindInAll(Finder):
             else:
                 debug(f'Nothing found for "{search_sid.full_string}"')
 
-    def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+    def do_find(self, search_sids: List[Sid], as_sid: Optional[bool] = True) -> Iterable[Sid] | Iterable[str]:
         raise NotImplementedError("Find by Type delegates do_find to other Finders, depending on the search type.")
 
     def __str__(self):

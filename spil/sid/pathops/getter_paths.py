@@ -20,8 +20,6 @@ import json
 from spil import Sid, Getter, FindInPaths
 from spil.conf import default_path_config, path_data_suffix  # type: ignore
 
-from spil.sid.read.util import first
-
 
 def _read_data(sid_path: Path) -> dict:
     """
@@ -38,8 +36,8 @@ def _read_data(sid_path: Path) -> dict:
     data_path = sid_path.with_suffix(path_data_suffix)
     data: dict[str, Any] = {}
     if data_path.exists():
-        with open(data_path) as f:
-            data = json.load(f) or dict()
+        with data_path.open() as f:
+            data = json.load(f) or {}
     return data
 
 
@@ -92,10 +90,14 @@ class GetFromPaths(Getter):
 if __name__ == "__main__":
     from pprint import pprint
     print(GetFromPaths())
-    search = 'vic/a'
+    search = 'hamlet/a'
+
+    print("Calling find:")
     for result in FindInPaths().find(search):
         pprint(result)
-    for result in GetFromPaths().get(search):
-        pprint(result)
+
+    print("Calling get:")
+    for result2 in GetFromPaths().get(search):
+        pprint(result2)
 
     print(GetFromPaths().get_attr(search, 'bill'))

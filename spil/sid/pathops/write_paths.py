@@ -59,14 +59,13 @@ def _write_data(sid_path: Path, data: Mapping[str, Any]) -> bool:
 
     # if there is already data, we load and update it
     if data_path.exists():
-        with open(data_path) as f:
-            previous_data = json.load(f) or dict()
+        with data_path.open() as f:
+            previous_data = json.load(f) or {}
             previous_data.update(data)
             data = previous_data
 
     # dumping data
-    with open(data_path, "w") as f:
-        f.write(json.dumps(data))
+    data_path.write_text(json.dumps(data))
 
     return data_path.exists()
 
@@ -184,6 +183,7 @@ if __name__ == "__main__":
     print(WriteToPaths())
     writer = WriteToPaths()
     done = writer.update(sid, data)
+    print(Sid(sid).path())
     print(f"Update: {done}")
 
     done = writer.set(sid, bill=25, random_attribute='random value')
