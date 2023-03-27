@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -10,15 +9,10 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from __future__ import annotations
 from typing import Tuple, Optional
 
-"""
-File system resolver
-Path <-> dict translation
-"""
 import os
 from pathlib import Path
 from collections import OrderedDict  # TODO: replace by dict
@@ -36,13 +30,21 @@ from spil.conf import key_types, sidtype_keytype_sep
 from spil.sid.core.sid_resolver import dict_to_type, sid_to_dict
 from spil.sid.pathops.pathconfig import get_path_config, PathConfig
 
+"""
+File system resolver
+Path <-> dict translation
+"""
+
 
 def get_resolvers(config: PathConfig) -> dict:
     """
     Technical necessity for Lucidity template reference mechanism.
 
-    :param config:
-    :return: dict
+    Args:
+        config:
+
+    Returns:
+
     """
     return {
         config.path_templates_reference: Template(  # type: ignore
@@ -50,10 +52,11 @@ def get_resolvers(config: PathConfig) -> dict:
         )
     }
 
+
 @cache
-def path_to_dict(path: str | os.PathLike[str],
-                 _type: Optional[str] = None,
-                 config: Optional[str] = None) -> Tuple[str, dict] | Tuple[None, None]:
+def path_to_dict(
+    path: str | os.PathLike[str], _type: Optional[str] = None, config: Optional[str] = None
+) -> Tuple[str, dict] | Tuple[None, None]:
     """
     Resolves the given path into the matching data dictionary.
     Uses the _type, if given, else looks up all templates and uses the first matching one.
@@ -69,23 +72,29 @@ def path_to_dict(path: str | os.PathLike[str],
     resolvers = get_resolvers(pc)
 
     path = str(path)
-    path = path.replace(os.sep, '/')
+    path = path.replace(os.sep, "/")
 
     if _type:
-        template = Template(_type, pc.path_templates.get(_type),
-                            anchor=lucidity.Template.ANCHOR_BOTH,
-                            default_placeholder_expression='[^/]*',
-                            duplicate_placeholder_mode=lucidity.Template.STRICT)
+        template = Template(
+            _type,
+            pc.path_templates.get(_type),
+            anchor=lucidity.Template.ANCHOR_BOTH,
+            default_placeholder_expression="[^/]*",
+            duplicate_placeholder_mode=lucidity.Template.STRICT,
+        )
         template.template_resolver = resolvers
         templates = [template]
 
     else:
         templates = []
         for name, pattern in pc.path_templates.items():
-            template = Template(name, pattern,
-                                anchor=lucidity.Template.ANCHOR_BOTH,
-                                default_placeholder_expression='[^/]*',
-                                duplicate_placeholder_mode=lucidity.Template.STRICT)
+            template = Template(
+                name,
+                pattern,
+                anchor=lucidity.Template.ANCHOR_BOTH,
+                default_placeholder_expression="[^/]*",
+                duplicate_placeholder_mode=lucidity.Template.STRICT,
+            )
             template.template_resolver = resolvers
             templates.append(template)
 
@@ -93,7 +102,7 @@ def path_to_dict(path: str | os.PathLike[str],
         data, template = lucidity.parse(path, templates)
         # print 'found', data, template
     except lucidity.ParseError as e:
-        debug('Lucidity did not find a matching pattern. Type given: {} (Message: "{}")'.format(_type, e))
+        debug(f'Lucidity did not find a matching pattern. Type given: {_type} (Message: "{e}")')
         return None, None
 
     if not data:
@@ -131,7 +140,7 @@ def path_to_dict(path: str | os.PathLike[str],
     return template.name, ordered
 
 
-def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] = None) -> os.PathLike[str]:
+def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] = None) -> Path:
     """
     Resolves the given data dictionary into a path.
     Uses the _type, if given, else calls dict_to_type to find matching type.
@@ -142,14 +151,14 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
     Returns path string.
     """
     if not data:
-        raise SpilException('[dict_to_path] Data is empty')
+        raise SpilException("[dict_to_path] Data is empty")
 
     pc = get_path_config(config)
     resolvers = get_resolvers(pc)
 
     data = data.copy()
 
-    debug('Data: {}'.format(data))
+    debug(f"Data: {data}")
 
     # setting defaults on empty values
     for key in data.keys():
@@ -169,22 +178,22 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
             if mapping:
                 data[key] = utils.get_key(mapping, value, value)
 
-    debug('sidtype: {}'.format(_type))
+    debug(f"sidtype: {_type}")
 
     pattern = pc.path_templates.get(_type)
 
-    debug('pattern: {}'.format(pattern))
+    debug(f"pattern: {pattern}")
 
     if not pattern:
-        raise SpilException('[dict_to_path] Unable to find pattern for sidtype: "{}" \nGiven data: "{}"'.format(_type, data))
+        raise SpilException(f'Unable to find pattern for type: "{_type}" \nData: "{data}"')
 
     template = Template(_type, pattern)
     template.template_resolver = resolvers
 
-    debug('template: {}'.format(template))
+    debug(f"template: {template}")
 
     if not template:
-        raise SpilException('toe')
+        raise SpilException(f"Unexpected: No template for type: {_type}")
 
     # adding template specific defaults
     for key in template.keys():
@@ -197,47 +206,47 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
             for new_key, mapping in pc.sidkeys_to_extrakeys.get(key, {}).items():
                 data[new_key] = mapping.get(data.get(key))
 
-    debug('data after path_defaults: {}'.format(data))
+    debug(f"data after path_defaults: {data}")
     path = template.format(data)
 
-    debug('found: {}'.format(path))
+    debug(f"found: {path}")
 
     return Path(path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from spil.util.log import setLevel, INFO, info, warning
 
-    info('Tests start')
+    info("Tests start")
 
     setLevel(INFO)
     # setLevel(DEBUG)  # In case of problems, use DEBUG mode
 
-    tests = ['hamlet/s/*']
+    tests = ["hamlet/s/*"]
 
     for test in tests:
 
-        info('*' * 15)
-        info('Testing : {}'.format(test))
+        info("*" * 15)
+        info("Testing : {}".format(test))
 
         _type, _dict = sid_to_dict(test)
-        info('Dict ({}) ---> \n{}'.format(_type, _dict))
+        info("Dict ({}) ---> \n{}".format(_type, _dict))
 
         try:
-            path = dict_to_path(_dict, _type=_type, config='server')
-            info(f'Path: {path}')
+            path = dict_to_path(_dict, _type=_type, config="server")
+            info(f"Path: {path}")
 
-            __, retour = path_to_dict(path, config='server')
-            info('Retour ({}) ---> \n{}'.format(_type, retour))
+            __, retour = path_to_dict(path, config="server")
+            info("Retour ({}) ---> \n{}".format(_type, retour))
 
-            assert (_dict == retour)
+            assert _dict == retour
 
         except SpilException as se:
             warning(se)
 
-        info('*' * 15)
-        print('  ')
+        info("*" * 15)
+        print("  ")
 
-    info('*' * 30)
-    info('*' * 30)
+    info("*" * 30)
+    info("*" * 30)
