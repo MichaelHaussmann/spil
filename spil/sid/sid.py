@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -16,6 +15,7 @@ from typing import Any, Optional, List
 
 import importlib
 from functools import total_ordering
+from pathlib import Path
 
 from spil.sid.core import uri_helper
 from spil.util.caching import lru_cache as cache
@@ -175,7 +175,7 @@ class StringSid(BaseSid):
     def __lt__(self, other: Sid | str) -> bool:
         return str(self) < str(other)
 
-    def __truediv__(self, other: Sid | str) -> Sid:
+    def __truediv__(self, other: Sid | str | None) -> Sid:
         """
         Override the division operator, to compose a Sid from another one.
         Inspired by pathlib.Path.
@@ -191,7 +191,11 @@ class StringSid(BaseSid):
             >>> sid.parent / sid.get(sid.keytype) == sid
             True
 
+            >>> Sid("hamlet/s/sq030") / None
+            Sid('shot__sequence:hamlet/s/sq030')
         """
+        if other is None:
+            return self.copy()
         return Sid(str(self) + conf.sip + str(other))
 
 
@@ -209,7 +213,7 @@ class TypedSid(StringSid):
     ):
         self._string = string or ""
         self._type = type or ""
-        self._fields = fields or dict()
+        self._fields = fields or {}
 
     @property
     def type(self) -> str:
@@ -435,7 +439,7 @@ class TypedSid(StringSid):
             info(f'Key "{key}" not found in fields "{self._fields}"')
             return Sid()
 
-        fields = dict()
+        fields = {}
         for k, v in self._fields.items():
             fields[k] = v
             if k == key:
@@ -600,7 +604,7 @@ class PathSid(TypedSid):
     """
 
     @cache
-    def path(self, config: Optional[str] = None) -> Pathlike[str] | None:  # type: ignore
+    def path(self, config: Optional[str] = None) -> Path | None:
         """
         Returns the file path for the current Sid, as a pathlib.Path.
         Returns None if the Sid has no path, or if it cannot be resolved.
@@ -617,8 +621,9 @@ class PathSid(TypedSid):
             >>> sid == new_sid
             True
 
-            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').path()
-            Path("/productions/hamlet/assets/characters/ophelia/3d/model/works/romeo_v001.ma")
+            >>> path = Sid('hamlet/a/char/ophelia/model/v001/w/ma').path()
+            >>> path.relative_to(conf.default_sid_conf_path).as_posix()  # to be location and os independent
+            'data/testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma'
 
             >>> Sid('bla/bla').path()
 
@@ -648,6 +653,7 @@ class DataSid(PathSid):
     # TODO: make configurable which Finder is used for DataSid operations (FindInAll per default).
     # Could be handled using a default config_name, and/or be changed at runtime.
     """
+
     def get_attr(self, attribute: str) -> Any | None:
         """
         Returns an attribute for the current sid.
@@ -658,10 +664,10 @@ class DataSid(PathSid):
         Example:
 
             >>> from spil import WriteToPaths
-            >>> sid = Sid('hamlet/a/char/ophelia/model/v001/p/ma')
-            >>> WriteToPaths().set(sid, comment="Updated topology")
+            >>> sid = Sid('hamlet/a/char/ophelia/model/v001/w/ma')
+            >>> __ = WriteToPaths().set(sid, comment="Updated topology")
             >>> sid.get_attr('comment')
-            "Updated topology"
+            'Updated topology'
 
         Args:
             attribute: Name of an attribute
@@ -671,7 +677,7 @@ class DataSid(PathSid):
 
         """
         from spil import GetFromAll  # fmt: skip
-        return GetFromAll().get_attr(self, attribute)
+        return GetFromAll().get_attr(self, attribute)  # type: ignore
 
     def get_last(self, key: Optional[str] = None) -> Sid:
         """
@@ -682,7 +688,7 @@ class DataSid(PathSid):
         Examples:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/p/ma').get_last('version')
-            Sid('asset__file:hamlet/a/char/ophelia/model/v001/p/ma')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v002/p/ma')
 
             >>> Sid('hamlet/a/char/ophelia/model').get_last()
             Sid('asset__task:hamlet/a/char/ophelia/surface')
@@ -713,7 +719,7 @@ class DataSid(PathSid):
         else:
             return Sid()
 
-    def get_next(self, key: str) -> Sid:  # FIXME: delegate to Data framework
+    def get_next(self, key: str) -> Sid:
         """
         Returns self with key's value incremented, or first value if there is none.
         If value is '*', returns "get_new" (next of last)
@@ -722,7 +728,6 @@ class DataSid(PathSid):
 
         Note:
             Currently limited to version.
-            The implementation will be moved.
 
         Examples:
 
@@ -730,7 +735,7 @@ class DataSid(PathSid):
             Sid('asset__file:hamlet/a/char/ophelia/model/v002/w/ma')
 
             >>> Sid('hamlet/a/char/ophelia/model/*/w/ma').get_next('version')
-            Sid('asset__file:hamlet/a/char/ophelia/model/v001/w/ma')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v003/w/ma')
 
             >>> Sid('hamlet/a/char/ophelia/model').get_next('version')
             Sid('asset__version:hamlet/a/char/ophelia/model/v001')
@@ -745,8 +750,10 @@ class DataSid(PathSid):
         if key != "version":
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
 
-        from spil import FindInAll
-        return FindInAll().find_next(self, key=key, as_sid=True)
+        attribute = f"next.{key}"
+
+        from spil import GetFromAll  # fmt: skip
+        return GetFromAll().get_attr(self, attribute=attribute)  # type: ignore
 
     def get_new(self, key: str) -> Sid:  # FIXME: Needs testing and documentation
         """
@@ -760,7 +767,7 @@ class DataSid(PathSid):
         Example:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_new('version')
-            Sid('asset__file:hamlet/a/char/ophelia/model/v002/w/ma')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v003/w/ma')
 
         Args:
             key:
@@ -808,7 +815,7 @@ class DataSid(PathSid):
             debug(f'Sid is undefined: "{self.string}". Returning False')
             return False
         from spil import FindInAll  # fmt: skip
-        return FindInAll().exists(self)
+        return FindInAll().exists(self)  # type: ignore
 
     def siblings_as(self, key: str) -> List[Sid]:
         """
@@ -855,7 +862,7 @@ class DataSid(PathSid):
         Examples:
 
             >>> Sid('hamlet/a/char/ophelia/rig').children()
-            [Sid('asset__version:hamlet/a/char/ophelia/rig/v001')]
+            [Sid('asset__version:hamlet/a/char/ophelia/rig/v001'), Sid('asset__version:hamlet/a/char/ophelia/rig/v002')]
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').children()
             []
@@ -906,9 +913,12 @@ class Sid(DataSid):
         >>> Sid(fields={'project': 'hamlet', 'sequence': 'sq010', 'type': 's'})  # fields dict
         Sid('shot__sequence:hamlet/s/sq010')
 
-        >>> Sid(path="/root/projects/hamlet/shots/sq010")           # path (default config)
-        >>> Sid(path="c:/projects/hamlet/shots/sq010", config='local')   # path (config "local")
+        >>> path = Path(conf.default_sid_conf_path) / "data/testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma"
+        >>> Sid(path=path)           # path (default config) # TODO: any config
+        Sid('asset__file:hamlet/a/char/ophelia/model/v001/w/ma')
 
+        >>> Sid(path=path, config='local')   # path (config "local")
+        Sid('asset__file:hamlet/a/char/ophelia/model/v001/w/ma')
 
     This class inherits all functionality from the class hierarchy.
     It only defines the factory to be used to create the Sid.
