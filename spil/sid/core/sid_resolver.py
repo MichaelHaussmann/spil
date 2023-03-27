@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -14,10 +13,6 @@ If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 from typing import Tuple, List, Optional, Mapping
 
-"""
-Sid resolver
-Transforms the sid string into a valid sid dict, and reverse.
-"""
 import string
 from collections import OrderedDict
 
@@ -27,15 +22,20 @@ from lucidity import Template  # type: ignore
 
 from spil.util.caching import lru_kw_cache as cache
 from spil.util.log import debug, info
-from spil.util.exception import SpilException
+from spil.util.exception import SpilException, raiser
 
 # sid conf
 from spil.conf import key_types, sidtype_keytype_sep  # type: ignore
 from spil.conf import sip, sid_templates  # type: ignore
 
+"""
+Sid resolver
+Transforms the sid string into a valid sid dict, and reverse.
+"""
+
 
 @cache
-def sid_to_dict(sid: str, _type: str | None = None) -> Tuple[str, dict] | Tuple[None, None]:
+def sid_to_dict(sid: str, _type: Optional[str] = None) -> Tuple[str, dict] | Tuple[None, None]:
     """
     Parses a given "sid" string using the existing sid_config templates.
     If "_type" is given, only the template named after the given "_type" is parsed.
@@ -54,28 +54,34 @@ def sid_to_dict(sid: str, _type: str | None = None) -> Tuple[str, dict] | Tuple[
 
     """
     if _type:
-        template = Template(_type, sid_templates.get(_type),
-                            anchor=lucidity.Template.ANCHOR_BOTH,
-                            default_placeholder_expression='[^/]*',
-                            duplicate_placeholder_mode=lucidity.Template.STRICT)
+        template = Template(
+            _type,
+            sid_templates.get(_type) or raiser(f"resolver received an invalid type: {_type}"),
+            anchor=lucidity.Template.ANCHOR_BOTH,
+            default_placeholder_expression="[^/]*",
+            duplicate_placeholder_mode=lucidity.Template.STRICT,
+        )
 
         templates = [template]
 
     else:
         templates = []
         for name, pattern in sid_templates.items():
-            template = Template(name, pattern,
-                                anchor=lucidity.Template.ANCHOR_BOTH,
-                                default_placeholder_expression='[^/]*',
-                                duplicate_placeholder_mode=lucidity.Template.STRICT)
+            template = Template(
+                name,
+                pattern,
+                anchor=lucidity.Template.ANCHOR_BOTH,
+                default_placeholder_expression="[^/]*",
+                duplicate_placeholder_mode=lucidity.Template.STRICT,
+            )
 
             templates.append(template)
 
     try:
-        data, template = lucidity.parse(str(sid), templates)
+        data, template = lucidity.parse(sid, templates)
         # print 'found', data, template
     except lucidity.ParseError as e:
-        debug('Lucidity did not find a matching pattern. Type given: {} (Message: "{}")'.format(_type, e))
+        debug(f'Lucidity did not find a matching pattern. Type: {_type} (Message: "{e}")')
         return None, None
 
     if not data:
@@ -93,6 +99,7 @@ def sid_to_dict(sid: str, _type: str | None = None) -> Tuple[str, dict] | Tuple[
 
     return template.name, ordered
 
+
 @cache
 def sid_to_dicts(sid: str) -> Mapping[str, dict]:
     """
@@ -109,35 +116,42 @@ def sid_to_dicts(sid: str) -> Mapping[str, dict]:
     Returns: a dictionary containing types as keys and resolved data as values.
 
     """
-    results = {}  # OrderedDict() TODO: check behaviour py2 != py3
+    results = {}
 
     # instantiating lucidity Templates
     for name, pattern in sid_templates.items():
-        template = Template(name, pattern,
-                            anchor=lucidity.Template.ANCHOR_BOTH,
-                            default_placeholder_expression='[^/]*',  # allows for empty keys // should it be '[^|]*' ?
-                            duplicate_placeholder_mode=lucidity.Template.STRICT)
+        template = Template(
+            name,
+            pattern,
+            anchor=lucidity.Template.ANCHOR_BOTH,
+            default_placeholder_expression="[^/]*",  # allows empty keys
+            duplicate_placeholder_mode=lucidity.Template.STRICT,
+        )
 
         # try template parse
         try:
-            data, template = lucidity.parse(str(sid), [template])
+            data, template = lucidity.parse(sid, [template])
         except lucidity.ParseError as e:
-            # ParseErrors are normal, we force the parsing of all the templates, and not just the first that matches, as usually
+            # ParseErrors are normal, we force the parsing of all the templates,
+            # and not just the first that matches, as usually
             continue
 
         if not data:
             continue
 
-        # Sorting the result data into an OrderedDict()
+        # Sorting the result data into an OrderedDict():
+        # getting the type
         sid_type = template.name.split(sidtype_keytype_sep)[0]
-        keys = key_types.get(sid_type)  # using template to get sorted keys
-        keys = filter(lambda x: x in template.keys(), keys)  # template.keys() is a set
-
+        # using template to get sorted keys for this basetype
+        keys = key_types.get(sid_type)
+        # filter out unused keys
+        keys = filter(lambda x: x in template.keys(), keys)
+        # building an Ordered dict with keys in right order
         data = data.copy()
         ordered = OrderedDict()
         for key in keys:
             ordered[key] = data.get(key)
-
+        # appending the oredered dict to the results list
         results[template.name] = ordered
 
     return results
@@ -158,7 +172,7 @@ def dict_to_sid(data: dict, _type: Optional[str] = None) -> str:
 
     """
     if not data:
-        raise SpilException('[dict_to_sid] Data is empty')
+        raise SpilException("[dict_to_sid] Data is empty")
 
     data = data.copy()
 
@@ -168,23 +182,23 @@ def dict_to_sid(data: dict, _type: Optional[str] = None) -> str:
     pattern = sid_templates.get(_type)
 
     if not pattern:
-        raise SpilException(
-            '[dict_to_sid] Unable to find pattern for sidtype: "{}" \nGiven data: "{}"'.format(_type, data))
+        raise SpilException(f'Unable to find pattern for type: "{_type}" \nData: "{data}"')
 
     template = lucidity.Template(_type, pattern)
 
     if not template:
-        raise SpilException('toe')
+        raise SpilException(f"Unexpected: No template for type: {_type}")
     try:
         sid = template.format(data).rstrip(sip)
     except lucidity.error.FormatError as e:
-        debug('Lucidity could not format the Sid. Data: {} / type: {} (Message: "{}")'.format(data, _type, e))
-        return ''  # TODO: test this
+        debug(f'Lucidity could not format the Sid. Data: {data} / type: {_type} (Message: "{e}")')
+        return ""
 
     return sid
 
 
-def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - this code is obscure and should be replaced / not be used
+# SMELL - this code is obscure and should be replaced / not be used
+def dict_to_type(data: dict, all: bool = False) -> str | List[str]:
     """
     Retrieves the sid types for the given dict "data".
     "data" can be unsorted.
@@ -205,14 +219,13 @@ def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - t
         all: if set to True, all matching types are returned, else the first matching type is returned (default)
 
     Returns: the type or types resolved from the given data dictionary.
-
     """
 
     found = []
-
     keys = data.keys()
 
-    for _type, template in sid_templates.copy().items():  # SMELL: this whole code is obscure...
+    # SMELL: this whole code is obscure...
+    for _type, template in sid_templates.copy().items():
 
         template_keys = [t[1] for t in string.Formatter().parse(template) if t[1] is not None]
 
@@ -221,18 +234,19 @@ def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - t
                 ltemplate = lucidity.Template(_type, template)
                 test = ltemplate.format(data)
                 if test:
-                    debug('Checking matching types ... (fails are normal)')  #FIXME / #SMELL : this code is plain nonsense...
+                    # FIXME / #SMELL : this code is plain nonsense...
+                    debug("Checking matching types ... (fails are normal)")
                     a, b = sid_to_dict(test, _type)
                     if a:
                         # print _type
                         found.append(_type)
 
     if not found:
-        info('No type found for {}'.format(data))
-        return ''
+        info("No type found for {}".format(data))
+        return ""
 
     if len(found) > 1:
-        debug('Sid multitypes for  => {} // {}'.format(data, found))
+        debug("Sid multitypes for  => {} // {}".format(data, found))
 
     if all:
         return found
@@ -240,37 +254,37 @@ def dict_to_type(data: dict, all: bool = False) -> str | List[str]:  # SMELL - t
         return found[0]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from spil.util.log import setLevel, INFO, info, warning
 
-    info('Tests start')
+    info("Tests start")
 
     setLevel(INFO)
     # setLevel(DEBUG)  # In case of problems, use DEBUG mode
 
-    tests = ['hamlet/s/*']
+    tests = ["hamlet/s/*"]
 
     for test in tests:
 
-        info('*' * 15)
-        info('Testing : {}'.format(test))
+        info("*" * 15)
+        info("Testing : {}".format(test))
 
         __, _dict = sid_to_dict(test)
-        info('sid {} ---> \n{}'.format(test, _dict))
+        info("sid {} ---> \n{}".format(test, _dict))
 
         a_type = dict_to_type(_dict)
-        info('type : {}'.format(a_type))
+        info("type : {}".format(a_type))
 
-        info('------ keys : {}'.format(_dict.keys()))
+        info("------ keys : {}".format(_dict.keys()))
 
         retour = dict_to_sid(_dict)
-        info('retour: ' + retour)
+        info("retour: " + retour)
 
-        assert(test == retour)
+        assert test == retour
 
-        info('*' * 15)
-        print('  ')
+        info("*" * 15)
+        print("  ")
 
-    info('*' * 30)
-    info('*' * 30)
+    info("*" * 30)
+    info("*" * 30)
