@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
 (C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
@@ -37,8 +35,8 @@ def raiser(exception: str | Exception):
 
     Examples:
 
-        >>> print(0 or raiser('Null value'))
-        >>> print(0 or raiser(ValueError('null value')))
+        ... print(0 or raiser('Null value'))
+        ... print(0 or raiser(ValueError('null value')))
 
     Inspired by https://mail.python.org/pipermail/python-ideas/2014-November/029921.html
 
@@ -56,7 +54,6 @@ def raiser(exception: str | Exception):
 
 
 if __name__ == "__main__":
-    import doctest
 
     try:
         try:
@@ -67,6 +64,3 @@ if __name__ == "__main__":
     except SpilException as pe:
 
         print("caught : ", pe)
-
-    # This fails, which means success, because we test an exception :)
-    doctest.testmod()
