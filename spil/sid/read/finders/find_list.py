@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -11,10 +9,9 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from __future__ import annotations
-from typing import Iterable, List, Set
+from typing import Iterator, List, Set
 
 import re
 
@@ -96,10 +93,11 @@ class FindInList(FindByGlob):
         Note: searchlist could be a generator, but it would be exhausted after a single function call.
         If do_extrapolate is True, searchlist becomes a list.
 
-        :param searchlist:
-        :param do_extrapolate:
-        :param do_pre_sort:
-        :param do_strip: if the returned items should be strip() (typically if coming from file input)
+        Args:
+            searchlist:
+            do_extrapolate:
+            do_pre_sort:
+            do_strip: if the returned items should be strip() (typically if coming from file input)
         """
         if do_extrapolate:
             self.searchlist = list(extrapolate(searchlist))
@@ -126,16 +124,19 @@ class FindInList(FindByGlob):
 
     def star_search(self, search_sids: List[Sid],
                     as_sid: bool = False,
-                    do_sort: bool = False) -> Iterable[Sid] | Iterable[str]:
+                    do_sort: bool = False) -> Iterator[Sid] | Iterator[str]:
         """
         Simple star search.
 
         Transforms the pattern into a regex (like fnmatch.translate), but without traversing "/" (the sid separator).
 
-        :param search_sids:
-        :param as_sid:
-        :param do_sort:
-        :return:
+        Args:
+            search_sids:
+            as_sid:
+            do_sort:
+
+        Returns:
+
         """
         done: Set[str] = set()
         done_add = done.add  # performance

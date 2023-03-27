@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -11,22 +9,34 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
-from spil.conf import basetyped_search_narrowing
+from spil import Sid
+from spil.conf import basetyped_search_narrowing  # type: ignore
 
 
 def execute(sids):
     """
-    Once a search Sid is typed, we may need to narrow down the values, to make sure the right type is hit in the search.
-
-    For example:
-    "asset_cat:hamlet/*/*" and "shot_seq:hamlet/*/*"
-    should be narrowed down to
-    "asset_cat:hamlet/a/*" and "shot_seq:hamlet/s/*"
+    Once a search Sid is typed, we may need to narrow down the values,
+    (filling the string with values)
+    to make sure the right type is hit in the search.
 
     The transformation cannot yet be properly automated.
     For that reason it is set in a config_name, and handled here.
+
+    TODO: for more precise results we might want to implement this on types also,
+    not only basetypes.
+
+    Examples:
+        >>> type_narrow(Sid("asset__assettype:hamlet/*/*"))
+        Sid('asset__assettype:hamlet/a/*')
+
+        >>> type_narrow(Sid("shot__sequence:hamlet/*/*"))
+        Sid('shot__sequence:hamlet/s/*')
+
+    Args:
+        sids:
+
+    Returns:
 
     """
     result = []
@@ -37,7 +47,16 @@ def execute(sids):
     return result
 
 
-def type_narrow(sid):
+def type_narrow(sid: Sid) -> Sid:
+    """
+    For a given basetype, looks up the configured uri, and applies it.
+
+    Args:
+        sid:
+
+    Returns:
+
+    """
 
     uri = basetyped_search_narrowing.get(sid.basetype, '')
     if uri:
@@ -47,7 +66,23 @@ def type_narrow(sid):
 
 if __name__ == '__main__':
 
-    import doctest
-    doctest.testmod()
+    from spil.util.log import DEBUG, setLevel
+    # import doctest
+    # doctest.testmod()
+    setLevel(DEBUG)
+    # sid = Sid("asset__assettype:hamlet/a/char")
+    sid = Sid("asset__file:hamlet/a/char/hamlet/model/v001/p/*")
+    s = type_narrow(sid)
+    print(s.full_string)
 
+    sid = Sid("asset__movie_file:hamlet/a/char/hamlet/model/v001/p/*?type=~a")
+    s = type_narrow(sid)
+    print(s.full_string)
+
+    sids = [Sid('asset__file:hamlet/a/char/hamlet/model/v001/p/*'),
+            Sid('asset__movie_file:hamlet/a/char/hamlet/model/v001/p/*'),
+            Sid('asset__cache_file:hamlet/a/char/hamlet/model/v001/p/*')]
+
+    done = execute(sids)
+    print(done)
 
