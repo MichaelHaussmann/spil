@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -10,146 +9,177 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from __future__ import annotations
-from typing import Iterator, Mapping, Any, List, Optional
+from typing import Iterator, Mapping, Any, List, Optional, Callable
 
 from spil import Sid
 from spil.sid.read.util import first
+from spil.sid.read.tools import unfold_search
 
 
 class Getter:
     """
     Interface for Sid Getter.
 
-    Implements common public Sid Search methods "get" and "get_one".
+    Whereas the Finder only finds Sids, the Getter retrieves Sid(s) and its data.
+
+    A Getter is getting from a data source.
+    Eg. GetFromPaths, GetFromSG.
+
+    The Getter's work has two forms:
+    Finding with data form a search sid, or Getting data from a Sid.
+
+    ## Finding with data
+
+    Methods: get(), do_get(), get_one()
+
+    The Getter receives a Search Sid, finds the result Sid(s) and returns them together with data.
+    This can be considered like a Finder including dependencies (the "Finder" itself only finds Sids).
+    2 Implementation options:
+    - The Getter calls the data source directly and retrieves Sids with data in one go.
+      Typically, it is done when the data source is a database (for example GetFromSG)
+    - The Getter calls a Finder to find the Sids, and then retrieves the data for each of them.
+      For example GetFromPaths calls FindInPaths and then reads the data from disk for the Sids.
+
+    These methods yield over dicts containing the data.
+    One special field named "sid" contains the Sid.
+
+    ## Getting data
+
+    Methods: get_data(), get_attr()
+
+    The Getter receives a specific Sid, and retrieves its data.
+    It is possible to call
+    - For a given existing Sid, retrieving data with all or some attributes
+    - For a given existing Sid, retrieving one attribute
+
+    get_data() returns the data dict
+    get_attr() returns the attributee
     """
 
-    def __init__(self):
-        pass
-
-    def get(self, search_sid: str | Sid, attribute: Optional[str] = None, as_sid: bool = False) -> Iterator[Mapping[str | Sid, Any | dict]]:
+    def get(
+        self,
+        search_sid: str | Sid,
+        attributes: Optional[List[str]] = None,
+        sid_encode: Callable = str,
+    ) -> Iterator[Mapping[str, Any]]:
         """
-        For a given search, returns an Iterator over Mappings containing a Sid as key,
-        and the retrieved data as value.
+        For a given search, returns an Iterator over Mappings containing the retrieved data.
+        One special field named "sid" contains the Sid.
+        The Sid can be encoded by providing a callable to "sid_encode". Default is str.
 
-        By default, attribute is None, retrieved data is a dictionary containing all configured data for the Sid type.
-        If attribute is given, data contains only the value of the given attribute.
+        By default, attributes is None, retrieved data contains all configured data for the Sid type.
+        If "attributes" is given, data contains only the key:value for the given attributes.
 
         The Sids returned by Getter.get() should be identical to those returned by Finder.find().
-        Getter retrieves data related to these Sids, whereas the Finder only the existing Sids themselves.
+        Getter retrieves data related to these Sids, whereas the Finder finds only the existing Sids themselves.
 
         Args:
-            as_sid:
-            search_sid:
-            attribute:
+            search_sid: the search sid (possibly untyped).
+            attributes: a list of attribute names, that should be fetched.
+            sid_encode: a callable to which the sid object will be passed,
+            that should return the value added to the data dictionary under the "sid" key.
+            Example: sid_encode=lambda x: x.full_string
+            If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
 
         Returns:
-            An iterator over Mappings containing a Sid as key,
-            and the retrieved data as value. Either for a given attribute (attribute),
-            or all data in a dictionary (data as configured).
-
+            Iterator over Mappings containing the retrieved data.
+            One special field named "sid" contains the Sid
         """
-        return []
+        # shortcut if Sid is not a search
+        sid = Sid(search_sid)
+        if sid and not sid.is_search():
+            generator = self.do_get([sid], attributes=attributes, sid_encode=sid_encode)
+        else:
+            search_sids = unfold_search(search_sid)
+            generator = self.do_get(search_sids, attributes=attributes, sid_encode=sid_encode)
+        yield from generator
 
-    def do_get(self, search_sids: List[Sid], attribute: Optional[str] = None, as_sid: bool = False) -> Iterator[Mapping[str | Sid, Any | dict]]:
+    def do_get(
+        self,
+        search_sids: List[Sid],
+        attributes: Optional[List[str]] = None,
+        sid_encode: Callable = str,
+    ) -> Iterator[Mapping[str, Any]]:
         """
-        For a given list of typed Search Sids
+        Has the same purpose as get(), but operates on given "search_sids",
+        a list of typed search sids.
+
+        Is called by get() after unfolding and typing the search sid.
 
         Args:
-            search_sids:
-            attribute:
-            as_sid:
+            search_sids: List of typed search sids.
+            attributes: a list of attribute names, that should be fetched.
+            sid_encode: a callable to which the sid object will be passed,
+            that should return the value added to the data dictionary under the "sid" key.
+            Example: sid_encode=lambda x: x.full_string
+            If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
 
         Returns:
-
+            Iterator over Mappings containing the retrieved data.
+            One special field named "sid" contains the Sid.
         """
-        return []
+        raise NotImplementedError("Method do_get() needs to be implemented.")
 
-    def get_one(self, search_sid: str | Sid, attribute: Optional[str] = None, as_sid: bool = False) -> Mapping[str | Sid, Any | dict]:
+    def get_one(
+        self,
+        search_sid: str | Sid,
+        attributes: Optional[List[str]] = None,
+        sid_encode: Callable = str,
+    ) -> Mapping[str, Any]:
         """
         Calls get() with the given parameters, and returns the first result.
 
         Args:
-            search_sid:
-            attribute:
-            as_sid:
+            See get()
 
         Returns:
-
+            Mapping containing the retrieved data.
+            One special field named "sid" contains the Sid
         """
-        found = first(self.get(search_sid, attribute=attribute, as_sid=as_sid))
-        return found
+        found = first(self.get(search_sid, attributes=attributes, sid_encode=sid_encode))
+        return found or {}
 
-    def get_attr(self, search_sid: str | Sid, attribute: Optional[str] = None) -> Any | dict[str, Any] | None:
+    def get_data(
+        self, sid: str | Sid, attributes: Optional[List[str]] = None, sid_encode: Callable = str
+    ) -> Mapping[str, Any]:
         """
-        Returns the result from get_one(), but without the Sid as key.
-        Returns directly the data dictionary, or the value of the attribute, if given.
+        Returns data associated to the given Sid, as a key:value dictionary.
+        One special field named "sid" contains the Sid.
+
+        Returns an empty dictionary if no data was found.
 
         Args:
-            search_sid:
-            attribute:
+            sid: a typed sid
+            attributes: a list of attribute names, that should be fetched.
+            sid_encode: a callable to which the sid object will be passed,
+            that should return the value added to the data dictionary under the "sid" key.
+            Example: sid_encode=lambda x: x.full_string
+            If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
 
         Returns:
+            Mapping containing the retrieved data.
+            One special field named "sid" contains the Sid
         """
-        result = self.get_one(search_sid=search_sid, attribute=attribute, as_sid=False)
-        if result is None:
-            return
-        if result.values():
-            return list(result.values())[0]
-        else:
-            return
+        return self.get_one(search_sid=sid, attributes=attributes, sid_encode=sid_encode)
+
+    def get_attr(self, sid: str | Sid, attribute: str) -> Any | None:
+        """
+        Returns an attribute, a named piece of data, for the given Sid.
+
+        Args:
+            sid: typed Sid
+            attribute: attribute name
+
+        Returns:
+            The value for the given Sid and attribute name.
+        """
+        return self.get_data(sid).get(attribute)
 
     def __str__(self):
         return f"[spil.{self.__class__.__name__}]"
 
 
-'''
-Drafts from previous implementation
-
-def get(sid, attribute, do_cached=True):  # TODO: put the choice of caching or not in the data source config_name.
-    if do_cached:
-        return get_cached_attribute(sid, attribute)
-    else:
-        return get_attribute(sid, attribute)
-
-def get_attribute_source(sid, attribute):
-    """
-    For a given Sid and attribute, looks up the matching data_source, as given by config_name.
-    Return value is a callable (typically a function).
-    """
-    _sid = Sid(sid)
-    if not str(_sid) == str(sid):
-        error('Sid could not be created, this is likely a configuration error. "{}" -> {}'.format(sid, _sid))
-    source = conf.get_attribute_source(_sid, attribute)
-    if source:
-        debug('Getting attribute source for "{} / {}": -> {}'.format(sid, attribute, source))
-        return source
-    else:
-        warning('Attribute Source not found for Sid "{} / {}" ({})'.format(sid, attribute, _sid.type))
-        return None
-
-
-def get_attribute(sid, attribute):
-    source = get_attribute_source(sid, attribute)
-    if source:
-        return source(sid)
-
-
-@cache
-def get_cached_attribute(sid, attribute):
-    source = conf.get_attribute_source(sid, attribute)
-    if source:
-        return source(sid)
-
-
-def reload_data_source(sid):
-    """
-    Reloads the data source for given sid
-    """
-'''
-
 if __name__ == "__main__":
     print(Getter())
-    

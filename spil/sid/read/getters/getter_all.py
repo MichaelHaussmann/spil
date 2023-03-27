@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -12,7 +11,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, List, Dict, Optional, overload, Any, Iterator, Mapping
+from typing import Iterator, Mapping, Any, List, overload, Optional, Callable, Dict
 from typing_extensions import Literal
 
 from spil import Sid
@@ -22,10 +21,13 @@ from spil.sid.read.getter import Getter
 from spil.util.log import debug, info, warning, error
 from spil.conf import get_getter_for  # type: ignore
 from spil.util.caching import lru_cache as cache
+from spil.sid.read.tools import unfold_search
 
 
-@cache
-def get_getter(sid: Sid | str, config: Optional[str] = None) -> Getter | None:
+# @cache
+def get_getter(
+    sid: Sid | str, attribute: Optional[str] = None, config: Optional[str] = None
+) -> Getter | None:
     """
     Calls spil.conf.get_getter_for() which is implemented in the spil_data_conf.
 
@@ -39,6 +41,7 @@ def get_getter(sid: Sid | str, config: Optional[str] = None) -> Getter | None:
     The Getter is called again each time a query method (get(), get_one(), get_attr()) is called.
 
     Args:
+        attribute:
         sid: the Search Sid for which we want to get the appropriate Getter instance
         config: an optional configuration name, to be able to have multiple configs co-existing.
 
@@ -49,20 +52,22 @@ def get_getter(sid: Sid | str, config: Optional[str] = None) -> Getter | None:
     _sid = Sid(sid)
     if not str(_sid) == str(sid):
         warning(f'Sid could not be instanced, likely a configuration error. "{sid}" -> {_sid}')
-    source = get_getter_for(_sid, config)
+    source = get_getter_for(_sid, attribute=attribute, config=config)
     if source:
-        debug(f'Getting data source for "{sid}": -> {source}')
+        debug(f'Getting data source for "{sid}" {attribute or ""} {config or ""}): -> {source}')
         return source
     else:
         warning(f'Data Source not found for Sid "{sid}" ({_sid.type})')
         return None
 
 
-class GetFromAll(Getter):
+class GetFromAll(Getter):  # noqa
     """
     This Getter will call other Getters, as configured, depending on the search sids type.
 
+    The do_get() method is delegated to other Getters, and not implemented.
     """
+
     def __init__(self, config: Optional[str] = None):
         """
         Config is an argument that will be passed to the config, via get_getter_for(sid, config).
@@ -71,83 +76,75 @@ class GetFromAll(Getter):
         Args:
             config: name of a configuration
         """
-
         self.config = config
 
-    def get(self, search_sid: str | Sid, attribute: Optional[str] = None, as_sid: bool = False) -> Iterator[Mapping[str | Sid, Any | dict]]:
+    def get(
+        self,
+        search_sid: str | Sid,
+        attributes: Optional[List[str]] = None,
+        sid_encode: Callable = str,
+    ) -> Iterator[Mapping[str, Any]]:
         """
-        For a given search, returns an Iterator over Mappings containing a Sid as key,
-        and the retrieved data as value.
-
-        By default, attribute is None, retrieved data is a dictionary containing all configured data for the Sid type.
-        If attribute is given, data contains only the value of the given attribute.
-
-        The Sids returned by Getter.get() should be identical to those returned by Finder.find().
-        Getter retrieves data related to these Sids, whereas the Finder only the existing Sids themselves.
-
-        Args:
-            as_sid:
-            search_sid:
-            attribute:
-
-        Returns:
-            An iterator over Mappings containing a Sid as key,
-            and the retrieved data as value. Either for a given attribute (attribute),
-            or all data in a dictionary (data as configured).
+        See Getter.
 
         """
-        return []
+        # we start by unfolding
+        search_sids: List[Sid] = unfold_search(search_sid)
 
-    def do_get(self, search_sids: List[Sid], attribute: Optional[str] = None, as_sid: bool = False) -> Iterator[Mapping[str | Sid, Any | dict]]:
+        # Dictionary to map a Getter to a list of Sids it should get.
+        getter_to_searches: Dict[Getter, List[Sid]] = {}
+
+        for search_sid in search_sids:
+
+            # Getter for the specific search
+            getter = get_getter(
+                search_sid, config=self.config
+            )  # IDEA: allow multiple getters to cumulate data
+
+            if getter:
+                searches = getter_to_searches.get(getter) or []
+                searches.append(search_sid)
+                getter_to_searches[getter] = searches
+            else:
+                warning(f"No Getter configured for {search_sid}. Skipped from search.")
+
+        for getter, searches in getter_to_searches.items():
+
+            debug(f'Searching "{getter}" --> "{searches}"')
+            generator = getter.do_get(searches, attributes=attributes, sid_encode=sid_encode)
+
+            # TODO: check if doublon check is needed
+            yield from generator
+
+    def get_data(
+        self, sid: str | Sid, attributes: Optional[List[str]] = None, sid_encode: Callable = str
+    ) -> Mapping[str, Any]:
         """
-        For a given list of typed Search Sids
-
-        Args:
-            search_sids:
-            attribute:
-            as_sid:
-
-        Returns:
+        See Getter
 
         """
-        return []
+        # Getter for the specific sid
+        source = get_getter(sid, config=self.config)
+        if source:
+            return source.get_data(sid, attributes=attributes, sid_encode=sid_encode)
+        else:
+            error(f"No Getter for get_data() found for {sid} / config: {self.config}")
+            return {}
 
-    def get_one(self, search_sid: str | Sid, attribute: Optional[str] = None, as_sid: bool = False) -> Mapping[str | Sid, Any | dict]:
-        """
-        Calls get() with the given parameters, and returns the first result.
-
-        Args:
-            search_sid:
-            attribute:
-            as_sid:
-
-        Returns:
-
-        """
-        found = first(self.get(search_sid, attribute=attribute, as_sid=as_sid))
-        return found
-
-    def get_attr(self, search_sid: str | Sid, attribute: Optional[str] = None) -> Any | dict[str, Any] | None:
-        """
-        Returns the result from get_one(), but without the Sid as key.
-        Returns directly the data dictionary, or the value of the attribute, if given.
-
-        Args:
-            search_sid:
-            attribute:
-
-        Returns:
-        """
-        result = self.get_one(search_sid=search_sid, attribute=attribute, as_sid=False)
-        if result is None:
+    def get_attr(self, sid: str | Sid, attribute: str) -> Any | None:
+        # Getter for the specific sid and attribute
+        source = get_getter(sid, attribute=attribute, config=self.config)
+        if source:
+            return source.get_attr(sid, attribute=attribute)
+        else:
+            error(
+                f"No Getter for get_attr() found for {sid} and {attribute} - config: {self.config}"
+            )
             return None
-        if result.values():
-            return list(result.values())[0]
 
     def __str__(self):
-        return f"[spil.{self.__class__.__name__}]"
+        return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'
 
 
 if __name__ == "__main__":
-    print(Getter())
-    
+    print(GetFromAll())
