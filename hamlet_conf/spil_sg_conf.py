@@ -96,6 +96,65 @@ field_mappings = {
     }
 }
 
+# TODO: data formatting
+data_mappings = {
+    'project': {
+        "id": "sg_id",
+        "description": 'description',
+        "image": "image"
+    },
+    'asset__assettype': {
+        "project.Project.name": 'project',
+        "sg_asset_type": "assettype",
+    },
+    'asset__asset': {
+        "description": 'description',
+        "sg_note": "note",
+        "id": "sg_id",
+        "sg_status_list": "status",
+        "shots": "shots",
+        "image": "image"
+    },
+    "asset__task": {
+        "id": "sg_id",
+        "sg_status_list": "status",
+        "image": "image"
+    },
+    "asset__version": {
+        "description": 'description',
+        "sg_note": "note",
+        "id": "sg_id",
+        "sg_status_list": "status",
+        "image": "image"
+    },
+    'shot__sequence': {
+        "id": "sg_id",
+        "sg_status_list": "status",
+    },
+    'shot__shot': {
+        "description": 'description',
+        "sg_note": "note",
+        "id": "sg_id",
+        "sg_cut_duration": "cut_duration",
+        "sg_status_list": "status",
+        "assets": "assets",
+        "image": "image"
+    },
+    "shot__task": {
+        "id": "sg_id",
+        "sg_status_list": "status",
+        "image": "image"
+    },
+    "shot__version": {
+        "description": 'description',
+        "sg_note": "note",
+        "id": "sg_id",
+        "sg_status_list": "status",
+        "image": "image"
+    }
+}
+
+
 
 defaults_by_basetype = {
     'shot': {
