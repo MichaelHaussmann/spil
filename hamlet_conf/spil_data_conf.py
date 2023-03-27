@@ -11,6 +11,8 @@ The data config specification is subject to change.
 (without affecting spil's API).
 
 """
+from __future__ import annotations
+from pathlib import Path
 # attribute getters
 # cachable_attributes (by getter / by type / with TTL - for example publish file size, date, owner
 
@@ -57,28 +59,32 @@ def get_finder_for(search_sid, config=None):  # get finder by Sid and optional c
     """
     # type: ignore
     from spil_sid_conf import projects, asset_types  # type: ignore
-    from spil import FindInConstants, FindInPaths
+    from spil import FindInConstants, FindInPaths, Finder
 
+    finder_paths = FindInPaths()
     finder_projects = FindInConstants("project", projects)
     finder_types = FindInConstants("type", ["a", "s"], parent_source=finder_projects)
     finder_assettypes = FindInConstants('assettype', asset_types, parent_source=finder_types)
+    finder_asset_states = FindInConstants('state', ["w", "p"], parent_source=finder_paths)
 
     finders_by_type = {
         'project': finder_projects,
-        'asset__type': finder_types,
-        'shot__type': finder_types,
+        'asset': finder_types,
+        'shot': finder_types,
         'asset__assettype': finder_assettypes,
-        'default': FindInPaths()
+        'asset__state': finder_asset_states,
+        'shot__state': finder_asset_states,
+        'default': finder_paths
     }
 
-    finder = finders_by_type.get(search_sid.type, {}) or finders_by_type.get('default', {})
+    finder: Finder = finders_by_type.get(search_sid.type, {}) or finders_by_type.get('default', {})
     if finder:
         return finder
     else:
         return None
 
 
-def get_getter_for(sid, attribute):
+def get_getter_for(sid, attribute=None, config=None):
     """
 
     *This is work in progress*
@@ -89,61 +95,64 @@ def get_getter_for(sid, attribute):
     Currently, the sid argument is not used.
     """
     # from spil_action.libs.files import get_comment, get_size, get_time
+    from spil import Getter, GetFromPaths
+    from spil_plugins.sg.get_sg import GetFromSG
+    from spil_plugins.crud.next_get import NextGetter
 
     attribute_getters = {
+        "next.version": NextGetter()
         #'comment': get_comment,
         #'size': get_size,
         #'time': get_time,
     }
 
-    getter = attribute_getters.get(attribute)
+    getter: Getter | None = attribute_getters.get(attribute)
     if getter:
         return getter
+
+    getters_by_type = {
+        'project': None,
+        'asset': None,
+        'shot': None,
+        'asset__assettype': None,
+        'asset__state': None,
+        'shot__state': None,
+        'asset__asset': GetFromSG(),
+        'shot__shot': GetFromSG(),
+        'shot__sequence': GetFromSG(),
+        'shot__task': GetFromSG(),
+        'asset__task': GetFromSG(),
+        'default': GetFromPaths()
+    }
+
+    if sid.type in getters_by_type:
+        # getter can be explicitly None
+        # in this case, no data can be retrieved.
+        return getters_by_type.get(sid.type)
     else:
-        print('No getter found for Attribute "{}" ({})'.format(attribute, sid))
-        return None
+        return getters_by_type.get('default')
 
 
 def get_writer_for(sid):
     """
     *This is work in progress*
     """
-    raise NotImplemented()
+    raise NotImplementedError("get_writer_for is not implemented")
 
 
-# Direct callback. TODO: move implementation
-def find_next(sid, key, as_sid=True):
+def get_data_json_path(sid_path: Path) -> Path:
     """
-    Note: This function will be moved.
-    Documentation and test are in Sid().get_next() which callbacks this function.
+    For a given Sid path, returns the path of a hidden data "sidecar" json file.
+    Adds a dot before the name and changes the extension to ".data.json"
+
+    Args:
+        sid_path: path of a Sid
+
+    Returns:
+        path of a hidden data sidecar json file.
+
     """
-    if key != "version":
-        raise NotImplementedError("next() supports only 'version' key for the moment.")
 
-    from spil import Sid
-    _sid = Sid(sid)
-    current = _sid.get("version")
-
-    # extracts current version
-    if current:
-        if current in ["*", ">"]:
-            version = (_sid.get_last("version").get("version") or "v000").split("v")[-1] or 0
-        else:
-            version = _sid.get("version").split("v")[
-                -1
-            ]  # temporary workaround for "v001"
-    # or 0 if no current version
-    else:
-        version = 0  # starts with v001
-
-    # increments and formats
-    version = int(version) + 1
-    version = "v" + str("%03d" % version)
-
-    # builds Sid and returns
-    result = _sid.get_with(version=version) or Sid()
-    if as_sid:
-        return result
-    else:
-        return str(result)
-
+    # TODO: add file rotation
+    data_path = sid_path.with_name('.' + sid_path.name).with_suffix(path_data_suffix)
+    return data_path
