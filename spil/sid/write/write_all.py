@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -27,7 +27,7 @@ class WriteToAll(Writer):
     This allows existing or external pipeline write functions to be wrapped by a Writer, without the need to implement one.
 
     Note that it is recommended to implement a custom writer, because the code is better structured,
-    but this approach is not always possible or desireable.
+    but this approach is not always possible or desirable.
     """
 
     def create(self, sid: Sid | str, data: Optional[dict] = None) -> bool:
