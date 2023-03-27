@@ -1,3 +1,4 @@
+from codetiming import Timer  # imported from here
 
 
 def stop():

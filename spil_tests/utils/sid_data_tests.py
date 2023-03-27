@@ -61,13 +61,16 @@ def test_data_sid(s, reraise=True, replace=None, from_search=None):
         params = {
             "exists": sid.exists(),
             "get_last": sid.get_last(),
-            "get_last (version)": sid.get_last("version"),
             "children": list(sid.children()),
             "siblings": list(sid.siblings()),
             "uncles": list(sid.parent.siblings()),
-            # "get_next": sid.get_next("version"),
-            # "get_new": sid.get_new("version"),
         }
+        if sid.get("version"):
+            params.update({
+                "get_last (version)": sid.get_last("version"),
+                "get_next (version)": sid.get_next("version"),
+                "get_new (version)": sid.get_new("version"),
+            })
 
         log.info("Params: \n" + pformat(params))
         log.info("Fields: \n" + pformat(sid.fields))
