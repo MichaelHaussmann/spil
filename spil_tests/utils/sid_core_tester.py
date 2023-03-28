@@ -18,7 +18,7 @@ log = get_logger("spil_tests", color=False)
 log.setLevel(DEBUG)
 
 
-def test_typed_sid(s, reraise=True, replace=None):
+def check_typed_sid(s, reraise=True, replace=None):
     """
     Test protocol for the Typed Sid.
 
@@ -110,7 +110,7 @@ def test_typed_sid(s, reraise=True, replace=None):
             raise e
 
 
-def test_typed_sids(sids, reraise=True, replace=None):
+def check_typed_sids(sids, reraise=True, replace=None):
     """
     Loop over core_test_sid.
     """
@@ -124,7 +124,7 @@ def test_typed_sids(sids, reraise=True, replace=None):
     for i, s in enumerate(sids):
         log.info("*" * 75)
         log.info("----------------------------------------- {}".format(i))
-        test_typed_sid(s, reraise=reraise, replace=replace)
+        check_typed_sid(s, reraise=reraise, replace=replace)
 
 
 if __name__ == "__main__":
@@ -135,4 +135,4 @@ if __name__ == "__main__":
 
     from scripts.example_sids import sids
 
-    test_typed_sids(sids)
+    check_typed_sids(sids)

@@ -21,7 +21,7 @@ log = get_logger("spil_tests")
 log.setLevel(DEBUG)
 
 
-def test_data_sid(s, reraise=True, replace=None, from_search=None):
+def check_data_sid(s, reraise=True, replace=None, from_search=None):
     """
     Test protocol for the Data Sid.
 
@@ -86,9 +86,9 @@ def test_data_sid(s, reraise=True, replace=None, from_search=None):
             raise e
 
 
-def test_data_sids(sids, reraise=True, replace=None):
+def check_data_sids(sids, reraise=True, replace=None):
     """
-    Loop over test_data_sid.
+    Loop over check_data_sid.
     """
 
     log.info("Testing if example sids match the Sid config_name")
@@ -100,7 +100,7 @@ def test_data_sids(sids, reraise=True, replace=None):
     for i, s in enumerate(sids):
         log.info('*' * 75)
         log.info("----------------------------------------- {}".format(i))
-        test_data_sid(s, reraise=reraise, replace=replace)
+        check_data_sid(s, reraise=reraise, replace=replace)
 
 
 def test_search(sid):
@@ -132,4 +132,4 @@ if __name__ == "__main__":
 
     sids = ["hamlet/a/char/gertrude/model/v000/w/blend", "hamlet/a/char/gertrude/model/v001/w/blend"]
 
-    test_data_sids(sids)
+    check_data_sids(sids)

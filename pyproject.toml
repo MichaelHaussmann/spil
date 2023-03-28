@@ -58,3 +58,21 @@ target-version = ['py37']
 [tool.refurb]
 python-version = 3.7
 ignore = [126]
+
+[tool.mypy]
+check-untyped-defs = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+log_cli = true
+addopts = "--doctest-modules"
+
+#log_cli_level = 10
+#testpaths = [
+#    "tests",
+#    "integration",
+#]
+# note the use of single quote below to denote "raw" strings in TOML
+# 'ignore:function ham\(\) is deprecated:DeprecationWarning',
