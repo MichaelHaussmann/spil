@@ -23,7 +23,7 @@ Searches is a dict with searches as
 from codetiming import Timer
 from spil import Sid, FindInPaths, SpilException
 
-from spil_tests.utils.sid_full_test import test_full_sid
+from spil_tests.utils.sid_full_tester import test_full_sid
 from spil.util.log import DEBUG, ERROR, get_logger
 
 log = get_logger("spil_tests")
