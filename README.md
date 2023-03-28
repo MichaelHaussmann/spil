@@ -1,8 +1,8 @@
 # Spil, the Simple Pipeline lib.
 
-[![Spil, the simple pipeline lib.](https://raw.githubusercontent.com/MichaelHaussmann/spil/py3/docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
+[![Spil, the simple pipeline lib.](https://raw.githubusercontent.com/MichaelHaussmann/spil/dev/docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
-Spil provides a simple, hierarchical, path-like unique identifier for every entity or file of a CG production pipeline.      
+Spil provides a simple, hierarchical, path-like, unique identifier for every entity or file of a CG production pipeline.      
 An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
 
 ## Motivation
