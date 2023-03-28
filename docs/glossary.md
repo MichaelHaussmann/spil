@@ -13,7 +13,7 @@ The string can be any string.
 
 During instantiation, the Sid factory attempts to resolve the string, according to the `spil_sid_conf`.
 If it succeeds, the Sid object receives a `type` property, and a `fields` dictionary.
-If the string contains a `uri`, it is applied.
+If the string contains a `query`, it is applied.
 
 If the string cannot be resolved, the Sid object only has a `string` property.
 
@@ -89,9 +89,9 @@ Sid('hamlet/a/char/ophelia/modeling/v002/p/mb').keytype  # "ext"
         keytype: 'project'
 
 
-### uri
+### query
 
-A uri is a key value representation of a Sid.  
+A query is a key value representation of a Sid.  
 
 `project=hamlet&type=a&assettype=props&asset=skull`
 
@@ -107,7 +107,7 @@ Example:
 `project/s/sq010/sh0010/**/ma?state=p`    
 Search all maya files for shot 0010, that are published.
 
-A Uri can contain optional fields, that get applied only where they already exist
+A Query can contain optional fields, that get applied only where they already exist
 (fields are only updated, never added).  
 Optional fields are prefixed with `~`.  
 
@@ -115,7 +115,7 @@ Example:
 `project/s/sq010/sh0010/anim/**/cache?node=~*`   
 Search all caches for shot 0010, optionally with node.  
 
-When a Sid is created with a URI, this URI is "applied" to the Sid.
+When a Sid is created with a Query, this Query is "applied" to the Sid.
 
 ```python
 from spil import Sid
@@ -124,13 +124,13 @@ sid = Sid("hamlet/a/props/dagger?asset=skull")
 print(sid.get("asset"))  # "skull"
 ```
 
-The uri apply works like this:
+The query apply works like this:
 - the Sid's type is defined, which creates the data dictionary
-- the uri key/values update the dictionary
+- the query key/values update the dictionary
 
-The uri apply is designed to update an existing typed Sid.
+The query apply is designed to update an existing typed Sid.
 If the Sid is not typed, or the apply changes the type, it is considered fail, and is not applied. 
-If the uri is not applied, it stays as a trailing part of the string.
+If the query is not applied, it stays as a trailing part of the string.
 
 ### Extrapolate
 

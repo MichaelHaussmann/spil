@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -10,7 +9,6 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from spil.util.log import DEBUG, ERROR, get_logger
 from spil import Sid, SpilException
@@ -41,7 +39,7 @@ def test_full_sid(s, reraise=True, replace=None, from_search=None):
     sid = Sid(s)
     log.info('Instanced: "{}"'.format(sid.full_string))
 
-    if not s.count("?"):  # Assert works only without URI part
+    if not s.count("?"):  # Assert works only without Query part
         assert str(sid) == s
     assert sid == eval(repr(sid))
 
@@ -66,13 +64,14 @@ def test_full_sid(s, reraise=True, replace=None, from_search=None):
             else:
                 log.warning('Sid "{}" has not parent ?'.format(sid))
 
-        assert sid == Sid(sid.get("project") + "?" + sid.as_uri()), \
-            "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_uri()()))
+        assert sid == Sid(
+            sid.get("project") + "?" + sid.as_query()
+        ), "Sid Query assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_query()()))
 
         assert sid == Sid(
-            sid.get("project") + "?" + sid.as_uri()
-        ), "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_uri()()))
-        log.info('Passed "URI": sid == Sid(sid.get("project") + "?" + sid.as_uri() ')
+            sid.get("project") + "?" + sid.as_query()
+        ), "Sid Query assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_query()()))
+        log.info('Passed "Query": sid == Sid(sid.get("project") + "?" + sid.as_query() ')
 
         if not sid.parent:
             log.warning("Sid {} has no valid parent (got: {}).".format(sid, sid.parent))
@@ -90,7 +89,9 @@ def test_full_sid(s, reraise=True, replace=None, from_search=None):
             except AssertionError:
                 msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path(): {}\nSid(path=sid.path()): {}\n".format(
                     "(Sid is a search, this may be normal)." if sid.is_search() else "",
-                    sid, sid.path(), Sid(path=sid.path())
+                    sid,
+                    sid.path(),
+                    Sid(path=sid.path()),
                 )
                 log.warning(msg)
             try:
@@ -99,7 +100,10 @@ def test_full_sid(s, reraise=True, replace=None, from_search=None):
             except AssertionError:
                 msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path(): {}\nSid(path=sid.path()): {}\nSid(path=sid.path()).path(): {}".format(
                     "(Sid is a search, this may be normal)." if sid.is_search() else "",
-                    sid, sid.path(), Sid(path=sid.path()), Sid(path=sid.path()).path()
+                    sid,
+                    sid.path(),
+                    Sid(path=sid.path()),
+                    Sid(path=sid.path()).path(),
                 )
                 log.warning(msg)
         else:
@@ -117,16 +121,22 @@ def test_full_sid(s, reraise=True, replace=None, from_search=None):
             "type": sid.type,
             "full_string": sid.full_string,
             "string": sid.string,
-            "uri": sid.as_uri(),
+            "query": sid.as_query(),
             "is_search": sid.is_search(),
             "get_last": sid.get_last(),
             "children": list(sid.children()),
             "siblings": list(sid.siblings()),
             "uncles": list(sid.parent.siblings()),
-            #"get_last (version)": sid.get_last("version"),
-            # "get_next": sid.get_next("version"),
-            # "get_new": sid.get_new("version"),
         }
+
+        if sid.get("version"):
+            params.update(
+                {
+                    "get_last (version)": sid.get_last("version"),
+                    "get_next (version)": sid.get_next("version"),
+                    "get_new (version)": sid.get_new("version"),
+                }
+            )
 
         log.info("Params: \n" + pformat(params))
         log.info("Fields: \n" + pformat(sid.fields))
@@ -154,7 +164,7 @@ def test_full_sids(sids, reraise=True, replace=None):
         return
 
     for i, s in enumerate(sids):
-        log.info('*' * 75)
+        log.info("*" * 75)
         log.info("----------------------------------------- {}".format(i))
         test_full_sid(s, reraise=reraise, replace=replace)
 
@@ -171,7 +181,7 @@ def test_search(sid):
     found = FindInPaths().find_one(sid)
     log.info("{} ----> FindInPaths() --->  {}".format(sid, found))
     if found and not sid.is_search():
-        assert (sid == found)
+        assert sid == found
 
     """
     found = Data().get_one(sid)

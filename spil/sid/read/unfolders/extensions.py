@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -11,11 +9,10 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
-from spil.conf import extension_alias  # from sid conf
+from spil.conf import extension_alias  # type: ignore # from sid conf
 from spil.conf import sip, ors
-from spil.sid.core import uri_helper
+from spil.sid.core import query_helper
 
 
 def execute(sids):
@@ -35,7 +32,7 @@ def execute(sids):
     return result
 
 
-def handle_extension(extension_string=''):
+def handle_extension(extension_string=""):
     """
     Updates the string representing the extension, by replacing the aliases by the actual extensions.
 
@@ -50,27 +47,25 @@ def handle_extension(extension_string=''):
     ''
     """
     if not extension_string:
-        return ''
+        return ""
 
     if extension_string.count(ors):
         extension_string = [x.strip() for x in extension_string.split(ors)]
     else:
         extension_string = [extension_string]
 
-    # print('extention_string', extention_string)
-
     result = []
     for ext in extension_string:
         ext = extension_alias.get(ext, [ext])
         result.extend(ext)
 
-    return ','.join(sorted(list(set(result))))
+    return ",".join(sorted(list(set(result))))
 
 
 def extensions(sid):
     """
     Replaces extension aliases in the given string.
-    Does replacement on the main string, and on an optional uri.
+    Does replacement on the main string, and on an optional query.
 
     Examples
     >>> extensions('bla/s/bla/bla/**/hou')
@@ -87,29 +82,30 @@ def extensions(sid):
 
     sid = str(sid)
 
-    if sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
-        sid, uri = sid.split('?', 1)
+    if sid.count("?"):  # sid contains Query ending. We put it aside, and later append it back
+        sid, query = sid.split("?", 1)
     else:
-        uri = ''
+        query = ""
 
     # main sid
     parts = sid.split(sip)
     newsid = parts[:-1]  # SMELL: this might not be an extension at all. Still works.
     newsid.append(handle_extension(parts[-1]))
 
-    # uri part
-    if uri:
-        uri_dict = uri_helper.to_dict(uri)
-        if uri_dict.get('ext'):  #FIXME: "ext" is hard coded.
-            uri_dict['ext'] = handle_extension(uri_dict.get('ext'))
-        uri = uri_helper.to_string(uri_dict)
+    # query part
+    if query:
+        query_dict = query_helper.to_dict(query)
+        if query_dict.get("ext"):  # FIXME: "ext" is hard coded.
+            query_dict["ext"] = handle_extension(query_dict.get("ext"))
+        query = query_helper.to_string(query_dict)
 
-    return sip.join(newsid) + ('?' + uri if uri else '')
+    return sip.join(newsid) + ("?" + query if query else "")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     import doctest
+
     doctest.testmod()
 
     """

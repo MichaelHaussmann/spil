@@ -13,7 +13,7 @@ If not, see <https://www.gnu.org/licenses/>.
 from typing import List
 
 from spil.conf import sip, ors
-from spil.sid.core import uri_helper
+from spil.sid.core import query_helper
 
 
 def execute(sids: List[str]) -> List[str]:
@@ -54,16 +54,16 @@ def or_op(sid: str) -> List[str]:
     if not sid.count(ors):  # no "or" operators in sid.
         return [sid]
 
-    if sid.count("?"):  # sid contains URI ending. We put it aside, and later append it back
-        sid, uri = sid.split("?", 1)
+    if sid.count("?"):  # sid contains Query ending. We put it aside, and later append it back
+        sid, query = sid.split("?", 1)
     else:
-        uri = ""
+        query = ""
 
     sids = or_on_path(sid)
 
     result = []
-    if uri:
-        uris = or_on_uri(uri)
+    if query:
+        uris = or_on_query(query)
         for s in sids:
             for u in uris:
                 result.append("{}?{}".format(s, u))
@@ -123,24 +123,24 @@ def or_on_path(sid):
     return result
 
 
-def or_on_uri(uri):
+def or_on_query(query):
     """
-    Applies the or operator to values of the uri, creating unique uris without the operator.
+    Applies the or operator to values of the query, creating unique uris without the operator.
 
     Example:
 
-        >>> or_on_uri('titi=tata,blip&roger=vadim,bom,tom, tata')
+        >>> or_on_query('titi=tata,blip&roger=vadim,bom,tom, tata')
         ['titi=tata&roger=vadim', 'titi=blip&roger=vadim', 'titi=tata&roger=bom', 'titi=blip&roger=bom', 'titi=tata&roger=tom', 'titi=blip&roger=tom', 'titi=tata&roger=tata', 'titi=blip&roger=tata']
 
     Args:
-        uri:
+        query:
 
     Returns:
 
     """
-    uri_dict = uri_helper.to_dict(uri)
-    result = [uri_dict.copy()]
-    for key, value in uri_dict.items():
+    query_dict = query_helper.to_dict(query)
+    result = [query_dict.copy()]
+    for key, value in query_dict.items():
         if value.count(ors):
             new_result = []
             for i in value.split(ors):
@@ -151,7 +151,7 @@ def or_on_uri(uri):
             result = new_result
     #     print(result)
 
-    return [uri_helper.to_string(d) for d in result]
+    return [query_helper.to_string(d) for d in result]
 
 
 if __name__ == "__main__":

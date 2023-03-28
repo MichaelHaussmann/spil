@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -19,7 +18,7 @@ from spil.sid.sid import Sid
 
 from spil.util.log import info, warning, debug
 from spil.sid.core import sid_resolver
-from spil.sid.core.uri_helper import apply_uri
+from spil.sid.core.query_helper import apply_query
 from spil.sid.pathops import fs_resolver
 
 
@@ -33,32 +32,32 @@ def sid_to_sid(sid: str | Sid) -> Sid:
     Returns: a Sid object
 
     """
-    debug(f'Starting with: {sid}')
+    debug(f"Starting with: {sid}")
 
     string = sid.full_string if isinstance(sid, Sid) else str(sid)
 
-    if string.count('?'):  # sid contains URI ending. We put it aside, and later append it back
-        string, uri = string.split('?', 1)
+    if string.count("?"):  # sid contains Query ending. We put it aside, and later append it back
+        string, query = string.split("?", 1)
     else:
-        uri = ''
+        query = ""
 
     # resolving
-    if string.count(':'):  # a fullstring
-        _type, string = string.split(':')
+    if string.count(":"):  # a fullstring
+        _type, string = string.split(":")
         _type, fields = sid_resolver.sid_to_dict(string, _type)
     else:  # a simple string
         _type, fields = sid_resolver.sid_to_dict(string)  # The string might be empty
 
     new_sid = Sid(from_factory=True)  # empty instance
 
-    # no uri to handle, we return
-    if not uri:
+    # no query to handle, we return
+    if not query:
         new_sid._init(string=string, type=_type, fields=fields)
         return new_sid
 
-    # applying the uri (applying the uri may update the type)
+    # applying the query (applying the query may update the type)
     else:
-        string, _type, fields = apply_uri(string, uri=uri, type=_type, fields=fields)
+        string, _type, fields = apply_query(string, query=query, type=_type, fields=fields)
         new_sid._init(string=string, type=_type, fields=fields)
         return new_sid
 
@@ -75,11 +74,11 @@ def dict_to_sid(fields: dict) -> Sid | None:
     """
     # TODO: make a fast version when the fields comes from an internal trusted and already typed call.
 
-    debug(f'Starting with: {fields}')
+    debug(f"Starting with: {fields}")
 
     _type = sid_resolver.dict_to_type(fields)  # FIXME: terrible code
     if not _type:
-        warning(f'Fields did not resolve to valid Sid type, returning empty Sid. fields: "{fields}"')
+        warning(f'Fields did not resolve to valid Sid type. fields: "{fields}"')
         return None
 
     # Now getting sid and ordered dict
@@ -89,7 +88,7 @@ def dict_to_sid(fields: dict) -> Sid | None:
     type, fields = sid_resolver.sid_to_dict(sid, _type)  # check if type == _type ?
 
     if not fields:
-        warning(f'After resolving back from Sid {sid}, Fields are empty. Your should investigate the config_name. Returning empty Sid.')
+        warning(f"After resolving back from Sid {sid}, Fields are empty. Check the config.")
         return None
 
     new_sid = Sid(from_factory=True)
@@ -127,11 +126,13 @@ def path_to_sid(path: str | os.Pathlike[str], config: Optional[str]) -> Sid | No
 
 
 # @lru_kw_cache
-def sid_factory(sid: Optional[str] = None,
-                uri: Optional[str] = None,
-                fields: Optional[dict] = None,
-                path: os.Pathlike[str] | str | None = None,  # type: ignore # Problem with os.Pathlike
-                config: Optional[str] = None) -> Sid:
+def sid_factory(
+    sid: Optional[str] = None,
+    query: Optional[str] = None,
+    fields: Optional[dict] = None,
+    path: os.Pathlike[str] | str | None = None,  # type: ignore # Problem with os.Pathlike
+    config: Optional[str] = None,
+) -> Sid:
     """
     Sid Factory.
     Depending on input, calls a sid creation function and returns the produced Sid object.
@@ -146,7 +147,7 @@ def sid_factory(sid: Optional[str] = None,
 
     Args:
         sid: a Sid object or string
-        uri: a string with "&" separated key=value pairs, eg. "?project=hamlet&type=s"
+        query: a string with "&" separated key=value pairs, eg. "?project=hamlet&type=s"
         fields: a Sid fields dictionary
         path: a path for a Sid
         config: config name for the path resolving
@@ -154,13 +155,13 @@ def sid_factory(sid: Optional[str] = None,
     Returns: Sid object
 
     """
-    debug(f"sid_factory start: {sid} - {uri} - {fields} - {path} - {config}")
+    debug(f"sid_factory start: {sid} - {query} - {fields} - {path} - {config}")
     result = None
     if sid:
         result = sid_to_sid(sid)
 
-    elif uri:
-        result = sid_to_sid(f"?{uri}")
+    elif query:
+        result = sid_to_sid(f"?{query}")
 
     elif fields:
         result = dict_to_sid(fields=fields)

@@ -116,8 +116,8 @@ def unfold_search(
     for ssid in search_sids.copy():  # make this a search unfolder ?
         if not ssid:  # untyped Sid evaluates to False
             search_sids.remove(ssid)
-        if ssid.string.count("?"):  # Un-appliable URI (uri still present in string)
-            warn(f'SearchSid "{ssid}" is typed, but has un-applied URI. Cannot be searched.')
+        if ssid.string.count("?"):  # Un-appliable Query (query still present in string)
+            warn(f'SearchSid "{ssid}" is typed, but has un-applied Query. Cannot be searched.')
             search_sids.remove(ssid)
 
     if do_uniquify:

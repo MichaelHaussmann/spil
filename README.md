@@ -88,14 +88,14 @@ shot = task.parent
 # shot sid: hamlet/s/sq030/sh0010 
 ```
 
-Creation with a URI or dictionary
+Creation with a Query or dictionary
 ```python
 from spil import Sid
-seq = Sid(uri="project=hamlet&type=s&sequence=sq010")  # uri        
+seq = Sid(query="project=hamlet&type=s&sequence=sq010")  # query        
 seq = Sid(fields={'project': 'hamlet', 'type': 's', 'sequence': 'sq010'})  # dict
 ```
 
-Data can be accessed in multiple ways: by key, as a complete dictionary, as string or URI.
+Data can be accessed in multiple ways: by key, as a complete dictionary, as string or Query.
 ```python
 from spil import Sid 
 shot = Sid("hamlet/s/sq030/sh0010")
@@ -108,8 +108,8 @@ shot.get("sequence")
 shot.fields            
 #  { 'project': 'hamlet', 'type': 's', 'sequence': 'sq030', 'shot': 'sh0010' }
 
-# as a URI
-shot.as_uri()          
+# as a Query
+shot.as_query()          
 # "project=hamlet&type=s&seq=sq030&shot=sh0010"
 
 # "fullstring": type and string
@@ -218,9 +218,9 @@ It is string based, and uses operators:
 "hamlet/s/sq030/sh010/**/cache"
 ```
 
-#### URI in search 
+#### Query in search 
 
-URI Syntax can be used to add search filters on yet untyped searches
+Query Syntax can be used to add search filters on yet untyped searches
 
 - "All published Movie files for hamlet's sequence 30" ?
 ```
@@ -341,7 +341,7 @@ Spil builds upon general concepts, as well as production proven CG pipeline conc
   A query technique where "example" entities, with search values, are used to retrieve "matching" results.  
   [en.wikipedia.org/wiki/Query_by_Example](https://en.wikipedia.org/wiki/Query_by_Example#As_a_general_technique)
   
-- URI / URL  
+- Query / URL  
   [en.wikipedia.org/wiki/Uniform_Resource_Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
   
 - Node tree & hierarchy

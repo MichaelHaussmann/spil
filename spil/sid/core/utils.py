@@ -1,3 +1,15 @@
+"""
+This file is part of SPIL, The Simple Pipeline Lib.
+
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+
+SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with SPIL.
+If not, see <https://www.gnu.org/licenses/>.
+"""
 from __future__ import annotations
 import string
 
@@ -30,7 +42,9 @@ def extrapolate(sids: Iterable[str], as_sid: bool = False) -> Iterable[str | Sid
     :return:
     """
 
-    debug("Start Extrapolate {}".format(sids))  # TODO: warning if a string or Sid is given, need iterable.
+    debug(
+        "Start Extrapolate {}".format(sids)
+    )  # TODO: warning if a string or Sid is given, need iterable.
 
     generated = set()
 
@@ -99,65 +113,69 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
     :return: List of typed Sids
     """
 
-    debug(f'Expanding {sid}')
+    debug(f"Expanding {sid}")
     sid = str(sid)
 
-    if not sid.count('/**'):  # nothing to expand
+    if not sid.count("/**"):  # nothing to expand
         r = simple_typing(sid)
-        debug('Nothing to expand for {}. Just casting to Sid set {}'.format(sid, r))
+        debug("Nothing to expand for {}. Just casting to Sid set {}".format(sid, r))
         return r
 
-    if sid.count('/**') > 1:
-        raise SpilException('Can only expand once in a Sid.')
+    if sid.count("/**") > 1:
+        raise SpilException("Can only expand once in a Sid.")
 
-    if sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
-        sid, uri = sid.split('?', 1)
+    if sid.count("?"):  # sid contains Query ending. We put it aside, and later append it back
+        sid, query = sid.split("?", 1)
     else:
-        uri = ''
+        query = ""
 
-    root = sid.split('/**')[0]
+    root = sid.split("/**")[0]
     basetype = Sid(root).basetype
-    debug('Basetype: {}'.format(basetype))
+    debug("Basetype: {}".format(basetype))
     if not basetype:
-        raise SpilException('The Search Sids "{}" root "{}" cannot be typed, so it cannot be expanded. This is probably a configuration error.'.format(sid, root))
+        raise SpilException(
+            f'The Search Sids "{sid}" root "{root}" cannot be typed, so it cannot be expanded. This is probably a configuration error.'
+        )
 
     leaf_key = leaf_keys.get(basetype)
     # leaf_key = 'version'  # TODO: find an option to edit this depending on the Finder.
     if not do_extrapolate and not leaf_key:
-        raise SpilException(f'Leaf key not defined for basetype: "{basetype}". Please check config.')
+        raise SpilException(
+            f'Leaf key not defined for basetype: "{basetype}". Please check config.'
+        )
 
     tested = []
     found = []
     result = []
     for key, template in sid_templates.items():
-        debug('Checking ' + key)
+        debug("Checking " + key)
         if key in found:
-            debug('.. Already checked {}, continue'.format(key))
+            debug(".. Already checked {}, continue".format(key))
             continue
         debug(f'.. Checking key "{key}"')
         keys = list(string.Formatter().parse(template))
         if do_extrapolate or keys[-1][1] == leaf_key:
-            count = len(keys)-1
-            current = sid.count('/')
-            needed = count-current+1
-            test = sid.replace('/**', '/*' * needed)
+            count = len(keys) - 1
+            current = sid.count("/")
+            needed = count - current + 1
+            test = sid.replace("/**", "/*" * needed)
             if test in tested:
-                debug('... Already tested, continue')
+                debug("... Already tested, continue")
                 continue
             else:
                 tested.append(test)
-            debug('... Filled {}x* --> {}'.format(needed, test))
+            debug("... Filled {}x* --> {}".format(needed, test))
             matching = sid_to_dicts(test)
-            debug('... Got {}'.format(matching))
+            debug("... Got {}".format(matching))
             for __type, data in matching.items():
-                debug('.... found :' + __type)
+                debug(".... found :" + __type)
                 found.append(__type)
                 if data and (do_extrapolate or (list(data)[-1] == leaf_key)):
-                    if uri:
-                        new_sid = Sid('{}:{}?{}'.format(__type, test, uri))
+                    if query:
+                        new_sid = Sid("{}:{}?{}".format(__type, test, query))
                     else:
-                        new_sid = Sid(__type + ':' + test)
-                    debug('.... appending: {}'.format(new_sid.full_string))
+                        new_sid = Sid(__type + ":" + test)
+                    debug(".... appending: {}".format(new_sid.full_string))
                     result.append(new_sid)
         else:
             debug('.. Type "{}" is not a leaf, and do_extrapolate is False, skipped.'.format(key))
@@ -180,12 +198,12 @@ def simple_typing(sid: str | Sid) -> List[Sid]:
     """
     _sid = str(sid)
 
-    if _sid.count('?'):  # sid contains URI ending. We put it aside, and later append it back
-        _sid, uri = _sid.split('?', 1)
+    if _sid.count("?"):  # sid contains Query ending. We put it aside, and later append it back
+        _sid, query = _sid.split("?", 1)
     else:
-        uri = ''
+        query = ""
 
-    root = _sid.split('/*')[0]
+    root = _sid.split("/*")[0]
     basetype = Sid(root).basetype
     if not basetype:  # not typed, returning as is
         return [Sid(sid)]
@@ -193,14 +211,14 @@ def simple_typing(sid: str | Sid) -> List[Sid]:
 
     result = []
     matching = sid_to_dicts(_sid)
-    debug('Got {}'.format(matching))
+    debug("Got {}".format(matching))
     for __type, data in matching.items():
-        debug('found :' + __type)
-        if uri:
-            new_sid = Sid('{}:{}?{}'.format(__type, _sid, uri))
+        debug("found :" + __type)
+        if query:
+            new_sid = Sid("{}:{}?{}".format(__type, _sid, query))
         else:
-            new_sid = Sid(__type + ':' + _sid)
-        debug('appending: {}'.format(new_sid.full_string))
+            new_sid = Sid(__type + ":" + _sid)
+        debug("appending: {}".format(new_sid.full_string))
         result.append(new_sid)
 
     return list(set(result)) or [Sid(sid)]
@@ -210,9 +228,9 @@ if __name__ == "__main__":
     from pprint import pprint
     from spil import setLevel
     from spil.util.log import DEBUG
+
     setLevel(DEBUG)
 
-    sid = 'hamlet/**'
+    sid = "hamlet/**"
     r = expand(sid)
     pprint(r)
-

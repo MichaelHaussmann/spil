@@ -17,7 +17,7 @@ import importlib
 from functools import total_ordering
 from pathlib import Path
 
-from spil.sid.core import uri_helper
+from spil.sid.core import query_helper
 from spil.util.caching import lru_cache as cache
 from spil.util.log import debug, info, warning
 
@@ -449,14 +449,14 @@ class TypedSid(StringSid):
 
     def get_with(
         self,
-        uri: Optional[str] = None,
+        query: Optional[str] = None,
         key: Optional[str] = None,
         value: Optional[str] = None,
         **kwargs,
     ) -> Sid:
         """
         Returns a new Sid
-        - with the given uri applied (see details about uri application in documentation)
+        - with the given query applied (see details about query application in documentation)
         or
         - updated using given key and value, eg. get_with(key='task', value='rendering') and
         - updated using **kwargs where keys are sid keys, eg. get_with(task='rendering')
@@ -473,14 +473,14 @@ class TypedSid(StringSid):
             >>> Sid('hamlet/s/sq030/sh0010/anim').get_with(task='render')
             Sid('shot__task:hamlet/s/sq030/sh0010/render')
 
-            >>> Sid("hamlet/a/prop/dagger").get_with(uri='asset=skull')
+            >>> Sid("hamlet/a/prop/dagger").get_with(query='asset=skull')
             Sid('asset__asset:hamlet/a/prop/skull')
 
             >>> Sid().get_with(project="hamlet")
             Sid('project:hamlet')
 
         Args:
-            uri: s tring uri, in the format ?key=value&key2=value2
+            query: s tring query, in the format ?key=value&key2=value2
             key: a key name, for example "shot", "sequence", or "task"
             value: a new value for given key. May be None (removes the key) or "" (empty value).
             **kwargs: a key/value dictionary
@@ -492,9 +492,9 @@ class TypedSid(StringSid):
             warning(f'Sid operation on an undefined Sid "{self.string}"')
             return Sid()  # Return type is always Sid.
 
-        # if we have a uri
-        if uri:
-            return Sid("{}?{}".format(self.full_string, uri))
+        # if we have a query
+        if query:
+            return Sid("{}?{}".format(self.full_string, query))
 
         data_copy = self._fields.copy()
 
@@ -545,20 +545,20 @@ class TypedSid(StringSid):
         # For example Sids containing /** are "complete".
         # or if a Sid has no children, it is leaf.
 
-    def as_uri(self) -> str:
+    def as_query(self) -> str:
         """
-        Returns the fields as a key value string, as in an URI.
+        Returns the fields as a key value string, as in an Query.
 
         Example:
 
-            >>> Sid('hamlet/a/char/ophelia/model').as_uri()
+            >>> Sid('hamlet/a/char/ophelia/model').as_query()
             'project=hamlet&type=a&assettype=char&asset=ophelia&task=model'
 
         Returns:
-            string uri
+            string query
 
         """
-        return uri_helper.to_string(self._fields)
+        return query_helper.to_string(self._fields)
 
     # IDEA: match_as(search_sid, key) for example, do the "seq" of both sids match (like is_relative_to ?)
     def match(self, search_sid: Sid | str) -> bool:
@@ -885,8 +885,8 @@ class Sid(DataSid):
     Sid class.
 
     Multiple ways to create a Sid:
-    - Sid string, fullstring, uri string (starting with "?"), Sid object, or empty string
-    - uri string
+    - Sid string, fullstring, query string (starting with "?"), Sid object, or empty string
+    - query string
     - fields dictionary
     - path (with optional config)
 
@@ -904,10 +904,10 @@ class Sid(DataSid):
         >>> Sid("shot__sequence:hamlet/s/sq010")                    # fullstring
         Sid('shot__sequence:hamlet/s/sq010')
 
-        >>> Sid("?project=hamlet&type=s&sequence=sq010")             # empty string with uri
+        >>> Sid("?project=hamlet&type=s&sequence=sq010")             # empty string with query
         Sid('shot__sequence:hamlet/s/sq010')
 
-        >>> Sid(uri="project=hamlet&type=s&sequence=sq010")          # uri
+        >>> Sid(query="project=hamlet&type=s&sequence=sq010")          # query
         Sid('shot__sequence:hamlet/s/sq010')
 
         >>> Sid(fields={'project': 'hamlet', 'sequence': 'sq010', 'type': 's'})  # fields dict

@@ -49,7 +49,7 @@ def execute(sids):
 
 def type_narrow(sid: Sid) -> Sid:
     """
-    For a given basetype, looks up the configured uri, and applies it.
+    For a given basetype, looks up the configured query, and applies it.
 
     Args:
         sid:
@@ -58,15 +58,16 @@ def type_narrow(sid: Sid) -> Sid:
 
     """
 
-    uri = basetyped_search_narrowing.get(sid.basetype, '')
-    if uri:
-        sid = sid.get_with(uri=uri)
+    query = basetyped_search_narrowing.get(sid.basetype, "")
+    if query:
+        sid = sid.get_with(query=query)
     return sid
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from spil.util.log import DEBUG, setLevel
+
     # import doctest
     # doctest.testmod()
     setLevel(DEBUG)
@@ -79,10 +80,11 @@ if __name__ == '__main__':
     s = type_narrow(sid)
     print(s.full_string)
 
-    sids = [Sid('asset__file:hamlet/a/char/hamlet/model/v001/p/*'),
-            Sid('asset__movie_file:hamlet/a/char/hamlet/model/v001/p/*'),
-            Sid('asset__cache_file:hamlet/a/char/hamlet/model/v001/p/*')]
+    sids = [
+        Sid("asset__file:hamlet/a/char/hamlet/model/v001/p/*"),
+        Sid("asset__movie_file:hamlet/a/char/hamlet/model/v001/p/*"),
+        Sid("asset__cache_file:hamlet/a/char/hamlet/model/v001/p/*"),
+    ]
 
     done = execute(sids)
     print(done)
-

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -10,7 +9,6 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from spil.util.log import DEBUG, get_logger
 from spil import Sid, SpilException
@@ -43,7 +41,7 @@ def test_typed_sid(s, reraise=True, replace=None):
     sid = Sid(s)
     log.info('Instanced: "{}"'.format(sid.full_string))
 
-    if not s.count("?"):  # Assert works only without URI part
+    if not s.count("?"):  # Assert works only without Query part
         assert str(sid) == s
     assert sid == eval(repr(sid))
 
@@ -61,7 +59,7 @@ def test_typed_sid(s, reraise=True, replace=None):
             "type": sid.type,
             "full_string": sid.full_string,
             "string": sid.string,
-            "uri": sid.as_uri(),
+            "query": sid.as_query(),
             "is_search": sid.is_search(),
         }
 
@@ -84,13 +82,14 @@ def test_typed_sid(s, reraise=True, replace=None):
             else:
                 log.warning('Sid "{}" has not parent ?'.format(sid))
 
-        assert sid == Sid(sid.get("project") + "?" + sid.as_uri()), \
-            "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.get_uri()))
+        assert sid == Sid(
+            sid.get("project") + "?" + sid.as_query()
+        ), "Sid Query assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.get_query()))
 
         assert sid == Sid(
-            sid.get("project") + "?" + sid.as_uri()
-        ), "Sid URI assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_uri()))
-        log.info('Passed "URI": sid == Sid(sid.get("project") + "?" + sid.get_uri() ')
+            sid.get("project") + "?" + sid.as_query()
+        ), "Sid Query assertion pb : {}".format(Sid(sid.get("project") + "?" + sid.as_query()))
+        log.info('Passed "Query": sid == Sid(sid.get("project")) + "?" + sid.get_query() ')
 
         if not sid.parent:
             log.warning("Sid {} has no valid parent (got: {}).".format(sid, sid.parent))
@@ -123,7 +122,7 @@ def test_typed_sids(sids, reraise=True, replace=None):
         return
 
     for i, s in enumerate(sids):
-        log.info('*' * 75)
+        log.info("*" * 75)
         log.info("----------------------------------------- {}".format(i))
         test_typed_sid(s, reraise=reraise, replace=replace)
 

@@ -17,7 +17,7 @@ Spil builds upon general concepts, as well as production proven CG pipeline conc
   A query technique where "example" entities, with search values, are used to retrieve "matching" results.  
   [en.wikipedia.org/wiki/Query_by_Example](https://en.wikipedia.org/wiki/Query_by_Example#As_a_general_technique)
   
-- URI / URL  
+- Query / URL  
   [en.wikipedia.org/wiki/Uniform_Resource_Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
   
 - Node tree & hierarchy

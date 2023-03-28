@@ -48,7 +48,7 @@ sid = Sid("hamlet/a/char/ophelia/model/v001/w/ma")
 print(sid)   # should print "hamlet/a/char/ophelia/model/v001/w/ma"
 print(sid.type)
 print(sid.path())
-print(sid.as_uri())
+print(sid.as_query())
 ```
 
 ### Test with FindInPaths
