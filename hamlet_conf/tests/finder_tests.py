@@ -9,10 +9,10 @@ from scripts.example_sids import sids  # type: ignore
 
 # from spil_plugins.sg.find_sg import FindInSG
 from spil_tests.prep.build_searches import from_sid_build_searches
-from spil_tests.utils.customsearch import test_searches_in_finder
+from spil_tests.utils.search_tester import test_searches_in_finder
 
 from spil.util.log import DEBUG, get_logger
-from spil_tests.utils.dualsearch_a_b import test_search_ab
+from spil_tests.utils.dualsearch_ab_tester import test_search_ab
 
 log = get_logger("spil_tests", color=False)
 

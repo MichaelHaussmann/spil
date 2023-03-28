@@ -5,7 +5,7 @@ Uses the example sids.
 """
 import spil  # config path bootstrap
 from scripts.example_sids import sids  # type: ignore
-from spil_tests.utils.sid_core_tests import test_typed_sids
+from spil_tests.utils.sid_core_tester import test_typed_sids
 
 if __name__ == "__main__":
 
