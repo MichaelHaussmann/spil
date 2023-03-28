@@ -1,3 +1,8 @@
+"""
+This test runs basic, "core" tests on Sid objects.
+
+Uses the example sids.
+"""
 import spil  # config path bootstrap
 from scripts.example_sids import sids  # type: ignore
 from spil_tests.utils.sid_core_tests import test_typed_sids

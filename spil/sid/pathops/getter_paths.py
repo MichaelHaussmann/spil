@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -12,78 +11,71 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterator, Mapping, Any, Optional
+from typing import Mapping, Any, Optional, List, Callable
 
-from pathlib import Path
 import json
 
-from spil import Sid, Getter, FindInPaths
-from spil.conf import default_path_config, path_data_suffix  # type: ignore
-
-from spil.sid.read.util import first
-
-
-def _read_data(sid_path: Path) -> dict:
-    """
-    Reads data dictionary from json.
-    To get the jsons file path, the suffix is replaced, as per config.
-
-    Args:
-        sid_path: path from a valid sid
-
-    Returns: data dictionary
-    """
-    # TODO: add Exception handling
-
-    data_path = sid_path.with_suffix(path_data_suffix)
-    data: dict[str, Any] = {}
-    if data_path.exists():
-        with open(data_path) as f:
-            data = json.load(f) or dict()
-    return data
+from spil.sid.read.getters.getter_finder import GetByFinder
+from spil.util.log import warning, debug, error
+from spil import Sid, FindInPaths
+from spil.conf import default_path_config, path_data_suffix, get_data_json_path  # type: ignore
 
 
-class GetFromPaths(Getter):
+class GetFromPaths(GetByFinder):
     """
     Getter from File system.
 
     This is still experimental.
     """
 
-    def __init__(self, config: Optional[str] = None):
+    def __init__(self, config: Optional[str] = None):  # noqa
         self.config = config or default_path_config  # type: ignore
         self.finder = FindInPaths(config=config)
 
-    def get(self, search_sid: str | Sid, attribute: Optional[str] = None, as_sid: bool = False) -> Iterator[Mapping[str | Sid, Any | dict]]:
+    def get_data(
+        self, sid: str | Sid, attributes: Optional[List[str]] = None, sid_encode: Callable = str
+    ) -> Mapping[str, Any]:
         """
-        For a given search, returns an Iterator over Mappings containing a Sid as key,
-        and the retrieved data as value.
+        Returns data associated to the given Sid, as a key:value dictionary.
+        Returns an empty dictionary if no data was found.
 
-        By default, attribute is None, retrieved data is a dictionary containing all configured data for the Sid type.
-        If attribute is given, data contains only the value of the given attribute.
-
-        The Sids returned by Getter.get() are identical to those returned by Finder.find().
-        Getter retrieves data related to these Sids, whereas the Finder only the existing Sids themselves.
+        Reads data dictionary from a json.
+        To infer the jsons file path, the Sid path is used,
+        with the suffix replaced, as per config.
 
         Args:
-            as_sid:
-            search_sid:
-            attribute:
+            sid:
+            attributes:
+            sid_encode:
 
-        Returns:
-            An iterator over Mappings containing a Sid as key,
-            and the retrieved data as value. Either for a given attribute (attribute),
-            or all data in a dictionary (data as configured).
-
+        Returns: A key:value dictionary, or an empty dictionary
         """
-        for sid in self.finder.find(search_sid=search_sid, as_sid=True):
-            data = _read_data(sid.path(self.config))
-            if not as_sid:
-                sid = str(sid)  # type: ignore  # (redefining sid as str)
-            if attribute:
-                yield {sid: data.get(attribute)}
-            else:
-                yield {sid: data}
+        _sid = Sid(sid)
+        sid_path = _sid.path(self.config)
+        if not sid_path:
+            debug(f'Given Sid "{sid}" has no path at config {self.config}. Cannot get data.')
+            return {}
+        data_path = get_data_json_path(sid_path)
+        data: dict[str, Any] = {}
+        if data_path.exists():
+            try:
+                with data_path.open() as f:
+                    data = json.load(f) or {}
+            except OSError as e:
+                warning(f"Failed to open the json file. Sid: {sid}, file: {data_path}, Error: {e}")
+            except json.JSONDecodeError as e:
+                warning(f"Failed to decode Json. Sid: {sid}, file: {data_path}, Error: {e}")
+            except Exception as e:
+                warning(f"Failed to get data from json. Sid: {sid}, file: {data_path}, Error: {e}")
+
+        encoded = sid_encode(_sid)
+        if encoded:
+            data["sid"] = encoded
+
+        if attributes:
+            return {key: data.get(key) for key in attributes}
+        else:
+            return data
 
     def __str__(self):
         return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'
@@ -91,11 +83,20 @@ class GetFromPaths(Getter):
 
 if __name__ == "__main__":
     from pprint import pprint
+
     print(GetFromPaths())
-    search = 'vic/a'
+    search = "hamlet/a"
+
+    print("Calling find:")
     for result in FindInPaths().find(search):
         pprint(result)
-    for result in GetFromPaths().get(search):
-        pprint(result)
 
-    print(GetFromPaths().get_attr(search, 'bill'))
+    print("Calling get:")
+    for result2 in GetFromPaths().get(search, sid_encode=lambda x: x.full_string):
+        pprint(result2)
+
+    print("Calling get with lambda None:")
+    for result2 in GetFromPaths().get(search, sid_encode=lambda x: None):
+        pprint(result2)
+
+    print(GetFromPaths().get_attr(search, "bill"))

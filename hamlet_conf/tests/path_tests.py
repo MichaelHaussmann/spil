@@ -1,3 +1,9 @@
+"""
+This test runs tests on "path" Sid objects.
+Path Sid objects implement path mapping.
+
+Uses the example sids.
+"""
 import spil  # config path bootstrap
 import spil_data_conf  # type: ignore
 from scripts.example_sids import sids  # type: ignore

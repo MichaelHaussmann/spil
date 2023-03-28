@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # type: ignore
 """
 Example File System resolver config_name.
@@ -8,7 +7,7 @@ from spil_sid_conf import key_patterns
 
 # for test and demo purposes
 from pathlib import Path
-project_root_path = Path(__file__).parent / "data" / "SPIL_PROJECTS" / "LOCAL" / "PROJECTS"
+project_root_path = Path(__file__).parent / "data" / "testing" / "SPIL_PROJECTS" / "LOCAL" / "PROJECTS"
 # Replace "project_root_path" by your own folder root, eg
 # r'/home/mh/Desktop/SPIL_PROJECTS/LOCAL/PROJECTS'
 

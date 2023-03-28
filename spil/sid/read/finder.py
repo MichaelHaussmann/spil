@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -12,7 +11,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, List, overload
+from typing import Iterator, List, overload, Optional
 from typing_extensions import Literal
 
 from spil.sid.sid import Sid
@@ -34,30 +33,42 @@ class Finder:
         - runs the actual search on each typed search sid
     """
 
-    def __init__(self):
-        pass
-
     @overload
-    def find(self, search_sid: str | Sid, as_sid: Literal[True]) -> Iterable[Sid]:
+    def find(self, search_sid: str, as_sid: Literal[True]) -> Iterator[Sid]:
         ...
 
     @overload
-    def find(self, search_sid: str | Sid, as_sid: Literal[False]) -> Iterable[str]:
+    def find(self, search_sid: str, as_sid: Literal[False]) -> Iterator[str]:
         ...
 
-    def find(self, search_sid: str | Sid, as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+    @overload
+    def find(self, search_sid: Sid, as_sid: Literal[True]) -> Iterator[Sid]:
+        ...
+
+    @overload
+    def find(self, search_sid: Sid, as_sid: Literal[False]) -> Iterator[str]:
+        ...
+
+    @overload
+    def find(self, search_sid: str) -> Iterator[Sid]:
+        ...
+
+    @overload
+    def find(self, search_sid: Sid) -> Iterator[Sid]:
+        ...
+
+    def find(
+        self, search_sid: str | Sid, as_sid: Optional[bool] = True
+    ) -> Iterator[Sid] | Iterator[str]:
         """
         Yields the Sids found using the given search_sid.
         Returns a generator over Sids, if as_sid is True (default), or over Sid strings.
 
         Example:
 
-            >>> for sid in Finder().find('hamlet/a/*'):
-            >>>     print(f"Found: {sid}")
-            Found: hamlet/a/char
-            Found: hamlet/a/prop
-            Found: hamlet/a/location
-            Found: hamlet/a/fx
+            >>> from spil import FindInAll
+            >>> list(FindInAll().find('hamlet/a/*'))
+            [Sid('asset__assettype:hamlet/a/char'), Sid('asset__assettype:hamlet/a/location'), Sid('asset__assettype:hamlet/a/prop'), Sid('asset__assettype:hamlet/a/fx')]
 
         Args:
             search_sid: typed or untyped Sid or string
@@ -73,16 +84,42 @@ class Finder:
         else:
             search_sids = unfold_search(search_sid)
             generator = self.do_find(search_sids, as_sid=as_sid)
+        yield from generator
 
-        for i in generator:
-            yield i
+    @overload
+    def do_find(self, search_sids: List[Sid], as_sid: Literal[True]) -> Iterator[Sid]:
+        ...
 
-    def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+    @overload
+    def do_find(self, search_sids: List[Sid], as_sid: Literal[False]) -> Iterator[str]:
+        ...
+
+    @overload
+    def do_find(
+        self, search_sids: List[Sid], as_sid: Optional[bool]
+    ) -> Iterator[Sid] | Iterator[str]:
+        ...
+
+    def do_find(
+        self, search_sids: List[Sid], as_sid: Optional[bool] = True
+    ) -> Iterator[Sid] | Iterator[str]:
         raise NotImplementedError(
             f"[Finder.do_find] is abstract, and seams not implemented. Class: {self.__class__}"
         )
 
-    def find_one(self, search_sid: str | Sid, as_sid: bool = True) -> Sid | str:
+    @overload
+    def find_one(self, search_sid: str | Sid, as_sid: Literal[True]) -> Sid:
+        ...
+
+    @overload
+    def find_one(self, search_sid: str | Sid, as_sid: Literal[False]) -> str:
+        ...
+
+    @overload
+    def find_one(self, search_sid: str | Sid, as_sid: Optional[bool]) -> Sid | str:
+        ...
+
+    def find_one(self, search_sid: str | Sid, as_sid: Optional[bool] = True) -> Sid | str:
         """
         Returns the first Sid found using the given search_sid.
 
@@ -92,8 +129,9 @@ class Finder:
 
         Example:
 
-            >>> Finder().find_one('hamlet/a/char/ophelia')
-            Sid("hamlet/a/char/ophelia")
+            >>> from spil import FindInAll
+            >>> FindInAll().find_one('hamlet/a/char/ophelia')
+            Sid('asset__asset:hamlet/a/char/ophelia')
 
         Args:
             search_sid: typed or untyped Sid or string
@@ -118,10 +156,12 @@ class Finder:
 
         Example:
 
-            >>> Finder().exists('hamlet/a/char/ophelia')
+            >>> from spil import FindInAll
+            >>> FindInAll().exists('hamlet/a/char/ophelia')
             True
 
-            >>> Finder().exists('hamlet/a/char/jimmy')
+            >>> from spil import FindInAll
+            >>> FindInAll().exists('hamlet/a/char/jimmy')
             False
 
         Args:

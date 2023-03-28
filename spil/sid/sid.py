@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -16,6 +15,7 @@ from typing import Any, Optional, List
 
 import importlib
 from functools import total_ordering
+from pathlib import Path
 
 from spil.sid.core import uri_helper
 from spil.util.caching import lru_cache as cache
@@ -175,7 +175,7 @@ class StringSid(BaseSid):
     def __lt__(self, other: Sid | str) -> bool:
         return str(self) < str(other)
 
-    def __truediv__(self, other: Sid | str) -> Sid:
+    def __truediv__(self, other: Sid | str | None) -> Sid:
         """
         Override the division operator, to compose a Sid from another one.
         Inspired by pathlib.Path.
@@ -191,7 +191,11 @@ class StringSid(BaseSid):
             >>> sid.parent / sid.get(sid.keytype) == sid
             True
 
+            >>> Sid("hamlet/s/sq030") / None
+            Sid('shot__sequence:hamlet/s/sq030')
         """
+        if other is None:
+            return self.copy()
         return Sid(str(self) + conf.sip + str(other))
 
 
@@ -209,7 +213,7 @@ class TypedSid(StringSid):
     ):
         self._string = string or ""
         self._type = type or ""
-        self._fields = fields or dict()
+        self._fields = fields or {}
 
     @property
     def type(self) -> str:
@@ -345,7 +349,7 @@ class TypedSid(StringSid):
     def parent(self) -> Sid:
         """
         Returns the parent Sid.
-        Returns an empty Sid, if the Sid is not "defined", or self if the Sid is already the root (has no parent).
+        Returns an empty Sid, if the Sid is not "defined", or a copy of self if the Sid is already the root (has no parent).
 
         Note that this is a logical operation, without data access.
 
@@ -435,7 +439,7 @@ class TypedSid(StringSid):
             info(f'Key "{key}" not found in fields "{self._fields}"')
             return Sid()
 
-        fields = dict()
+        fields = {}
         for k, v in self._fields.items():
             fields[k] = v
             if k == key:
@@ -466,8 +470,8 @@ class TypedSid(StringSid):
 
         Examples:
 
-            >>> Sid('hamlet/s/sq030/sh0010/anim').get_with(task='rendering')
-            Sid('hamlet/s/sq030/sh0010/rendering')
+            >>> Sid('hamlet/s/sq030/sh0010/anim').get_with(task='render')
+            Sid('shot__task:hamlet/s/sq030/sh0010/render')
 
             >>> Sid("hamlet/a/prop/dagger").get_with(uri='asset=skull')
             Sid('asset__asset:hamlet/a/prop/skull')
@@ -527,7 +531,10 @@ class TypedSid(StringSid):
         For example, in searching for render files,
         it can be useful to handle the "render pass" as leave,
         to avoid going too deep in the hierarchy.
-        This is done in the browser, to browse render files by the pass folder, not individually by default.
+
+        This is done, for example, in the spil_ui browser,
+        to browse render files by the pass folder,
+        not individually by default.
 
         Returns:
             True if this Sid is a leaf, else False.
@@ -573,7 +580,7 @@ class TypedSid(StringSid):
             False
 
         Returns
-            True if match, else False
+            True if matched, else False
         """
         # Identicals always match
         if Sid(search_sid) == self:
@@ -590,8 +597,14 @@ class TypedSid(StringSid):
 
 
 class PathSid(TypedSid):
+    """
+    The PathSid adds path resolving.
+
+    TODO: cache must be invalidated whenever (if ever) the default PathConfig changes.
+    """
+
     @cache
-    def path(self, config: Optional[str] = None) -> Pathlike[str] | None:  # type: ignore
+    def path(self, config: Optional[str] = None) -> Path | None:
         """
         Returns the file path for the current Sid, as a pathlib.Path.
         Returns None if the Sid has no path, or if it cannot be resolved.
@@ -608,11 +621,11 @@ class PathSid(TypedSid):
             >>> sid == new_sid
             True
 
-            >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').path()
-            Path("/productions/hamlet/assets/characters/ophelia/3d/model/works/romeo_v001.ma")
+            >>> path = Sid('hamlet/a/char/ophelia/model/v001/w/ma').path()
+            >>> path.relative_to(conf.default_sid_conf_path).as_posix()  # to be location and os independent
+            'data/testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma'
 
             >>> Sid('bla/bla').path()
-
 
         Args:
             config: Name of the path config to be used, as configured.
@@ -634,12 +647,37 @@ class PathSid(TypedSid):
 
 class DataSid(PathSid):
     """
-    The DataSid implements operations that delegate calls to data sources, Finders and Getters.
-    By default FindInAll is used.
+    The DataSid implements operations that delegate calls to data sources: Finders and Getters.
+    By default FindInAll and GetFromAll are used.
 
     # TODO: make configurable which Finder is used for DataSid operations (FindInAll per default).
     # Could be handled using a default config_name, and/or be changed at runtime.
     """
+
+    def get_attr(self, attribute: str) -> Any | None:
+        """
+        Returns an attribute for the current sid.
+        Uses GetFromAll, which calls the apropriate Getter defined for this Sid in spil_data_conf.
+
+        Shortcut to GetFromAll().get_attr(sid, attribute), which is called internally.
+
+        Example:
+
+            >>> from spil import WriteToPaths
+            >>> sid = Sid('hamlet/a/char/ophelia/model/v001/w/ma')
+            >>> __ = WriteToPaths().set(sid, comment="Updated topology")
+            >>> sid.get_attr('comment')
+            'Updated topology'
+
+        Args:
+            attribute: Name of an attribute
+
+        Returns:
+            The value of the attribute, or None if it was not found.
+
+        """
+        from spil import GetFromAll  # fmt: skip
+        return GetFromAll().get_attr(self, attribute)  # type: ignore
 
     def get_last(self, key: Optional[str] = None) -> Sid:
         """
@@ -650,7 +688,7 @@ class DataSid(PathSid):
         Examples:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/p/ma').get_last('version')
-            Sid('asset__file:hamlet/a/char/ophelia/model/v001/p/ma')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v002/p/ma')
 
             >>> Sid('hamlet/a/char/ophelia/model').get_last()
             Sid('asset__task:hamlet/a/char/ophelia/surface')
@@ -681,75 +719,55 @@ class DataSid(PathSid):
         else:
             return Sid()
 
-    def get_attr(self, attribute: str) -> Any | None:
+    def get_next(self, key: str) -> Sid:
         """
-        Returns an attribute for the current sid as defined in data_conf.
-
-        Shortcut to data.find(sid, attribute), which is called internally.
-
-        Example:
-
-            >>> Sid('hamlet/a/char/ophelia/model/v003/w/ma').get_attr('comment')
-            "Updated topology"
-        """
-        raise NotImplementedError("This method needs re-implementation")  # type: ignore
-        # from spil.data.data import get  # FIXME: WIP
-        # value = get(self, attribute)
-        # if value:
-        #     return value
-        # else:
-        #     return None
-
-    def get_next(self, key: str) -> Sid:  # FIXME: delegate to Data framework
-        """
-        This method is experimental. Do not use.
-
-        Returns self with version incremented, or first version if there is no version.
-        If version is '*', returns "new" version (next of last)
+        Returns self with key's value incremented, or first value if there is none.
+        If value is '*', returns "get_new" (next of last)
 
         If the result is not a valid Sid (not typed, no fields), returns an empty Sid.
 
-        Example:
+        Note:
+            Currently limited to version.
+
+        Examples:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_next('version')
             Sid('asset__file:hamlet/a/char/ophelia/model/v002/w/ma')
 
+            >>> Sid('hamlet/a/char/ophelia/model/*/w/ma').get_next('version')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v003/w/ma')
+
+            >>> Sid('hamlet/a/char/ophelia/model').get_next('version')
+            Sid('asset__version:hamlet/a/char/ophelia/model/v001')
+
         Args:
-            key:
+            key: the key for which we want to increment the value. Typically a version.
 
         Returns:
-            Sid
-        """
-        raise NotImplementedError("This method needs re-implementation")  # type: ignore
+            A Sid with key's value incremented, or an empty Sid.
 
+        """
         if key != "version":
             raise NotImplementedError("get_next() support only 'version' key for the moment.")
-        current = self.get("version")
-        if current:
-            if current in ["*", ">"]:  # FIXME: point to "searcher signs" config_name
-                version = (self.get_last("version").get("version") or "v000").split("v")[-1] or 0
-            else:
-                version = self.get("version").split("v")[
-                    -1
-                ]  # temporary workaround for "v001" FIXME
-        else:
-            version = 0  # allow non existing version #RULE: starts with V001 (#FIXME)
-        version = int(version) + 1
-        version = "v" + str("%03d" % version)
-        result = self.get_with(version=version)
-        return result if result else Sid()
 
-    def get_new(self, key: str) -> Sid:  # FIXME: delegate to Data framework
+        attribute = f"next.{key}"
+
+        from spil import GetFromAll  # fmt: skip
+        return GetFromAll().get_attr(self, attribute=attribute)  # type: ignore
+
+    def get_new(self, key: str) -> Sid:  # FIXME: Needs testing and documentation
         """
-        This implementation is experimental.
+        Returns a new Sid with the key incremented to the "next available value".
+        Makes sense with numerical values, especially with versions.
 
-        Returns self with next of last version, or first version if there is no version.
+        For example, if the given key is "version":
+        Returns self with next version (the one following the last), or first version if there is no version.
         If the result is not a valid Sid (not typed, no fields), returns an empty Sid.
 
         Example:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_new('version')
-            Sid('hamlet/a/char/ophelia/model/v005/w/ma')
+            Sid('asset__file:hamlet/a/char/ophelia/model/v003/w/ma')
 
         Args:
             key:
@@ -758,25 +776,21 @@ class DataSid(PathSid):
             Sid
 
         """
-        raise NotImplementedError("This method needs re-implementation")  # type: ignore
-
-        if key != "version":
-            raise NotImplementedError("get_new() support only 'version' key for the moment.")
-        if self.get("version"):
-            if self.get_last("version"):
-                result = self.get_last("version").get_next("version")
-                return result if result else Sid()
+        if self.get(key):
+            if self.get_last(key):
+                result = self.get_last(key).get_next(key)
+                return result or Sid()
             else:
-                result = self.get_next("version")  # Returns a first version
-                return result if result else Sid()
+                result = self.get_next(key)  # Returns a first version
+                return result or Sid()
         else:
-            with_added_version = self.get_with(version="*").get_last("version")
-            if with_added_version:
-                result = with_added_version.get_next("version")
-                return result if result else Sid()
+            with_added_key = self.get_with(key=key, value="*").get_last(key)
+            if with_added_key:
+                result = with_added_key.get_next(key)
+                return result or Sid()
             else:
-                result = self.get_next("version")  # Returns a first version
-                return result if result else Sid()
+                result = self.get_next(key)  # Returns a first version
+                return result or Sid()
 
     def exists(self) -> bool:
         """
@@ -801,7 +815,7 @@ class DataSid(PathSid):
             debug(f'Sid is undefined: "{self.string}". Returning False')
             return False
         from spil import FindInAll  # fmt: skip
-        return FindInAll().exists(self)
+        return FindInAll().exists(self)  # type: ignore
 
     def siblings_as(self, key: str) -> List[Sid]:
         """
@@ -848,7 +862,7 @@ class DataSid(PathSid):
         Examples:
 
             >>> Sid('hamlet/a/char/ophelia/rig').children()
-            [Sid('asset__version:hamlet/a/char/ophelia/rig/v001')]
+            [Sid('asset__version:hamlet/a/char/ophelia/rig/v001'), Sid('asset__version:hamlet/a/char/ophelia/rig/v002')]
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').children()
             []
@@ -899,9 +913,12 @@ class Sid(DataSid):
         >>> Sid(fields={'project': 'hamlet', 'sequence': 'sq010', 'type': 's'})  # fields dict
         Sid('shot__sequence:hamlet/s/sq010')
 
-        >>> Sid(path="/root/projects/hamlet/shots/sq010")           # path (default config)
-        >>> Sid(path="c:/projects/hamlet/shots/sq010", config='local')   # path (config "local")
+        >>> path = Path(conf.default_sid_conf_path) / "data/testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma"
+        >>> Sid(path=path)           # path (default config) # TODO: any config
+        Sid('asset__file:hamlet/a/char/ophelia/model/v001/w/ma')
 
+        >>> Sid(path=path, config='local')   # path (config "local")
+        Sid('asset__file:hamlet/a/char/ophelia/model/v001/w/ma')
 
     This class inherits all functionality from the class hierarchy.
     It only defines the factory to be used to create the Sid.

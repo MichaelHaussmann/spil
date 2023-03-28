@@ -1,7 +1,8 @@
-from shotgun_api3 import shotgun
-from spil_plugins.sg import conf  # FIXME: make parent package indepentent
+from shotgun_api3 import shotgun  # type: ignore
+from spil_plugins.sg import conf  # FIXME: make parent package independent
 
 sg = None
+
 
 def get_sg():
     """
@@ -20,5 +21,3 @@ if __name__ == "__main__":
     print(get_sg())
     print(get_sg())
     from pprint import pprint
-
-

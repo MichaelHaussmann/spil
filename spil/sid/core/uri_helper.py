@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -11,12 +10,6 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
 """
-
-"""
-URI style string handling helper functions.
-
-TODO: Sid URI handling needs to be cleaned up, typed and documented.
-"""
 from urllib.parse import urlencode
 from urllib import parse as urlparse
 
@@ -24,6 +17,12 @@ from spil.sid.core import sid_resolver
 from spil import conf
 from spil.util.log import warning, debug
 from spil.util.exception import SpilException
+
+"""
+URI style string handling helper functions.
+
+TODO: Sid URI handling needs to be cleaned up, typed and documented.
+"""
 
 
 def to_dict(uri_string):
@@ -44,16 +43,17 @@ def to_dict(uri_string):
     {'keyA': 'valueA', 'keyB': 'valueB'}
 
     """
-    uri_string = uri_string.replace('?', '&')  # we allow a=b?x=y but change it to a proper uri: a=b&x=y
+    # we allow a=b?x=y but change it to a proper uri: a=b&x=y
+    uri_string = uri_string.replace("?", "&")
 
     # cleaning start / end signs
-    if uri_string.startswith('&'):
+    if uri_string.startswith("&"):
         uri_string = str(uri_string[1:])
 
-    if uri_string.endswith('&'):
+    if uri_string.endswith("&"):
         uri_string = str(uri_string[:-1])
 
-    uri_pairs = dict(urlparse.parse_qsl(urlparse.urlsplit('?' + uri_string).query))
+    uri_pairs = dict(urlparse.parse_qsl(urlparse.urlsplit("?" + uri_string).query))
     return uri_pairs
 
 
@@ -66,33 +66,43 @@ def to_string(uri_dict):
     >>> to_string({'keyA': 'valueA', 'keyB': 'valueB, BB'})
     'keyA=valueA&keyB=valueB,BB'
     """
+
     def encode(x, *args, **kwargs):
-        return x.replace(' ', '')
+        return x.replace(" ", "")
 
-    return urlencode(uri_dict, quote_via=encode)
+    return urlencode(uri_dict, quote_via=encode)  # noqa
 
 
-def update(data, uri, option_prefix='~'):
+def update(data, uri, option_prefix="~"):
     """
     Updates given dict with given uri into a new dict.
 
-    If the URI value starts with option_prefix, it is only updated (if the key exists), not added.
+    If the URI value starts with option_prefix, it is only updated, if the key exists, not added.
 
-    Option_prefix are removed from values, unless set to None.
+    Option_prefix are removed from values, unless explicitely set to None.
     Keys and values are supposed to be strings.
 
     Examples:
-    >>> update({'keyA': 'valueA', 'keyB': 'valueB'}, 'keyB=~replaceB&keyC=~skip this&keyD=keep this')
-    {'keyA': 'valueA', 'keyB': 'replaceB', 'keyD': 'keep this'}
 
-    >>> update({'keyA': 'valueA'}, 'keyB=~valueB', option_prefix=None)
-    {'keyA': 'valueA', 'keyB': '~valueB'}
+        >>> update({'keyA': 'valueA', 'keyB': 'valueB'}, 'keyB=~replaceB&keyC=~skip this&keyD=keep this')
+        {'keyA': 'valueA', 'keyB': 'replaceB', 'keyD': 'keep this'}
 
-    >>> update({'keyA': 'valueA'}, 'keyB=valueB')
-    {'keyA': 'valueA', 'keyB': 'valueB'}
+        >>> update({'keyA': 'valueA'}, 'keyB=~valueB', option_prefix=None)
+        {'keyA': 'valueA', 'keyB': '~valueB'}
+
+        >>> update({'keyA': 'valueA'}, 'keyB=valueB')
+        {'keyA': 'valueA', 'keyB': 'valueB'}
+
+    Args:
+        data: a key:value dictionary
+        uri: a uri string
+        option_prefix: A sign prepended to a value, to indicate it is optional. "~"  by default.
+
+    Returns: updated disctionary
+
     """
     if not data:  # may be None
-        data = dict()
+        data = {}
 
     data = data.copy()
     new_data = to_dict(uri)
@@ -101,7 +111,7 @@ def update(data, uri, option_prefix='~'):
 
         if option_prefix:
             if str(value).startswith(str(option_prefix)):
-                value = str(value).replace(option_prefix, '')
+                value = str(value).replace(option_prefix, "")
                 is_value_optional = True
             else:
                 is_value_optional = False
@@ -164,31 +174,51 @@ def apply_uri(string, uri=None, type=None, fields=None):
 
     if not new_types:
         warning(f'[Sid] After URI apply, Sid "{string}" has no type. URI will not be applied.')
-        string = '{}?{}'.format(string, uri)
+        string = "{}?{}".format(string, uri)
         return string, _type, fields
 
-    if len(new_types) > 1:
-        if _type not in new_types:
-            if any(s in '{}?{}'.format(string, uri) for s in conf.search_symbols):
-                debug(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
-                      f'But it is a Search, so URI will be applied.')
+    # After URI apply, if there is one single new type, we use this new type
+    if len(new_types) == 1:
+        _type = new_types[0]
+
+    # if the Sid now matches multiple types, we have to choose
+    elif len(new_types) > 1:
+
+        # if the given type matches one of the new types, we keep the given type
+        if _type in new_types:
+            pass
+
+        # if the given type does not match any of the new types
+        else:
+            # if the Sid is a search, we use the first of the new types.
+            # TODO: this is arbitrary and should be warned or better handled.
+            if any(s in "{}?{}".format(string, uri) for s in conf.search_symbols):
+                debug(
+                    f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
+                    f"But it is a Search, so URI will be applied."
+                )
                 # URI will be applied, using the first new_types (# FIXME: refuse the temptation to guess)
                 # In this case we should check if all the types result in the same Sid string, and return it, untyped.
+                _type = new_types[0]
             else:
-                warning(f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
-                        f'URI will not be applied.')
-                string = '{}?{}'.format(string, uri)
+                warning(
+                    f'[Sid] After URI apply, Sid "{string}" matches different types: {new_types}. '
+                    f"URI will not be applied."
+                )
+                string = "{}?{}".format(string, uri)
                 return string, _type, fields
 
     # fields updated by URI is OK
-    new_string = sid_resolver.dict_to_sid(new_data, new_types[0])
+    new_string = sid_resolver.dict_to_sid(new_data, _type)
     if new_string:
-        return new_string, new_types[0], new_data
+        return new_string, _type, new_data
     else:
-        raise SpilException(f"Sid: [{string}?{uri}] : Uri was correctly applied, but unable to resolve back to Sid")
+        raise SpilException(
+            f"Sid: [{string}?{uri}] Uri was correctly applied, but unable to resolve back to Sid"
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     Launches doctest (test in the doc).
     """
@@ -196,14 +226,15 @@ if __name__ == '__main__':
 
     setLevel(INFO)
 
-    info('Tests start')
+    info("Tests start")
 
     import doctest
+
     # info(doctest)
 
     doctest.testmod()
 
-    r = to_dict('&keyA=valueA&keyB=valueB&')
+    r = to_dict("&keyA=valueA&keyB=valueB&")
     # print(r)
 
-    info('Tests done.')
+    info("Tests done.")

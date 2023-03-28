@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -18,15 +17,21 @@ try:
     from spil.sid.sid import Sid
 
     from spil.sid.read.finder import Finder
-    from spil.sid.read.finders.find_paths import FindInPaths
+    from spil.sid.pathops.find_paths import FindInPaths
     from spil.sid.read.finders.find_list import FindInList
     from spil.sid.read.finders.find_constants import FindInConstants
     from spil.sid.read.finders.find_all import FindInAll
-    from spil.sid.read.finders.find_cache import FindInCache
+    from spil.sid.read.getters.getter_all import GetFromAll
+#     from spil.sid.read.finders.find_cache import FindInCache
 
     from spil.sid.read.getter import Getter
-    from spil.sid.write.writer import Writer
+    from spil.sid.pathops.getter_paths import GetFromPaths
 
+    from spil.sid.write.writer import Writer
+    from spil.sid.write.write_all import WriteToAll
+    from spil.sid.pathops.write_paths import WriteToPaths
+
+    # FIXME: keep util level import
     from spil.util.exception import SpilException
     from spil.util import log
     from spil.util import log as logging  # to use as standard logging and create custom loggers

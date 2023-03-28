@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
@@ -10,8 +9,14 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
+from spil.util.exception import raiser
+from spil.util.log import DEBUG, ERROR, get_logger
+from spil_tests import Timer
+
+log = get_logger("spil_tests")
+log.setLevel(DEBUG)
+
 """
 To launch searches on two finders. 
 Allows comparing of finders.
@@ -21,14 +26,8 @@ Searches is a dict with searches as
     value: read description 
 
 """
-from codetiming import Timer
-from spil.util.log import DEBUG, ERROR, get_logger
 
-log = get_logger("spil_tests")
-log.setLevel(DEBUG)
-
-
-def test_search_ab(searches, finderA, finderB, as_sid=False, replace=None):
+def test_search_ab(searches, finderA, finderB, as_sid=False, raise_problems=False):
 
     log.debug("Searching sids in A:{} and B:{}".format(finderA, finderB))
 
@@ -37,7 +36,7 @@ def test_search_ab(searches, finderA, finderB, as_sid=False, replace=None):
 
     for search_sid, comment in searches.items():
 
-        log.info("*" * 10)
+        log.info("=" * 50)
         log.info("{} --> {}".format(search_sid, comment))
 
         a_timer = Timer(name="a_timer", logger=log.info)
@@ -55,9 +54,12 @@ def test_search_ab(searches, finderA, finderB, as_sid=False, replace=None):
         problems = found_b ^ found_a
 
         for i in problems:
-            log.warning("Not equal in both searches: {}".format(i))
+            log.warning(f"Not equal in both searches: {i}")
 
-    log.debug("*" * 10)
+        if problems and raise_problems:
+            raiser(f"Differences: {problems}")
+
+    log.debug("=" * 10)
     log.debug("Done all searches.")
     global_timer.stop()
 

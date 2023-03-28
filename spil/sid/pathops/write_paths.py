@@ -17,9 +17,10 @@ from typing import Optional, Mapping, Any
 import shutil
 import json
 
-from spil import Sid, SpilException, Writer
-from spil.conf import default_path_config, create_file_using_template, create_file_using_touch, path_data_suffix  # type: ignore
-from spil.util.log import debug, warning
+from spil import Sid, Writer
+from spil.util.exception import SpilException
+from spil.conf import default_path_config, create_file_using_template, create_file_using_touch, get_data_json_path  # type: ignore
+from spil.util.log import debug, warning, error
 from pathlib import Path
 
 
@@ -53,22 +54,36 @@ def _write_data(sid_path: Path, data: Mapping[str, Any]) -> bool:
 
     Returns: True on success, False on failure
     """
-    # FIXME: This is work in progress.
-    # TODO: add Exception handling and file rotation
-    data_path = sid_path.with_suffix(path_data_suffix)
 
-    # if there is already data, we load and update it
-    if data_path.exists():
-        with open(data_path) as f:
-            previous_data = json.load(f) or dict()
-            previous_data.update(data)
-            data = previous_data
+    data_path = get_data_json_path(sid_path)
 
-    # dumping data
-    with open(data_path, "w") as f:
-        f.write(json.dumps(data))
+    try:
+        # if there is already data, we load and update it
+        if data_path.exists():
+            with data_path.open() as f:
+                previous_data = json.load(f) or {}
+                previous_data.update(data)
+                data = previous_data
 
-    return data_path.exists()
+        # dumping data, converting to string if not serializable
+        data_path.write_text(json.dumps(data, indent=4, default=str))
+
+        return data_path.exists()
+
+    except json.JSONDecodeError as e:
+        error(f"Could not decode json at {sid_path}. Error: {e}")
+        raise
+        # return False
+
+    except OSError as e:
+        error(f"Could not access the json file {sid_path}. Error: {e}")
+        raise
+        # return False
+
+    except Exception as e:
+        error(f"Unexpected exception saving data at {sid_path}. Error: {e}")
+        raise
+        # return False
 
 
 class WriteToPaths(Writer):
@@ -99,11 +114,15 @@ class WriteToPaths(Writer):
 
         _sid = Sid(sid)
         if not _sid.path(self.config):
-            raise SpilException(f"[WriteToPaths] Cannot Create: sid {sid} has no path (config: {self.config}).")
+            raise SpilException(
+                f"[WriteToPaths] Cannot Create: sid {sid} has no path (config: {self.config})."
+            )
 
         path = _sid.path(self.config)
         if path.exists():
-            raise SpilException(f"[WriteToPaths] Cannot Create: path already exists for {sid}. Path: {path} (config: {self.config}).")
+            raise SpilException(
+                f"[WriteToPaths] Cannot Create: path already exists for {sid}. Path: {path} (config: {self.config})."
+            )
 
         suffix = path.suffix
         if suffix:
@@ -146,15 +165,21 @@ class WriteToPaths(Writer):
         """
         _sid = Sid(sid)
         if not _sid.path(self.config):
-            raise SpilException(f"[WriteToPaths] Cannot update: sid {sid} has no path (config: {self.config}).")
+            raise SpilException(
+                f"[WriteToPaths] Cannot update: sid {sid} has no path (config: {self.config})."
+            )
 
         path = _sid.path(self.config)
         if not path.exists():
-            raise SpilException(f"[WriteToPaths] Cannot Update: Sid {sid} does not exist at path: {path} (config: {self.config}).")
+            raise SpilException(
+                f"[WriteToPaths] Cannot Update: Sid {sid} does not exist at path: {path} (config: {self.config})."
+            )
 
         return _write_data(path, data)
 
-    def set(self, sid: Sid | str, attribute: Optional[str] = None, value: Optional[Any] = None, **kwargs) -> bool:
+    def set(
+        self, sid: Sid | str, attribute: Optional[str] = None, value: Optional[Any] = None, **kwargs
+    ) -> bool:
         """
         Sets given attribute with given value, and / or given kwargs, for given Sid.
         Updates the data if it already exists.
@@ -173,21 +198,25 @@ class WriteToPaths(Writer):
             kwargs[attribute] = value
         return self.update(sid, data=kwargs)
 
+    def delete(self, sid: Sid | str) -> bool:
+        raise NotImplementedError("Deletion is currently not implemented.")
+
     def __str__(self):
         return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'
 
 
 if __name__ == "__main__":
 
-    sid = 'hamlet/a'
+    sid = "hamlet/a"
     data = {"author": "John"}
     print(WriteToPaths())
     writer = WriteToPaths()
     done = writer.update(sid, data)
+    print(Sid(sid).path())
     print(f"Update: {done}")
 
-    done = writer.set(sid, bill=25, random_attribute='random value')
+    done = writer.set(sid, bill=25, random_attribute="random value")
     print(f"Set: {done}")
 
-    done = writer.set(sid, attribute='bill', value=299)
+    done = writer.set(sid, attribute="bill", value=299)
     print(f"Set: {done}")

@@ -1,16 +1,22 @@
 # type: ignore
+"""
+This script uses the test sids,
+and generates empty but correctly named files,
+according to the path configs.
+
+"""
 import spil  # default config path bootstrap
 import spil_data_conf
 from scripts.example_sids import sids
 from spil_tests.prep.make_mock_fs import generate_mock_fs
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from spil.util.log import setLevel, INFO, DEBUG, info
 
-    print('')
-    print('Tests start')
-    print('')
+    print("")
+    print("Tests start")
+    print("")
 
     # setLevel(WARN)
     setLevel(INFO)

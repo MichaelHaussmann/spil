@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -12,7 +12,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from __future__ import annotations
-from typing import Iterable, List, Set
+from typing import Iterator, List, Set
 from pprint import pformat
 
 from spil import Finder, SpilException, Sid
@@ -58,8 +58,8 @@ class FindInSG(Finder):
     def __init__(self):
         self.sg = get_sg()  # TODO: handle connection pool while freeing resource when un needed.
 
-    def do_find(self, search_sids: List[Sid],
-                as_sid: bool = True) -> Iterable[Sid] | Iterable[str]:
+    # TODO: implement overrides
+    def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterator[Sid] | Iterator[str]:
         """
         Yields Sids (if as_bool is True, the default) or strings (if as_bool is set to False),
         as found in Shotgrid by querying the given search_sids.
@@ -69,13 +69,13 @@ class FindInSG(Finder):
             as_sid: If True (default) SId objects are yielded, else Strings.
 
         Returns:
-            Iterable over Sids or strings.
+            Iterator over Sids or strings.
         """
 
         found: Set = set()
 
         if not search_sids:
-            log.warning('Nothing Searchable. ')
+            log.warning("Nothing Searchable. ")
 
         for search_sid in search_sids:
             for sid in self.sg_request(search_sid):
@@ -86,7 +86,7 @@ class FindInSG(Finder):
                     else:
                         yield sid
 
-    def sg_request(self, sid: Sid) -> Iterable[str]:
+    def sg_request(self, sid: Sid) -> Iterator[str]:
 
         if not sid:
             raise SpilException(f'Sid "{sid}" is not typed, cannot search.')
@@ -94,24 +94,30 @@ class FindInSG(Finder):
         sid_type = sid.type
         sg_type = type_mapping.get(sid_type)
         if not sg_type:
-            raise SpilException(f'This sid type "{sid_type}" cannot currently not be queried in SG directly. Use another Finder.')
+            raise SpilException(
+                f'This sid type "{sid_type}" cannot currently not be queried in SG directly. Use another Finder.'
+            )
 
         field_mapping = field_mappings.get(sid_type)
         if not field_mapping:
-            raise SpilException(f'Fields for sid type "{sid_type}" were not configured. Check the config.')
+            raise SpilException(
+                f'Fields for sid type "{sid_type}" were not configured. Check the config.'
+            )
 
         # building SG request filters
         filters = []
         for key, value in sid.fields.items():
             # print(f"Field {key} / {value}")
-            field = get_key(field_mapping, key)  # for every Sid field, we get the corresponding SG field
+            # for every Sid field, we get the corresponding SG field
+            field = get_key(field_mapping, key)
             if field:
-                if value == '*':
-                    sg_filter = [field, 'is_not', None]
+                if value == "*":
+                    sg_filter = [field, "is_not", None]
                 else:
                     value_mapping = value_mappings.get(key, {})
-                    value = get_key(value_mapping, value) or value  # we set the value, or map the value
-                    sg_filter = [field, 'is', value]
+                    # we set the value, or map the value
+                    value = get_key(value_mapping, value) or value
+                    sg_filter = [field, "is", value]
                 filters.append(sg_filter)
 
         # SG request fields as configured
@@ -131,7 +137,7 @@ class FindInSG(Finder):
         # looping over results, that are SG dicts
         for sg_dict in results:
 
-            log.debug('*' * 20)
+            log.debug("*" * 20)
             log.debug(pformat(sg_dict))
 
             # getting a Sid dict with default values (or empty if no defaults configured)
@@ -160,7 +166,8 @@ class FindInSG(Finder):
             # new Sid dict is done
             log.debug(new_sid)
 
-            # Unless the dict is empty, we resolve to string sid and return. TODO: create a Sid directly.
+            # Unless the dict is empty, we resolve to string sid and return.
+            # TODO: create a Sid directly.
             if new_sid:
                 sid_string = dict_to_sid(new_sid, sid_type)
                 log.debug(sid_string)
@@ -171,7 +178,7 @@ if __name__ == "__main__":
 
     log.setLevel(INFO)
 
-    search = 'hamlet/a,s/*/*/*'
+    search = "hamlet/a,s/*/*/*"
 
     finder = FindInSG()
 
@@ -180,4 +187,3 @@ if __name__ == "__main__":
 
     for f in finder.find(search):
         print(f)
-
