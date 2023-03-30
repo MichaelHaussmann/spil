@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+# type: ignore
 """
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -16,11 +17,7 @@ If not, see <https://www.gnu.org/licenses/>.
 import importlib
 import inspect
 
-from spil.conf.util import extrapolate, pattern_replacing
-
-import six
-if six.PY2:
-    ModuleNotFoundError = ImportError
+from spil.conf.util import extrapolate_templates, pattern_replacing
 
 # stubs that are replaced by imports
 sid_templates = {}
@@ -32,27 +29,24 @@ basetyped_search_narrowing = {}
 key_patterns = {}
 extension_alias = {}
 projects = []
+leaf_keys = {}
 
 try:
-    module = importlib.import_module('sid_conf')
+    module = importlib.import_module('spil_sid_conf')
 except ModuleNotFoundError as e:
-    problem = """
-    -------------------------------------------------------------------------------------------------------------
-    CONFIGURATION PROBLEM: 
 
-    The configuration module "sid_conf" was not found.
-    
-    Ensure to either include "demo_conf" in your python path, 
-    or create your own "sid_conf" and add its folder to the python path.    
+    try:
+        import sys
+        from spil.conf import default_sid_conf_path, sid_conf_using_demo_configuration_message
+        sys.path.append(default_sid_conf_path)
+        module = importlib.import_module('spil_sid_conf')
+        print(sid_conf_using_demo_configuration_message)
 
-    (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)
-
-    Please see installation and configuration documentation.
-
-    -------------------------------------------------------------------------------------------------------------
-    """
-    print(problem)
-    raise Exception(problem)
+    except Exception as e:
+        from spil.conf import sid_conf_import_error_message
+        problem = sid_conf_import_error_message.format(module='spil_sid_conf')
+        print(problem)
+        raise Exception(problem)
 
 __all__ = []
 for name, value in inspect.getmembers(module):
@@ -62,7 +56,7 @@ for name, value in inspect.getmembers(module):
     globals()[name] = value
     __all__.append(name)
 
-sid_templates = extrapolate(sid_templates, extrapolate_types, to_extrapolate, extrapolation_leaf_subtype)
+sid_templates = extrapolate_templates(sid_templates, to_extrapolate)
 pattern_replacing(sid_templates, key_patterns)
 
 if __name__ == '__main__':

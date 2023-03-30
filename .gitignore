@@ -8,3 +8,12 @@ venv27
 /drafts/
 /dist/
 /build/
+.pytest_cache
+.mypy_cache
+/.limbo/
+/docs-wip
+/docs/_build
+/hamlet_conf/data/testing/SPIL_PROJECTS
+/hamlet_conf/data/caches/*
+/memo.md
+*wip

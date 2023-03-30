@@ -7,6 +7,7 @@ import sys
 import re
 import functools
 from collections import defaultdict
+from future.utils import with_metaclass
 
 import lucidity.error
 
@@ -251,8 +252,8 @@ class Template(object):
                                  'characters.')
             else:
                 _, value, traceback = sys.exc_info()
-                message = 'Invalid pattern: {0}'.format(value)
-                raise ValueError(message).with_traceback(traceback)
+                message = 'Invalid pattern: {0}| {1}'.format(value, traceback)
+                raise ValueError(message)
 
         return compiled
 
@@ -290,7 +291,7 @@ class Template(object):
             expression = self._default_placeholder_expression
 
         # Un-escape potentially escaped characters in expression.
-        expression = expression.replace('\{', '{').replace('\}', '}')
+        expression = expression.replace('\\{', '{').replace('\\}', '}')
 
         return r'(?P<{0}>{1})'.format(placeholder_name, expression)
 
@@ -303,10 +304,9 @@ class Template(object):
         return groups['placeholder']
 
 
-class Resolver(object):
+class Resolver(with_metaclass(abc.ABCMeta)):
     '''Template resolver interface.'''
 
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def get(self, template_name, default=None):

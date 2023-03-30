@@ -49,7 +49,7 @@ logger.addHandler(handler)
 
 logzero.formatter(logging.Formatter(fmt=__logFormat))
 
-logger.setLevel(logging.INFO)  # FIXME: config (depending on deploy dir)
+logger.setLevel(logging.INFO)  # FIXME: config_name (depending on deploy dir)
 
 
 def get_logger(name, color=True):

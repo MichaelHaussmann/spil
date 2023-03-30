@@ -15,9 +15,7 @@ If not, see <https://www.gnu.org/licenses/>.
 import json
 import platform
 
-import six
-if six.PY2: from pathlib2 import Path
-else: from pathlib import Path
+from pathlib import Path
 
 from spil.util.log import debug, info, error
 from spil.util.singleton import Singleton
@@ -38,6 +36,8 @@ def get_user_config_path():
     Returns a Path object.
     """
     home = Path.home()
+    if home.name == "Documents" and home.parent.exists():
+        home = home.parent  # fix for maya
     user_config_path = home / user_app_folder_name / user_conf_file_name
 
     return user_config_path
@@ -48,7 +48,7 @@ user_config_path = get_user_config_path()
 
 class ConfigIO(Singleton):
     '''
-    Writer and Reader for User config
+    Writer and Reader for User config_name
     '''
 
     conf_path = None
@@ -95,6 +95,8 @@ class ConfigIO(Singleton):
 
 if __name__ == '__main__':
 
+    from spil import logging
+    logging.setLevel(logging.INFO)
     info('Path is : {}'.format(user_config_path))
     cfio = ConfigIO()
     info(cfio.read())

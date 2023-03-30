@@ -1,0 +1,1 @@
+This is a maya file template place holder.
