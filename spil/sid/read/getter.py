@@ -27,35 +27,38 @@ class Getter:
     A Getter is getting from a data source.
     Eg. GetFromPaths, GetFromSG.
 
-    The Getter's work has two forms:
+    The Getters work has two forms:
     Finding with data form a search sid, or Getting data from a Sid.
 
-    ## Finding with data
+    1. Finding with data
 
-    Methods: get(), do_get(), get_one()
+      The Getter receives a Search Sid, finds the result Sid(s) and returns them together with data.
+      This can be considered like a Finder including dependencies (the "Finder" itself only finds Sids).
 
-    The Getter receives a Search Sid, finds the result Sid(s) and returns them together with data.
-    This can be considered like a Finder including dependencies (the "Finder" itself only finds Sids).
-    2 Implementation options:
-    - The Getter calls the data source directly and retrieves Sids with data in one go.
-      Typically, it is done when the data source is a database (for example GetFromSG)
-    - The Getter calls a Finder to find the Sids, and then retrieves the data for each of them.
-      For example GetFromPaths calls FindInPaths and then reads the data from disk for the Sids.
+      Implementation options
 
-    These methods yield over dicts containing the data.
-    One special field named "sid" contains the Sid.
+        - The Getter calls the data source directly and retrieves Sids with data in one go. Typically, it is done when the data source is a database (for example GetFromSG)
 
-    ## Getting data
+        - The Getter calls a Finder to find the Sids, and then retrieves the data for each of them. For example GetFromPaths calls FindInPaths and then reads the data from disk for the Sids.
 
-    Methods: get_data(), get_attr()
+      Methods: get(), do_get(), get_one()
+      These methods yield over dicts containing the data.
+      One special field named "sid" contains the Sid.
 
-    The Getter receives a specific Sid, and retrieves its data.
-    It is possible to call
-    - For a given existing Sid, retrieving data with all or some attributes
-    - For a given existing Sid, retrieving one attribute
+    2. Getting data
 
-    get_data() returns the data dict
-    get_attr() returns the attributee
+      The Getter receives a specific Sid, and retrieves its data.
+
+      It is possible to call
+
+        - For a given existing Sid, retrieving data with all or some attributes
+
+        - For a given existing Sid, retrieving one attribute
+
+      Methods: get_data(), get_attr()
+      get_data() returns the data dict
+      get_attr() returns the attributee
+
     """
 
     def get(
@@ -78,10 +81,9 @@ class Getter:
         Args:
             search_sid: the search sid (possibly untyped).
             attributes: a list of attribute names, that should be fetched.
-            sid_encode: a callable to which the sid object will be passed,
-            that should return the value added to the data dictionary under the "sid" key.
-            Example: sid_encode=lambda x: x.uri
-            If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
+            sid_encode: a callable to which the sid object will be passed, that should return the value added to the data dictionary under the "sid" key.
+                        Example: `sid_encode=lambda x: x.uri`
+                        If the callable returns None, the value is not added. As in `sid_encode=lambda x: None`
 
         Returns:
             Iterator over Mappings containing the retrieved data.
@@ -111,10 +113,9 @@ class Getter:
         Args:
             search_sids: List of typed search sids.
             attributes: a list of attribute names, that should be fetched.
-            sid_encode: a callable to which the sid object will be passed,
-            that should return the value added to the data dictionary under the "sid" key.
-            Example: sid_encode=lambda x: x.uri
-            If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
+            sid_encode: a callable to which the sid object will be passed, that should return the value added to the data dictionary under the "sid" key.
+                        Example: `sid_encode=lambda x: x.uri`
+                        If the callable returns None, the value is not added. As in `sid_encode=lambda x: None`
 
         Returns:
             Iterator over Mappings containing the retrieved data.
@@ -153,10 +154,9 @@ class Getter:
         Args:
             sid: a typed sid
             attributes: a list of attribute names, that should be fetched.
-            sid_encode: a callable to which the sid object will be passed,
-            that should return the value added to the data dictionary under the "sid" key.
-            Example: sid_encode=lambda x: x.uri
-            If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
+            sid_encode: a callable to which the sid object will be passed, that should return the value added to the data dictionary under the "sid" key.
+                        Example: `sid_encode=lambda x: x.uri`
+                        If the callable returns None, the value is not added. As in `sid_encode=lambda x: None`
 
         Returns:
             Mapping containing the retrieved data.
