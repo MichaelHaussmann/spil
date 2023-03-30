@@ -47,14 +47,25 @@ class GetFromSG(Getter):
         sid_encode: Callable = str,
     ) -> Iterator[Mapping[str, Any]]:
         """
-        For a given list of typed Search Sids
+        For a given list of typed Search Sids, returns an Iterator over Mappings containing the retrieved data.
+        One special field named "sid" contains the Sid.
+        The Sid can be encoded by providing a callable to "sid_encode". Default is str.
+
+        By default, attributes is None, retrieved data contains all configured data for the Sid type.
+        If "attributes" is given, data contains only the key:value for the given attributes.
+
+        The Sids returned by Getter.get() should be identical to those returned by Finder.find().
+        Getter retrieves data related to these Sids, whereas the Finder finds only the existing Sids themselves.
+
 
         Args:
-            search_sids:
-            attributes:
-            sid_encode:
+            search_sids: List of typed Sids for search
+            attributes: Optional list of attributes to be retrieved
+            sid_encode: Callable to format the returned Sid, as a value of key "sid".
 
         Returns:
+            Iterator over Mappings containing the retrieved data.
+            One special field named "sid" contains the Sid
 
         """
         found: Set = set()
@@ -63,7 +74,7 @@ class GetFromSG(Getter):
             log.warning("Nothing Searchable. ")
 
         for search_sid in search_sids:
-            for sid, data in self.sg_request(search_sid, attributes=attributes):
+            for sid, data in self._sg_request(search_sid, attributes=attributes):
                 if sid not in found:
                     found.add(sid)
                     _sid = sid_encode(Sid(sid))
@@ -71,7 +82,7 @@ class GetFromSG(Getter):
                         data["sid"] = _sid
                     yield data
 
-    def sg_request(
+    def _sg_request(
         self, sid: Sid, attributes: Optional[List[str]] = None
     ) -> Iterator[Tuple[str, dict]]:
 

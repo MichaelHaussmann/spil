@@ -27,13 +27,10 @@ from spil.util.log import DEBUG, get_logger, INFO
 
 log = get_logger("spil_sg")
 
+"""
+Notes: 
 
-class FindInSG(Finder):
-    """
-    Finder Implementation for Shotgrid backend.
-    Relies on the spil_sg_conf.
-
-    TODO: "search re-grouping"
+    # TODO: "search re-grouping"
     Currently, a search Sid is "unfolded" into a list of typed search Sids.
     Examples :
 
@@ -53,12 +50,20 @@ class FindInSG(Finder):
     This makes sense in glob searches, where the "or" operator does not exist.
     But in SG, it would make sense to re-group same type searches,
     and include variations (like the "or") in the search request.
+
+"""
+
+
+class FindInSG(Finder):
+    """
+    Finder Implementation for Shotgrid backend.
+    Relies on the spil_sg_conf.
     """
 
     def __init__(self):
         self.sg = get_sg()  # TODO: handle connection pool while freeing resource when un needed.
 
-    # TODO: implement overrides
+    # TODO: implement type overrides
     def do_find(self, search_sids: List[Sid], as_sid: bool = True) -> Iterator[Sid] | Iterator[str]:
         """
         Yields Sids (if as_bool is True, the default) or strings (if as_bool is set to False),
@@ -66,7 +71,7 @@ class FindInSG(Finder):
 
         Args:
             search_sids: A list of Typed Search Sids
-            as_sid: If True (default) SId objects are yielded, else Strings.
+            as_sid: If True (default) Sid objects are yielded, else Strings.
 
         Returns:
             Iterator over Sids or strings.
@@ -78,7 +83,7 @@ class FindInSG(Finder):
             log.warning("Nothing Searchable. ")
 
         for search_sid in search_sids:
-            for sid in self.sg_request(search_sid):
+            for sid in self._sg_request(search_sid):
                 if sid not in found:
                     found.add(sid)
                     if as_sid:
@@ -86,7 +91,22 @@ class FindInSG(Finder):
                     else:
                         yield sid
 
-    def sg_request(self, sid: Sid) -> Iterator[str]:
+    def _sg_request(self, sid: Sid) -> Iterator[str]:
+        """
+        For a given typed search sid, retrieves the result be querying Shotgrid.
+
+        Implementation steps:
+        - Using "type_mapping" and "field_mapping", the Search Sid translates to SG type, filters and fields
+        - The query (type, filters and fields) is send to the SG API, and the result is retrieved
+        - Using "field_mapping" and "value_mapping" the results are translated back
+        - the resulting dictionaries are resolved to Sid objects
+
+        Args:
+            sid: types search Sid
+
+        Returns:
+            generator over Sid strings
+        """
 
         if not sid:
             raise SpilException(f'Sid "{sid}" is not typed, cannot search.')
@@ -167,11 +187,12 @@ class FindInSG(Finder):
             log.debug(new_sid)
 
             # Unless the dict is empty, we resolve to string sid and return.
-            # TODO: create a Sid directly.
+            # TODO: create a Sid directly, instead of a Sid string. Evaluate what is faster.
             if new_sid:
                 sid_string = dict_to_sid(new_sid, sid_type)
                 log.debug(sid_string)
-                yield sid_string
+                if sid_string:
+                    yield sid_string
 
 
 if __name__ == "__main__":
