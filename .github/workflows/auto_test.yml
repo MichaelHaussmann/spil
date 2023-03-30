@@ -58,4 +58,4 @@ jobs:
         run: pip install -e .[dev]
 
       - name: Run unit tests
-        run: python -m pytest --capture=yes .
+        run: python -m pytest --capture=fd .
