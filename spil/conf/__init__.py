@@ -12,10 +12,16 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+import os
+import sys
 from spil.conf.global_conf import *
 
 # user config_name
 from spil.conf.configio import ConfigIO
+
+# not currently in use.
+if os.environ.get("SPIL_CONFIG_PATH"):
+    sys.path.append(os.environ["SPIL_CONFIG_PATH"])
 
 try:
     from spil.conf.sid_conf_load import *

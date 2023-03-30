@@ -1,0 +1,4 @@
+
+class Context:
+
+    name = "default"

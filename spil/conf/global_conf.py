@@ -12,6 +12,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 
 """
+import os
 from pathlib import Path
 
 pysep = "/"  # python path separator
@@ -24,7 +25,8 @@ application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(
 
 application_path = Path(__file__).parent.parent
 default_sid_conf_path = str(application_path.parent / "hamlet_conf")
-default_sid_conf_data_path = str(application_path.parent / "hamlet_conf" / "data")
+# os.environ['SPIL_ROOT'] = str(application_path.resolve())
+# default_sid_conf_data_path = str(application_path.parent / "hamlet_conf" / "data")
 
 # automatic replacement to INFO and WARN in BETA and PROD
 loglevel = 80
