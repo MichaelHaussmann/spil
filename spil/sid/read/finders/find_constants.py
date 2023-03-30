@@ -1,5 +1,4 @@
 """
-
 This file is part of SPIL, The Simple Pipeline Lib.
 
 (C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
@@ -34,40 +33,48 @@ class FindInConstants(FindByGlob):
     Examples:
 
         We instantiate a parent Finder
-        >>> from spil import FindInPaths
-        >>> fp = FindInPaths()
+
+            >>> from spil import FindInPaths
+            >>> fp = FindInPaths()
 
         Finding a constant list of asset types
-        >>> finder = FindInConstants('assettype', ['char', 'location', 'prop', 'fx'], parent_source=fp)
-        >>> list( finder.find('hamlet/a/*') )
-        [Sid('asset__assettype:hamlet/a/char'), Sid('asset__assettype:hamlet/a/location'), Sid('asset__assettype:hamlet/a/prop'), Sid('asset__assettype:hamlet/a/fx')]
+
+            >>> finder = FindInConstants('assettype', ['char', 'location', 'prop', 'fx'], parent_source=fp)
+            >>> list( finder.find('hamlet/a/*') )
+            [Sid('asset__assettype:hamlet/a/char'), Sid('asset__assettype:hamlet/a/location'), Sid('asset__assettype:hamlet/a/prop'), Sid('asset__assettype:hamlet/a/fx')]
 
         Search "above" in the hierarchy is delegated to the parent
-        >>> list( finder.find('hamlet/*/prop') )
-        [Sid('asset__assettype:hamlet/a/prop')]
+
+            >>> list( finder.find('hamlet/*/prop') )
+            [Sid('asset__assettype:hamlet/a/prop')]
 
         Other examples, defining a constant list of "states" and searching for states
-        >>> finder_states = FindInConstants('state', ["w", "p"], parent_source=fp)
-        >>> list( finder_states.find('hamlet/a/location/ramparts/rig/v001/*') )
-        [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/w'), Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p')]
+
+            >>> finder_states = FindInConstants('state', ["w", "p"], parent_source=fp)
+            >>> list( finder_states.find('hamlet/a/location/ramparts/rig/v001/*') )
+            [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/w'), Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p')]
 
         Finding a state with a parent search
-        >>> list( finder_states.find('hamlet/a/location/ramparts/rig/*/p') )
-        [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p')]
+
+            >>> list( finder_states.find('hamlet/a/location/ramparts/rig/*/p') )
+            [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p')]
 
         Finding a state with a multi-parent search
-        >>> list( finder_states.find('hamlet/a/location/*/rig/*/p') )
-        [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v001/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v002/p'), Sid('asset__state:hamlet/a/location/garden/rig/v001/p'), Sid('asset__state:hamlet/a/location/garden/rig/v002/p'), Sid('asset__state:hamlet/a/location/elsinore/rig/v001/p'), Sid('asset__state:hamlet/a/location/elsinore/rig/v002/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v001/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v002/p')]
+
+            >>> list( finder_states.find('hamlet/a/location/*/rig/*/p') )
+            [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v001/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v002/p'), Sid('asset__state:hamlet/a/location/garden/rig/v001/p'), Sid('asset__state:hamlet/a/location/garden/rig/v002/p'), Sid('asset__state:hamlet/a/location/elsinore/rig/v001/p'), Sid('asset__state:hamlet/a/location/elsinore/rig/v002/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v001/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v002/p')]
 
         Combining parent and constant search
-        >>> list( finder_states.find('hamlet/a/location/ramparts/rig/*/*') )
-        [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/w'), Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/w'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p')]
+
+            >>> list( finder_states.find('hamlet/a/location/ramparts/rig/*/*') )
+            [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/w'), Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/w'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p')]
 
         Finds itself if needed.
-        >>> list( finder_states.find('hamlet/a/location/ramparts/rig/v001/p') )
-        [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p')]
 
-    Still beta.
+            >>> list( finder_states.find('hamlet/a/location/ramparts/rig/v001/p') )
+            [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p')]
+
+    This is still beta code.
     """
 
     def __init__(self, key: str, values: List[str], parent_source: Finder | None = None):  # noqa
@@ -83,7 +90,9 @@ class FindInConstants(FindByGlob):
         self.values = values
         self.parent_source = parent_source
 
-    def _append_value(self, root: Sid, done: set, as_sid: bool = False) -> Iterator[Sid] | Iterator[str]:
+    def _append_value(
+        self, root: Sid, done: set, as_sid: bool = False
+    ) -> Iterator[Sid] | Iterator[str]:
         """
         This method fills the keytype with the values, by appending them to the parent root.
 
@@ -99,19 +108,19 @@ class FindInConstants(FindByGlob):
 
             result = root.get_with(key=self.key, value=value)
             if not result:
-                debug(f'Generated Sid "{result}" is not valid, skipped (built with {self.key}:{value})')
+                debug(f'Generated Sid "{result}" is not valid, skipped (used {self.key}:{value})')
                 continue
 
             if result not in done:
-                #done.add(result)
+                # done.add(result)
                 if as_sid:
                     yield result
                 else:
                     yield str(result)
 
-    def star_search(self, search_sids: List[Sid],
-                    as_sid: bool = False,
-                    do_sort: bool = False) -> Iterator[Sid] | Iterator[str]:
+    def star_search(
+        self, search_sids: List[Sid], as_sid: bool = False, do_sort: bool = False
+    ) -> Iterator[Sid] | Iterator[str]:
 
         done = set()
 
@@ -126,7 +135,7 @@ class FindInConstants(FindByGlob):
             if "*" not in str(root):
 
                 if root not in done:
-                    #done.add(root)  # TODO: useful ?
+                    # done.add(root)  # TODO: useful ?
                     if as_sid:
                         yield root
                     else:
@@ -147,7 +156,7 @@ class FindInConstants(FindByGlob):
                     if root.get(self.key) != "*":
                         result = found_root / root.get(self.key)
                         if result not in done:
-                            #done.add(result)
+                            # done.add(result)
                             if as_sid:
                                 yield result
                             else:
@@ -176,23 +185,22 @@ if __name__ == "__main__":
 
     cs1 = FindInConstants("project", projects)
     cs2 = FindInConstants("type", ["a", "s"], parent_source=cs1)
-    cs3 = FindInConstants('assettype', asset_types, parent_source=cs2)
-    cs4 = FindInConstants('sequence', ['sq088'], parent_source=cs2)
+    cs3 = FindInConstants("assettype", asset_types, parent_source=cs2)
+    cs4 = FindInConstants("sequence", ["sq088"], parent_source=cs2)
     print(cs2)
 
     for i in cs1.find("*"):
         print(f"sid: {i} / {type(i)} / path: {i.path()}")
-    print('-' * 20)
+    print("-" * 20)
 
     for i in cs2.find("hamlet/*"):
         print(f"sid: {i} / {type(i)} / path: {i.path()}")
-    print('-' * 20)
+    print("-" * 20)
 
     for i in cs3.find("hamlet/*/*"):
         print(f"sid: {i} / {type(i)} / path: {i.path()}")
-    print('-' * 20)
+    print("-" * 20)
 
     for i in cs4.find("hamlet/*/*"):
         print(f"sid: {i} / {type(i)} / path: {i.path()}")
-    print('-' * 20)
-
+    print("-" * 20)
