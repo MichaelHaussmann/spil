@@ -191,7 +191,7 @@ if __name__ == "__main__":
     getter = GetFromSG()
 
     print("Assets + shots")
-    for f in getter.get("hamlet/a,s/*/*", sid_encode=lambda x: x.full_string):
+    for f in getter.get("hamlet/a,s/*/*", sid_encode=lambda x: x.uri):
         pprint(f)
 
     print("Tasks")
