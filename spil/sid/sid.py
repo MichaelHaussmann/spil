@@ -202,6 +202,7 @@ class StringSid(BaseSid):
 class TypedSid(StringSid):
     """
     The TypedSid class implements a Sid that has been resolved successfully.
+
     It has a "type" and a "field" data dictionary.
     """
 
@@ -219,6 +220,7 @@ class TypedSid(StringSid):
     def type(self) -> str:
         """
         Returns the Sids type.
+
         If the Sid has no type, an empty string is returned.
 
         Examples:
@@ -234,6 +236,7 @@ class TypedSid(StringSid):
 
         Returns:
             The Sid type
+
         """
         return self._type
 
@@ -241,16 +244,20 @@ class TypedSid(StringSid):
     def fields(self) -> dict:
         """
         Returns the Sids data dictionary.
+
         The fields match what is defined in the Sid template.
 
-        >>> Sid("hamlet/a/char/*").fields
-        OrderedDict([('project', 'hamlet'), ('type', 'a'), ('assettype', 'char'), ('asset', '*')])
+        Examples:
 
-        >>> Sid("hamlet/s/sq010/sh0010/anim").fields
-        OrderedDict([('project', 'hamlet'), ('type', 's'), ('sequence', 'sq010'), ('shot', 'sh0010'), ('task', 'anim')])
+            >>> Sid("hamlet/a/char/*").fields
+            OrderedDict([('project', 'hamlet'), ('type', 'a'), ('assettype', 'char'), ('asset', '*')])
+
+            >>> Sid("hamlet/s/sq010/sh0010/anim").fields
+            OrderedDict([('project', 'hamlet'), ('type', 's'), ('sequence', 'sq010'), ('shot', 'sh0010'), ('task', 'anim')])
 
         Returns:
             Sids data dictionary.
+
         """
         return self._fields.copy()
 
@@ -258,11 +265,8 @@ class TypedSid(StringSid):
     def uri(self) -> str:
         """
         Returns the "uri" representation of a Sid.
-        The form is "type:string" if typed, else just the sid string.
 
-        Note:
-             If the Sid ends with a "query", this query is applied, if possible.
-             An unapplied query stays in the string and thus, the uri.
+        The form is "type:string" if typed, else just the sid string.
 
         Examples:
 
@@ -271,6 +275,10 @@ class TypedSid(StringSid):
 
             >>> Sid('blablabla').uri
             'blablabla'
+
+        Note:
+             If the Sid ends with a "query", this query is applied, if possible.
+             An unapplied query stays in the string and thus, the uri.
 
         Examples with query:
 
@@ -285,6 +293,7 @@ class TypedSid(StringSid):
 
         Returns
             the "uri" representation of a Sid.
+
         """
         return "{}{}".format(self._type + ":" if self._type else "", self.string)
 
@@ -303,9 +312,9 @@ class TypedSid(StringSid):
 
             >>> Sid("bla/bla").basetype
 
-
         Returns
             string basetype
+
         """
         result = None
         if not self._type:
@@ -324,22 +333,22 @@ class TypedSid(StringSid):
 
         Note that this is not necessarily the second part of the "type".
 
-        ```
-        Sid("hamlet/a/char/claudius/model/v001/w/blend")
-        type: 'asset__file'
-        keytype: 'ext'
-        basetype: 'asset'
+        Note:
 
-        Sid("hamlet/s")
-        type: 'shot'
-        keytype: 'type'
-        basetype: 'shot'
+            Sid("hamlet/a/char/claudius/model/v001/w/blend")
+              - type: 'asset__file'
+              - keytype: 'ext'
+              - basetype: 'asset'
 
-        Sid("hamlet")
-        type: 'project'
-        keytype: 'project'
-        basetype: 'project'
-        ```
+            Sid("hamlet/s")
+              - type: 'shot'
+              - keytype: 'type'
+              - basetype: 'shot'
+
+            Sid("hamlet")
+              - type: 'project'
+              - keytype: 'project'
+              - basetype: 'project'
 
         Examples:
 
@@ -354,6 +363,7 @@ class TypedSid(StringSid):
 
         Returns:
              string keytype
+
         """
         if not self._fields:
             warning(f'Sid operation on an undefined Sid "{self.string}"')
@@ -364,6 +374,7 @@ class TypedSid(StringSid):
     def parent(self) -> Sid:
         """
         Returns the parent Sid.
+
         Returns an empty Sid, if the Sid is not "defined", or a copy of self if the Sid is already the root (has no parent).
 
         Note that this is a logical operation, without data access.
@@ -397,6 +408,7 @@ class TypedSid(StringSid):
 
         Returns:
             The amount of keys in the "fields" dictionary.
+
         """
         return len(self._fields)
 
@@ -426,9 +438,10 @@ class TypedSid(StringSid):
     def get_as(self, key: str) -> Sid:
         """
         Returns a new Sid built of the fields until (and including) the given key.
+
         If the Sid is not typed or the key is not found, an empty Sid is returned.
 
-        Example:
+        Examples:
 
             >>> Sid('hamlet/a/char/ophelia/model/v001/w/ma').get_as('task')
             Sid('asset__task:hamlet/a/char/ophelia/model')
@@ -470,9 +483,12 @@ class TypedSid(StringSid):
         **kwargs,
     ) -> Sid:
         """
-        Returns a new Sid
+        Returns a new Sid.
+
         - with the given query applied (see details about query application in documentation)
+
         or
+
         - updated using given key and value, eg. get_with(key='task', value='rendering') and
         - updated using **kwargs where keys are sid keys, eg. get_with(task='rendering')
 
@@ -481,7 +497,8 @@ class TypedSid(StringSid):
         A key set to None will be removed.
         To empty a keys value, set it to an empty string "".
 
-        Note: only works on typed or empty Sids.
+        Note:
+            Only works on typed or empty Sids.
 
         Examples:
 
@@ -502,6 +519,7 @@ class TypedSid(StringSid):
 
         Returns:
             A new Sid. Depending on the update, the type of the returned Sid can change.
+
         """
         if self._string and not self._fields:
             warning(f'Sid operation on an undefined Sid "{self.string}"')
@@ -533,6 +551,7 @@ class TypedSid(StringSid):
     def is_leaf(self):
         """
         Returns True if the current Sid is a "leaf" node.
+
         A leaf node has no children (and cannot have children).
 
         Current implementation checks if the keytype is set as a "leaf type" in the config_name.
@@ -553,6 +572,7 @@ class TypedSid(StringSid):
 
         Returns:
             True if this Sid is a leaf, else False.
+
         """
         return bool(self.get(conf.leaf_keys.get(self.basetype)))
         # TODO:
@@ -578,8 +598,7 @@ class TypedSid(StringSid):
     # IDEA: match_as(search_sid, key) for example, do the "seq" of both sids match (like is_relative_to ?)
     def match(self, search_sid: Sid | str) -> bool:
         """
-        Returns True if a given search_sid matches the current Sid.
-        Else False.
+        Returns True if a given search_sid matches the current Sid, else False.
 
         This method is useful to create filters matching groups of Sids, more precise than types.
 
@@ -596,6 +615,7 @@ class TypedSid(StringSid):
 
         Returns
             True if matched, else False
+
         """
         # Identicals always match
         if Sid(search_sid) == self:
