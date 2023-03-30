@@ -17,7 +17,7 @@ Spil builds upon general concepts, as well as production proven CG pipeline conc
   A query technique where "example" entities, with search values, are used to retrieve "matching" results.  
   [en.wikipedia.org/wiki/Query_by_Example](https://en.wikipedia.org/wiki/Query_by_Example#As_a_general_technique)
   
-- Query / URL  
+- URI / URL  
   [en.wikipedia.org/wiki/Uniform_Resource_Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
   
 - Node tree & hierarchy
@@ -46,7 +46,7 @@ Spil builds upon general concepts, as well as production proven CG pipeline conc
   [Katana Asset API](https://learn.foundry.com/katana/4.0/Content/tg/asset_management_system_plugin_api/concepts.html)  
 
 - Asset Resolution - ArResolver - in USD    
-  [graphics.pixar.com/usd/release/wp_ar2.html](https://graphics.pixar.com/usd/release/wp_ar2.html)  
+  [https://openusd.org/release/api/ar_page_front.html](https://openusd.org/release/api/ar_page_front.html)  
   
 - The Sid itself    
   The Sid has been used in general and fx pipelines since 2011, in various implementations and at various degrees.    
@@ -106,7 +106,7 @@ It's performance depends on the data sources that are used.
 
 The priority is to make the current feature set more robust, efficient, and easy to deploy.
 - tools to help create and verify the configuration files
-- automated testing and profiling
+- more testing and profiling
 - adding a C++ resolver is planned, but not scheduled yet 
 
 To take profit from the Sids universality, we plan on building reusable open source bricks and pipeline tools.

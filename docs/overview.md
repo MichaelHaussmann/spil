@@ -86,14 +86,14 @@ shot = task.parent
 # shot sid: hamlet/s/sq030/sh0010 
 ```
 
-Creation with a Query or dictionary
+Creation with a uri-query or dictionary
 ```python
 from spil import Sid
-seq = Sid(query="project=hamlet&type=s&sequence=sq010")  # query        
+seq = Sid(query="project=hamlet&type=s&sequence=sq010")  # uri-query        
 seq = Sid(fields={'project': 'hamlet', 'type': 's', 'sequence': 'sq010'})  # dict
 ```
 
-Data can be accessed in multiple ways: by key, as a complete dictionary, as string or Query.
+Data can be accessed in multiple ways: by key, as a complete dictionary, as string or uri-query.
 ```python
 from spil import Sid 
 shot = Sid("hamlet/s/sq030/sh0010")
@@ -233,7 +233,7 @@ Query Syntax can be used to add search filters on yet untyped searches
   
 ### Finders
 
-To launch queries, Spil implements `Finder` classes that access different data sources.  
+To launch search queries, Spil implements `Finder` classes that access different data sources.  
 
 - **FindInPaths**: to search the file system
 - **FindInList**: to search a list
