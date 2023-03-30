@@ -42,7 +42,8 @@ dependencies = [
 requires-python = ">=3.7"
 
 [project.optional-dependencies]
-dev = ["mypy", "black", "codetiming", "pytest", "flake8", "isort", "refurb"]
+dev = ["codetiming", "pytest"]
+qc = ["mypy", "black", "flake8", "isort", "refurb"]
 
 [project.urls]
 "Homepage" = "https://github.com/MichaelHaussmann/spil"
@@ -67,7 +68,7 @@ filterwarnings = [
     "ignore::DeprecationWarning",
 ]
 log_cli = true
-addopts = "--doctest-modules"
+addopts = "--doctest-modules --capture=no"
 
 #log_cli_level = 10
 #testpaths = [

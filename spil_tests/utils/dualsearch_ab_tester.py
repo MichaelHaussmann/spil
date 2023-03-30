@@ -15,19 +15,18 @@ from spil.util.log import DEBUG, ERROR, get_logger
 from spil_tests import Timer
 
 log = get_logger("spil_tests")
-log.setLevel(DEBUG)
 
 """
 To launch searches on two finders. 
 Allows comparing of finders.
 
 Searches is a dict with searches as 
-    key: read sid
-    value: read description 
+    key: search sid
+    value: search description 
 
 """
 
-def test_search_ab(searches, finderA, finderB, as_sid=False, raise_problems=False):
+def check_search_ab(searches, finderA, finderB, as_sid=False, raise_problems=False):
 
     log.debug("Searching sids in A:{} and B:{}".format(finderA, finderB))
 
@@ -82,6 +81,6 @@ if __name__ == "__main__":
     # fl = FindInList(sids)
     ft = FindInAll()
 
-    test_search_ab(searches, ft, fpl)
+    check_search_ab(searches, ft, fpl)
     # to compare speed, run the test twice and check second time.
-    # test_search_ab(searches, fpl, ft)
+    # check_search_ab(searches, fpl, ft)

@@ -20,7 +20,7 @@ log = get_logger("spil_tests", color=False)
 log.setLevel(DEBUG)
 
 
-def test_path_sid(s, configs=[], reraise=True, replace=None):
+def check_path_sid(s, configs=[], reraise=True, replace=None):
     """
     Test protocol including Path operations: Sid(path=...) and sid.path().
 
@@ -81,7 +81,7 @@ def test_path_sid(s, configs=[], reraise=True, replace=None):
             raise e
 
 
-def test_path_sids(sids, configs=[], reraise=True, replace=None):
+def check_path_sids(sids, configs=[], reraise=True, replace=None):
     """
     Loop over test_sid.
     """
@@ -95,7 +95,7 @@ def test_path_sids(sids, configs=[], reraise=True, replace=None):
     for i, s in enumerate(sids):
         log.info('*' * 75)
         log.info("----------------------------------------- {}".format(i))
-        test_path_sid(s, configs=configs, reraise=reraise, replace=replace)
+        check_path_sid(s, configs=configs, reraise=reraise, replace=replace)
 
 
 if __name__ == "__main__":
@@ -106,4 +106,4 @@ if __name__ == "__main__":
 
     from scripts.example_sids import sids
 
-    test_path_sids(sids)
+    check_path_sids(sids)

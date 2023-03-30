@@ -46,7 +46,7 @@ def check_data_sid(s, reraise=True, replace=None, from_search=None):
             log.error('Sid "{}" not typed, skipping'.format(sid))
             return
 
-        test_search(sid)
+        check_search(sid)
 
         if from_search:
             match = sid.match(from_search)
@@ -103,7 +103,7 @@ def check_data_sids(sids, reraise=True, replace=None):
         check_data_sid(s, reraise=reraise, replace=replace)
 
 
-def test_search(sid):
+def check_search(sid):
     """
     Runs a search on the given Sid.
     If the Sid exists on the system, the search result should equal the search.

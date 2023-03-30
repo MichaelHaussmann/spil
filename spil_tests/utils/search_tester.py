@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -10,27 +9,24 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
+from spil import Sid, FindInPaths, SpilException
+from spil_tests.utils.sid_full_tester import test_full_sid
+from spil.util.log import DEBUG, ERROR, get_logger
+from spil_tests import Timer
+
+log = get_logger("spil_tests")
+
 """
 To launch searches on a custom Finder.
 
 Searches is a dict with searches as 
-    key: read sid
-    value: read description 
+    key: search sid
+    value: search description 
 
 """
-from codetiming import Timer
-from spil import Sid, FindInPaths, SpilException
 
-from spil_tests.utils.sid_full_tester import test_full_sid
-from spil.util.log import DEBUG, ERROR, get_logger
-
-log = get_logger("spil_tests")
-log.setLevel(DEBUG)
-
-
-def test_searches_in_finder(searches, finder=None, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None, reraise=True):
+def check_searches_in_finder(searches, finder=None, as_sid=True, do_log=True, do_deep=False, do_doublon_check=True, do_match_check=False, replace=None, reraise=True):
     """
     Runs given searches on the given Finder.
 
@@ -87,4 +83,4 @@ if __name__ == "__main__":
     searches = {}
     searches["hamlet/s/*/*"] = ""
 
-    test_searches_in_finder(searches)
+    check_searches_in_finder(searches)
