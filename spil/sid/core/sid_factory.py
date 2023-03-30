@@ -34,7 +34,7 @@ def sid_to_sid(sid: str | Sid) -> Sid:
     """
     debug(f"Starting with: {sid}")
 
-    string = sid.full_string if isinstance(sid, Sid) else str(sid)
+    string = sid.uri if isinstance(sid, Sid) else str(sid)
 
     if string.count("?"):  # sid contains Query ending. We put it aside, and later append it back
         string, query = string.split("?", 1)
@@ -42,7 +42,7 @@ def sid_to_sid(sid: str | Sid) -> Sid:
         query = ""
 
     # resolving
-    if string.count(":"):  # a fullstring
+    if string.count(":"):  # a uri
         _type, string = string.split(":")
         _type, fields = sid_resolver.sid_to_dict(string, _type)
     else:  # a simple string

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2022 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -31,7 +30,7 @@ def check_path_sid(s, configs=[], reraise=True, replace=None):
 
     log.info('Testing: "{}"'.format(s))
     sid = Sid(s)
-    log.info('Instanced: "{}"'.format(sid.full_string))
+    log.info('Instanced: "{}"'.format(sid.uri))
 
     try:
         if not sid.type:

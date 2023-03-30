@@ -153,7 +153,7 @@ class FindInAll(Finder):  # noqa
                         yield i
 
             else:
-                debug(f'Nothing found for "{search_sid.full_string}"')
+                debug(f'Nothing found for "{search_sid.uri}"')
 
     def __str__(self):
         return f'[spil.{self.__class__.__name__} -- Config: "{self.config}"]'

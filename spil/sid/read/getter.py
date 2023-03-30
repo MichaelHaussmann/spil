@@ -80,7 +80,7 @@ class Getter:
             attributes: a list of attribute names, that should be fetched.
             sid_encode: a callable to which the sid object will be passed,
             that should return the value added to the data dictionary under the "sid" key.
-            Example: sid_encode=lambda x: x.full_string
+            Example: sid_encode=lambda x: x.uri
             If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
 
         Returns:
@@ -113,7 +113,7 @@ class Getter:
             attributes: a list of attribute names, that should be fetched.
             sid_encode: a callable to which the sid object will be passed,
             that should return the value added to the data dictionary under the "sid" key.
-            Example: sid_encode=lambda x: x.full_string
+            Example: sid_encode=lambda x: x.uri
             If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
 
         Returns:
@@ -155,7 +155,7 @@ class Getter:
             attributes: a list of attribute names, that should be fetched.
             sid_encode: a callable to which the sid object will be passed,
             that should return the value added to the data dictionary under the "sid" key.
-            Example: sid_encode=lambda x: x.full_string
+            Example: sid_encode=lambda x: x.uri
             If the callable returns None, the value is not added. As in: sid_encode=lambda x: None
 
         Returns:

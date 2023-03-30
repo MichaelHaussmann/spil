@@ -37,7 +37,7 @@ def test_full_sid(s, reraise=True, replace=None, from_search=None):
 
     log.info('Testing: "{}"'.format(s))
     sid = Sid(s)
-    log.info('Instanced: "{}"'.format(sid.full_string))
+    log.info('Instanced: "{}"'.format(sid.uri))
 
     if not s.count("?"):  # Assert works only without Query part
         assert str(sid) == s
@@ -119,7 +119,7 @@ def test_full_sid(s, reraise=True, replace=None, from_search=None):
             "is_leaf": sid.is_leaf(),
             "len": len(sid),
             "type": sid.type,
-            "full_string": sid.full_string,
+            "uri": sid.uri,
             "string": sid.string,
             "query": sid.as_query(),
             "is_search": sid.is_search(),

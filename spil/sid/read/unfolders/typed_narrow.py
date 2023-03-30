@@ -74,11 +74,11 @@ if __name__ == "__main__":
     # sid = Sid("asset__assettype:hamlet/a/char")
     sid = Sid("asset__file:hamlet/a/char/hamlet/model/v001/p/*")
     s = type_narrow(sid)
-    print(s.full_string)
+    print(s.uri)
 
     sid = Sid("asset__movie_file:hamlet/a/char/hamlet/model/v001/p/*?type=~a")
     s = type_narrow(sid)
-    print(s.full_string)
+    print(s.uri)
 
     sids = [
         Sid("asset__file:hamlet/a/char/hamlet/model/v001/p/*"),

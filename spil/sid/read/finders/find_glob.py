@@ -117,7 +117,7 @@ class FindByGlob(Finder):
 
         founds: List[str] = []
         for search_sid in search_sids:
-            ssid = search_sid.full_string.replace(">", "*")
+            ssid = search_sid.uri.replace(">", "*")
             debug("star read start on {}".format(ssid))
             founds.extend(self.star_search([Sid(ssid)], as_sid=False))
             debug("star read done")

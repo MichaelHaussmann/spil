@@ -92,7 +92,7 @@ if __name__ == "__main__":
         pprint(result)
 
     print("Calling get:")
-    for result2 in GetFromPaths().get(search, sid_encode=lambda x: x.full_string):
+    for result2 in GetFromPaths().get(search, sid_encode=lambda x: x.uri):
         pprint(result2)
 
     print("Calling get with lambda None:")

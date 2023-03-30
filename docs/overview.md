@@ -110,8 +110,8 @@ shot.fields
 shot.as_query()          
 # "project=hamlet&type=s&seq=sq030&shot=sh0010"
 
-# "fullstring": type and string
-shot.fullstring        
+# "uri": type and string
+shot.uri        
 # "shot__shot:hamlet/s/sq030/sh0010" 
 ```
 

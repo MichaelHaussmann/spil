@@ -39,7 +39,7 @@ def check_typed_sid(s, reraise=True, replace=None):
 
     log.info('Testing: "{}"'.format(s))
     sid = Sid(s)
-    log.info('Instanced: "{}"'.format(sid.full_string))
+    log.info('Instanced: "{}"'.format(sid.uri))
 
     if not s.count("?"):  # Assert works only without Query part
         assert str(sid) == s
@@ -57,7 +57,7 @@ def check_typed_sid(s, reraise=True, replace=None):
             "keytype": sid.keytype,
             "len": len(sid),
             "type": sid.type,
-            "full_string": sid.full_string,
+            "uri": sid.uri,
             "string": sid.string,
             "query": sid.as_query(),
             "is_search": sid.is_search(),

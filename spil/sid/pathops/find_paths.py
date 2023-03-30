@@ -136,7 +136,7 @@ class FindInPaths(FindByGlob):
                         warn(
                             f"Found Sid and search have different types. "
                             f'Consider narrowing the pattern, or implementing "typed_search_narrowing".'
-                            f"Found: {sid.full_string} -- Search: {search.full_string}"
+                            f"Found: {sid.uri} -- Search: {search.uri}"
                         )
                         continue
                 except SpilException as e:

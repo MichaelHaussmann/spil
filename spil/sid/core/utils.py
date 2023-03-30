@@ -175,7 +175,7 @@ def expand(sid: str | Sid, do_extrapolate: bool = False) -> List[Sid]:
                         new_sid = Sid("{}:{}?{}".format(__type, test, query))
                     else:
                         new_sid = Sid(__type + ":" + test)
-                    debug(".... appending: {}".format(new_sid.full_string))
+                    debug(".... appending: {}".format(new_sid.uri))
                     result.append(new_sid)
         else:
             debug('.. Type "{}" is not a leaf, and do_extrapolate is False, skipped.'.format(key))
@@ -218,7 +218,7 @@ def simple_typing(sid: str | Sid) -> List[Sid]:
             new_sid = Sid("{}:{}?{}".format(__type, _sid, query))
         else:
             new_sid = Sid(__type + ":" + _sid)
-        debug("appending: {}".format(new_sid.full_string))
+        debug("appending: {}".format(new_sid.uri))
         result.append(new_sid)
 
     return list(set(result)) or [Sid(sid)]
