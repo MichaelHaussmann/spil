@@ -28,7 +28,7 @@ sys.path.append(str(spil_conf))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 project = 'Spil'
-copyright = '2022, Michael Haussmann'
+copyright = '2023, Michael Haussmann'
 author = 'Michael Haussmann'
 release = '0.1.0'  # see also from spil import __version__
 
