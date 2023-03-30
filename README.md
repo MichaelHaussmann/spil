@@ -409,8 +409,7 @@ Spil aims to be : flexible, pragmatic, simple - and reliable.
   
 - Beta stage  
   The core concepts have been around for a while, and different versions of the Sid are and have been used in production pipelines for some time now.    
-  But this version of "Spil" is a rewrite. It is currently used in production, but is still young.  
-  It lacks automated code testing, CI/CD, and profiling.  
+  But this version of "Spil" is a rewrite. It is currently used in production, but is still young.
   
 - Needs optimisation  
   Core parts, like the resolver, will need a C++ implementation.      
