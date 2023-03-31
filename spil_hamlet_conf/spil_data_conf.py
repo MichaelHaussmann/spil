@@ -16,7 +16,7 @@ from pathlib import Path
 # attribute getters
 # cachable_attributes (by getter / by type / with TTL - for example publish file size, date, owner
 
-# sid_cache_path = '/home/mh/PycharmProjects/spil2/hamlet_conf/data/caches'
+# sid_cache_path = '/home/mh/PycharmProjects/spil2/spil_hamlet_conf/data/caches'
 # sid_cache_folder = sid_cache_path
 
 # ---------------------------------------------
