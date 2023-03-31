@@ -7,7 +7,7 @@ Spil uses pytest.
 The *Auto Test* (auto_test.yml) github action runs all tests, including doc-tests, on windows and ubuntu.
 
 Pytest is configured in pyproject.toml and a conftest.py file.
-On session start, Pytest runs test file creations (inside the `hamlet_conf/data/testing` folder).
+On session start, Pytest runs test file creations (inside the `spil_hamlet_conf/data/testing` folder).
 
 The Action is triggered by push or pull-request on main branch.
 
@@ -22,9 +22,9 @@ These modules can be run directly from a code editor.
 ## Integration Tests - Data tests
 
 Most tests work in conjunction with the configuration.
-Per default, they use the shipped demo configuration `hamlet_conf`.
+Per default, they use the shipped demo configuration `spil_hamlet_conf`.
 
-On session start, Pytest runs file creations (inside the `hamlet_conf/data/testing` folder).
+On session start, Pytest runs file creations (inside the `spil_hamlet_conf/data/testing` folder).
 These files are used by the tests (including doctests).
 
 When creating a new configuration for a pipeline, it is recommended to implement related tests.
@@ -42,22 +42,22 @@ When creating a new config, these basic config conformity checks are useful:
 
 For in-depth tests and greater test coverage, it is useful to prepare static data for repeatable tests.
  
-- Recreate or adapt the `hamlet_conf/scripts/generate_example_sids.py` script, which generates correctly formatted test Sids.
-- Save the example sids into a file using `hamlet_conf/scripts/save_examples_to_file.py`
-- Run `hamlet_conf/scripts/save_examples_to_mock_fs.py`: this will create dummy project files and folders on disk (using the test Sids).
+- Recreate or adapt the `spil_hamlet_conf/scripts/generate_example_sids.py` script, which generates correctly formatted test Sids.
+- Save the example sids into a file using `spil_hamlet_conf/scripts/save_examples_to_file.py`
+- Run `spil_hamlet_conf/scripts/save_examples_to_mock_fs.py`: this will create dummy project files and folders on disk (using the test Sids).
 
 ### Testing the Sids and Finders
 
 If the basic config checks pass, and there is testable data, we can continue to usage tests.  
-Complete tests are found in `hamlet_conf/tests`.
+Complete tests are found in `spil_hamlet_conf/tests`.
 
-- `hamlet_conf/tests/core_test.py`: tests given Sids for **core attributes** (types, fields, parent(), etc.)
-- `hamlet_conf/tests/path_test.py`: tests given Sids **path resolving and path related attributes** (path())
-- `hamlet_conf/tests/data_test.py`: tests given Sids **data access attributes** (exists(), children(), get_last(), etc.)
-- `hamlet_conf/tests/finder_test.py`: uses given Sids to build random search Sids, and **tests Finders**.  
+- `spil_hamlet_conf/tests/core_test.py`: tests given Sids for **core attributes** (types, fields, parent(), etc.)
+- `spil_hamlet_conf/tests/path_test.py`: tests given Sids **path resolving and path related attributes** (path())
+- `spil_hamlet_conf/tests/data_test.py`: tests given Sids **data access attributes** (exists(), children(), get_last(), etc.)
+- `spil_hamlet_conf/tests/finder_test.py`: uses given Sids to build random search Sids, and **tests Finders**.  
   Do not hesitate to adapt this test file, depending on the finders you will use.  
   *(Note that you could also manually create a python script with example / test searches)*.
-- `hamlet_conf/tests/quicktest.py`: sandbox-like file to quickly test various things.
+- `spil_hamlet_conf/tests/quicktest.py`: sandbox-like file to quickly test various things.
 
 *(more tests work in progress)*
 

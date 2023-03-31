@@ -16,7 +16,7 @@ from pathlib import Path
 here = Path(__file__)
 root = here.parent.parent
 venv = root / 'venv' / 'lib' / 'python3.7' / 'site-packages'
-spil_conf = root / 'hamlet_conf'
+spil_conf = root / 'spil_hamlet_conf'
 print(root)
 sys.path.append(str(root))
 sys.path.append(str(venv))

@@ -1,6 +1,26 @@
 """
+This file is part of SPIL, The Simple Pipeline Lib.
 
+(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+
+SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License along with SPIL.
+If not, see <https://www.gnu.org/licenses/>.
+"""
+"""
+
+        
+        
+        
+        
         THIS IS WORK IN PROGRESS.
+        
+        
+        
+        
 
 """
 from __future__ import annotations
@@ -41,11 +61,7 @@ def get_sidcache(data_search, data_source, cache_file=None, name=None):
         Each sid_cache_file is handled by its own, single, SidCache instance.
         A SidCache object handles only one sid_cache_file.
         For example:
-            a = SidCache(cache_file='/shots.txt')
-            b = SidCache(cache_file='/shots.txt')
-            c = SidCache(cache_file='/assets.txt')
-            a and b will be the same object instance, and access the same data.
-            c will be another object.
+
 
     Note that the file can be accessed concurrently from different python instances, from different machines.
     SidCache still needs to ensure threadsafety.
@@ -106,8 +122,8 @@ class FindInCache(Finder):
         For 'hamlet/s/*/*/*' (sequences, shots and tasks for hamlet project)
         Originally loaded from FS (File Search).
     ```
-    >>> sidcache = get_sidcache(sid_cache_file='/temp/hamlet_shots.txt', data_search='hamlet/s/*/*', data_source=FS())
-    >>> sidcache.find('hamlet/s/*')
+    ... sidcache = get_sidcache(sid_cache_file='/temp/hamlet_shots.txt', data_search='hamlet/s/*/*', data_source=FS())
+    ... sidcache.find('hamlet/s/*')
     ```
     TODO: optional multiple data sources
     TODO: ttl for warmup

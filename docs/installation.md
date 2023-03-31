@@ -12,13 +12,13 @@ $ pip install spil
 # Or install latest version
 $ pip install git+https://github.com/MichaelHaussmann/spil.git
 ```
-This installs `spil`, `spil_tests`, `spil_plugins`, and `hamlet_conf`, the demo configuration.
+This installs `spil`, `spil_tests`, `spil_plugins`, and `spil_hamlet_conf`, the demo configuration.
 
 ### Default configuration
 
 To be able to use Spil, the configuration must be added to the python path.  
-Spil ships with an example configuration folder named `hamlet_conf`.
-If no configuration is found, the `hamlet_conf` folder is added to the python path during spil import.
+Spil ships with an example configuration folder named `spil_hamlet_conf`.
+If no configuration is found, the `spil_hamlet_conf` folder is added to the python path during spil import.
 
 Learn more at the [configuration documentation](configuration.md).
 
@@ -38,7 +38,7 @@ The config package could be versioned by current year, for example 2023.0.1
 
 ## Testing the install
 
-Spil works out of the box with the shipped demo config `hamlet_conf`.
+Spil works out of the box with the shipped demo config `spil_hamlet_conf`.
 
 In python, type:
 ```python
@@ -55,14 +55,14 @@ print(sid.as_query())
 
 To play with the Finder and Sid paths, files need to exist on the file system.
 
-To generate test files, run `hamlet_conf/scripts/save_examples_to_mock_fs.py`.
-This will create dummy project files and folders on disk, inside the `hamlet_conf/data` folder.
+To generate test files, run `spil_hamlet_conf/scripts/save_examples_to_mock_fs.py`.
+This will create dummy project files and folders on disk, inside the `spil_hamlet_conf/data` folder.
 
 From the installation folder type:
 ```shell
-$ python hamlet_conf/scripts/save_examples_to_mock_fs.py 
+$ python spil_hamlet_conf/scripts/save_examples_to_mock_fs.py 
 ```
-*If you didn't configure Spil, it prints the location of the `hamlet_conf` path when you use it. For example when you `import spil`.*
+*If you didn't configure Spil, it prints the location of the `spil_hamlet_conf` path when you use it. For example when you `import spil`.*
 *Make sure `spil` is in your python path, which should be the case after installation.*
 
 

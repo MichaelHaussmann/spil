@@ -7,7 +7,7 @@ include = [
   "spil",
   "spil_plugins",
   "spil_tests",
-  "hamlet_conf"
+  "spil_hamlet_conf"
 ]
 exclude = [".gitignore"]
 

@@ -139,7 +139,7 @@ def apply_query(string, query=None, type=None, fields=None):
     This is a problem in case of a read Sid, which could be poly-typed.
 
     Examples.
-    (Note that the examples depend on "hamlet_conf" example configuration. Failure may be due to non matching config)
+    (Note that the examples depend on "spil_hamlet_conf" example configuration. Failure may be due to non matching config)
 
     Query updates the sequence:
     >>> apply_query('hamlet/s/sq010', query='sequence=sq030', type='shot__sequence', fields={'project':'hamlet','type':'s','sequence':'sq010'})

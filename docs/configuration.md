@@ -23,15 +23,15 @@ Best way to get started:
 ## Included Demo configuration
 
 To be able to use Spil, the configuration must be added to the python path.  
-Spil ships with an example configuration folder named `hamlet_conf`, for a hypothetical *"hamlet"* project.
+Spil ships with an example configuration folder named `spil_hamlet_conf`, for a hypothetical *"hamlet"* project.
 
-If no configuration is found, the `hamlet_conf` folder is added to the python path during spil import.
+If no configuration is found, the `spil_hamlet_conf` folder is added to the python path during spil import.
 
 ### Adapting the demo config 
 
 The easiest way to start, is to adapt the existing config to your needs.
 
-- Copy or move the `hamlet_conf` folder to a location of your choice, and add it to your python path.
+- Copy or move the `spil_hamlet_conf` folder to a location of your choice, and add it to your python path.
 - You can rename it. 
 - The configuration files inside the folder, `spil_*_conf.py`,  must keep the same naming.
 
@@ -72,7 +72,7 @@ The easiest way to start, is to adapt the existing config to your needs.
   
 ### Included test files
 
-Under `hamlet_conf/tests` are tests scripts, that test the functions of the Sid and the configuration.
+Under `spil_hamlet_conf/tests` are tests scripts, that test the functions of the Sid and the configuration.
 While adapting the configuration, running the tests help detect problems.
 
 See below, [Testing the configuration](configuration.md).
@@ -153,8 +153,8 @@ It configures Finders (FindInCaches, FindInAll), Getters, and Writers.
 
 ## Testing the configuration
 
-- Recreate or adapt the `hamlet_conf/scripts/example_sids.py` script, which generates correctly formatted test Sids.
-- Run `hamlet_conf/scripts/save_examples_to_mock_fs.py`: this will create dummy project files and folders on disk
+- Recreate or adapt the `spil_hamlet_conf/scripts/example_sids.py` script, which generates correctly formatted test Sids.
+- Run `spil_hamlet_conf/scripts/save_examples_to_mock_fs.py`: this will create dummy project files and folders on disk
 
 ### Checking the config
 
@@ -185,7 +185,7 @@ Found: hamlet/a/char/ghost
 Found: hamlet/a/char/gertrude
 ```
 
-Complete tests are found in `hamlet_conf/tests`.
+Complete tests are found in `spil_hamlet_conf/tests`.
 
 Read more here: [testing](testing.md).
 
