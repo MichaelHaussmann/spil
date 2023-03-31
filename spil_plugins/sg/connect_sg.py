@@ -1,5 +1,5 @@
 from shotgun_api3 import shotgun  # type: ignore
-from spil_plugins.sg import conf  # FIXME: make parent package independent
+from spil_plugins.sg import conf_secret as conf  # FIXME: make parent package independent
 
 sg = None
 

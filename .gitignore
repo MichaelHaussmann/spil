@@ -17,3 +17,4 @@ venv27
 /hamlet_conf/data/caches/*
 /memo.md
 *wip
+*_secret.py
