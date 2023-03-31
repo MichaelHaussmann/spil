@@ -8,6 +8,6 @@ path_templates = path_templates.copy()  # type: ignore
 
 # Replace this by your own folder root, eg
 # path_templates['project_root'] = r'/home/mh/Desktop/SPIL_PROJECTS/SERVER/PRJ'
-path_templates['project_root'] = str(project_server_root_path)
+path_templates['project_root'] = project_server_root_path.as_posix()
 
 
