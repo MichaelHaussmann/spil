@@ -96,7 +96,7 @@ def get_getter_for(sid, attribute=None, config=None):
     """
     # from spil_action.libs.files import get_comment, get_size, get_time
     from spil import Getter, GetFromPaths
-    from spil_plugins.sg.get_sg import GetFromSG
+    # from spil_plugins.sg.get_sg import GetFromSG
     from spil_plugins.crud.next_get import NextGetter
 
     attribute_getters = {
@@ -117,11 +117,11 @@ def get_getter_for(sid, attribute=None, config=None):
         'asset__assettype': None,
         'asset__state': None,
         'shot__state': None,
-        'asset__asset': GetFromSG(),
-        'shot__shot': GetFromSG(),
-        'shot__sequence': GetFromSG(),
-        'shot__task': GetFromSG(),
-        'asset__task': GetFromSG(),
+        # 'asset__asset': GetFromSG(),
+        # 'shot__shot': GetFromSG(),
+        # 'shot__sequence': GetFromSG(),
+        # 'shot__task': GetFromSG(),
+        # 'asset__task': GetFromSG(),
         'default': GetFromPaths()
     }
 
