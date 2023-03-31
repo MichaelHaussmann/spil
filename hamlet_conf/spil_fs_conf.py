@@ -13,7 +13,7 @@ project_root_path = Path(__file__).parent / "data" / "testing" / "SPIL_PROJECTS"
 
 path_templates = {
 
-    'project_root':            str(project_root_path),
+    'project_root':            project_root_path.as_posix(),
 
     # type asset
     'asset__file':             '{@project_root}/{project}/PROD/{type:ASSETS}/{assettype}/{asset}/{task}/{version}/{assettype}_{asset}_{task}_{state}_{version}.{ext:scenes}',
