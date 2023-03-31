@@ -61,8 +61,8 @@ class FindInConstants(FindByGlob):
 
         Finding a state with a multi-parent search
 
-            >>> list( finder_states.find('hamlet/a/location/*/rig/*/p') )
-            [Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v001/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v002/p'), Sid('asset__state:hamlet/a/location/garden/rig/v001/p'), Sid('asset__state:hamlet/a/location/garden/rig/v002/p'), Sid('asset__state:hamlet/a/location/elsinore/rig/v001/p'), Sid('asset__state:hamlet/a/location/elsinore/rig/v002/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v001/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v002/p')]
+            >>> sorted(list( finder_states.find('hamlet/a/location/*/rig/*/p') ))
+            [Sid('asset__state:hamlet/a/location/elsinore/rig/v001/p'), Sid('asset__state:hamlet/a/location/elsinore/rig/v002/p'), Sid('asset__state:hamlet/a/location/garden/rig/v001/p'), Sid('asset__state:hamlet/a/location/garden/rig/v002/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v001/p'), Sid('asset__state:hamlet/a/location/lakeside/rig/v002/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v001/p'), Sid('asset__state:hamlet/a/location/queens_chamber/rig/v002/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v001/p'), Sid('asset__state:hamlet/a/location/ramparts/rig/v002/p')]
 
         Combining parent and constant search
 
