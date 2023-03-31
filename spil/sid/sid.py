@@ -858,8 +858,8 @@ class DataSid(PathSid):
 
         Example:
 
-            >>> Sid('hamlet/a/fx/blood/surface/v002/p/ma').siblings_as('asset')
-            [Sid('asset__asset:hamlet/a/fx/blood'), Sid('asset__asset:hamlet/a/fx/rain'), Sid('asset__asset:hamlet/a/fx/water'), Sid('asset__asset:hamlet/a/fx/mist'), Sid('asset__asset:hamlet/a/fx/thunder')]
+            >>> sorted( Sid('hamlet/a/fx/blood/surface/v002/p/ma').siblings_as('asset') )
+            [Sid('asset__asset:hamlet/a/fx/blood'), Sid('asset__asset:hamlet/a/fx/mist'), Sid('asset__asset:hamlet/a/fx/rain'), Sid('asset__asset:hamlet/a/fx/thunder'), Sid('asset__asset:hamlet/a/fx/water')]
 
         Args:
             key: keytype we want siblings from
@@ -881,8 +881,8 @@ class DataSid(PathSid):
 
         Example:
 
-            >>> Sid('hamlet/a/fx/blood/surface').siblings()
-            [Sid('asset__task:hamlet/a/fx/blood/model'), Sid('asset__task:hamlet/a/fx/blood/surface'), Sid('asset__task:hamlet/a/fx/blood/art'), Sid('asset__task:hamlet/a/fx/blood/rig')]
+            >>> sorted( Sid('hamlet/a/fx/blood/surface').siblings() )
+            [Sid('asset__task:hamlet/a/fx/blood/art'), Sid('asset__task:hamlet/a/fx/blood/model'), Sid('asset__task:hamlet/a/fx/blood/rig'), Sid('asset__task:hamlet/a/fx/blood/surface')]
 
         Returns:
             List of sibling Sids.
