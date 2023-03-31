@@ -97,7 +97,7 @@ def get_getter_for(sid, attribute=None, config=None):
     # from spil_action.libs.files import get_comment, get_size, get_time
     from spil import Getter, GetFromPaths
     # from spil_plugins.sg.get_sg import GetFromSG
-    from spil_plugins.crud.next_get import NextGetter
+    from hamlet_plugins.next_get import NextGetter
 
     attribute_getters = {
         "next.version": NextGetter()
