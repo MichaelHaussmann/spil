@@ -40,6 +40,14 @@ Once you add your configuration folder (or the demo configuration folder) to the
 
 Please check the documentation for "Adapting the demo config" [configuration](configuration.md).
 
+## The project name is hard coded in the configuration file ?
+
+In the shipped default demo configuration, the project is hardcoded in the spil_sid_conf file.
+This can be changed, to retrieve projects names by any other possible way.
+
+The main idea is: the preciser the information in the configuration, the better the pattern matching works.    
+Data that changes rarely (asset types, task types, and potentially project names) should find their way into the configuration.  
+How this is done can vary, and getting the configuration from a database is absolutely possible.
 
 ## Use the name of an item as it's unique Id - really ? 
 
