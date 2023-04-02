@@ -11,7 +11,7 @@ exclude = [".gitignore"]
 
 [project]
 name = "spil"
-version = "0.1.0rc2"
+version = "0.1.0"
 description = "The Simple Pipeline Lib."
 readme = "README.md"
 authors = [{ name = "Michael Haussmann", email = "spil@xeo.info" }]
