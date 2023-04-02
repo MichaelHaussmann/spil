@@ -11,9 +11,9 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from spil import Sid, FindInPaths, SpilException
-from spil_tests.utils.sid_full_tester import test_full_sid
-from spil.util.log import DEBUG, ERROR, get_logger
-from spil_tests import Timer
+from spil.tests.utils.sid_full_tester import test_full_sid
+from spil.util.log import get_logger
+from spil.tests import Timer
 
 log = get_logger("spil_tests")
 
@@ -76,7 +76,7 @@ def check_searches_in_finder(searches, finder=None, as_sid=True, do_log=True, do
 
 if __name__ == "__main__":
 
-    from spil.util.log import setLevel, ERROR, DEBUG
+    from spil.util.log import setLevel, ERROR
 
     setLevel(ERROR)
 

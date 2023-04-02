@@ -13,7 +13,7 @@ If not, see <https://www.gnu.org/licenses/>.
 
 """
 
-# from spil_tests.utils import init  # needs to be before spil.conf import
+# from tests.utils import init  # needs to be before spil.conf import
 
 from spil.util.log import debug, info
 from spil import Sid

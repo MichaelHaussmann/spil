@@ -14,7 +14,7 @@ from spil.util.log import DEBUG, get_logger
 from spil import Sid, SpilException
 from pprint import pformat
 
-log = get_logger("spil_tests", color=False)
+log = get_logger("tests", color=False)
 log.setLevel(DEBUG)
 
 

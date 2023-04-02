@@ -5,9 +5,8 @@ Uses the example sids.
 """
 import random
 
-import spil  # config path bootstrap
 from scripts.example_sids import sids  # type: ignore
-from spil_tests.utils.sid_core_tester import check_typed_sids
+from spil.tests.utils.sid_core_tester import check_typed_sids
 from spil.util.log import setLevel, INFO
 
 def test_typed_sids():

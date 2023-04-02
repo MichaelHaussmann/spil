@@ -6,9 +6,9 @@ from spil import FindInPaths as Finder
 
 if __name__ == "__main__":
 
-    from spil_tests import stop
+    from spil.tests import stop
     from pprint import pprint
-    from spil.util.log import debug, setLevel, INFO, DEBUG, info
+    from spil.util.log import setLevel, INFO
 
     setLevel(INFO)
 

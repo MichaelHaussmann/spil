@@ -10,7 +10,7 @@ import random
 
 # import spil  # config path bootstrap
 from scripts.example_sids import sids  # type: ignore
-from spil_tests.utils.sid_data_tester import check_data_sids
+from spil.tests.utils.sid_data_tester import check_data_sids
 
 
 def test_data_sids():

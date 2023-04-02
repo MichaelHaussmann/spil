@@ -5,11 +5,10 @@ https://stackoverflow.com/questions/17801300/how-to-run-a-method-before-all-test
 """
 from contextlib import suppress
 
-import spil  # default config path bootstrap
 from spil import SpilException
 import spil_data_conf
 from scripts.example_sids import sids
-from spil_tests.prep.make_mock_fs import generate_mock_fs
+from spil.tests.prep.make_mock_fs import generate_mock_fs
 
 
 def pytest_sessionstart(session):

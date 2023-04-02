@@ -11,7 +11,7 @@ from spil import Sid
 from spil.conf import sid_templates  # type: ignore
 
 from spil.util.log import DEBUG, ERROR, get_logger
-log = get_logger('spil_tests')
+log = get_logger('tests')
 log.setLevel(DEBUG)
 
 
