@@ -7,7 +7,7 @@ This test file will be read in test scripts.
 """
 from pathlib import Path
 from spil import conf
-from scripts.generate_example_sids import sids  # type: ignore
+from hamlet_scripts.generate_example_sids import sids  # type: ignore
 from spil.tests.prep.save_sid_list_to_file import write_sids_to_file
 
 sid_file = Path(conf.default_sid_conf_data_path) / "testing" / "hamlet.sids.txt"

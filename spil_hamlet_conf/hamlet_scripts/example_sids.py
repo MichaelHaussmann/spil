@@ -7,7 +7,7 @@ The script can also launch a "test_config_coverage".
 This shows all the types covered by the test sids,
 and which types are not.
 """
-from scripts.save_examples_to_file import sid_file
+from hamlet_scripts.save_examples_to_file import sid_file
 
 sids = []
 with sid_file.open() as f:

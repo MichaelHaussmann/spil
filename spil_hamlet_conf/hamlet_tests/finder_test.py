@@ -5,7 +5,7 @@ Use test sids and the created test files.
 """
 import random
 
-from scripts.example_sids import sids  # type: ignore
+from hamlet_scripts.example_sids import sids  # type: ignore
 
 # from spil_plugins.sg.find_sg import FindInSG
 from spil import FindInList, FindInPaths, FindInAll

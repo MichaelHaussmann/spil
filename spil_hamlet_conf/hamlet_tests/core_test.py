@@ -5,7 +5,7 @@ Uses the example sids.
 """
 import random
 
-from scripts.example_sids import sids  # type: ignore
+from hamlet_scripts.example_sids import sids  # type: ignore
 from spil.tests.utils.sid_core_tester import check_typed_sids
 from spil.util.log import setLevel, INFO
 

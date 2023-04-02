@@ -14,7 +14,7 @@ from spil.util.log import DEBUG, get_logger
 from spil import Sid, SpilException
 from pprint import pformat
 
-log = get_logger("tests", color=False)
+log = get_logger("spil_tests", color=False)
 log.setLevel(DEBUG)
 
 
@@ -133,6 +133,7 @@ if __name__ == "__main__":
 
     setLevel(INFO)
 
-    from scripts.example_sids import sids
+    # from hamlet_scripts.example_sids import sids
+    sids = []
 
     check_typed_sids(sids)

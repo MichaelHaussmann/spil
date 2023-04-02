@@ -7,7 +7,7 @@ from contextlib import suppress
 
 from spil import SpilException
 import spil_data_conf
-from scripts.example_sids import sids
+from hamlet_scripts.example_sids import sids
 from spil.tests.prep.make_mock_fs import generate_mock_fs
 
 

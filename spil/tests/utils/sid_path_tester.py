@@ -9,13 +9,12 @@ SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
 """
 from spil.util.log import DEBUG, get_logger
 from spil import Sid, SpilException
 from pprint import pformat
 
-log = get_logger("tests", color=False)
+log = get_logger("spil_tests", color=False)
 log.setLevel(DEBUG)
 
 
@@ -45,7 +44,9 @@ def check_path_sid(s, configs=[], reraise=True, replace=None):
             except AssertionError:
                 msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path(): {}\nSid(path=sid.path()): {}\n".format(
                     "(Sid is a search, this may be normal)." if sid.is_search() else "",
-                    sid, sid.path(), Sid(path=sid.path())
+                    sid,
+                    sid.path(),
+                    Sid(path=sid.path()),
                 )
                 log.warning(msg)
             try:
@@ -54,7 +55,10 @@ def check_path_sid(s, configs=[], reraise=True, replace=None):
             except AssertionError:
                 msg = "Sid path is ambiguous. {}\nsid: {}\nsid.path(): {}\nSid(path=sid.path()): {}\nSid(path=sid.path()).path(): {}".format(
                     "(Sid is a search, this may be normal)." if sid.is_search() else "",
-                    sid, sid.path(), Sid(path=sid.path()), Sid(path=sid.path()).path()
+                    sid,
+                    sid.path(),
+                    Sid(path=sid.path()),
+                    Sid(path=sid.path()).path(),
                 )
                 log.warning(msg)
         else:
@@ -92,7 +96,7 @@ def check_path_sids(sids, configs=[], reraise=True, replace=None):
         return
 
     for i, s in enumerate(sids):
-        log.info('*' * 75)
+        log.info("*" * 75)
         log.info("----------------------------------------- {}".format(i))
         check_path_sid(s, configs=configs, reraise=reraise, replace=replace)
 
@@ -103,6 +107,7 @@ if __name__ == "__main__":
 
     setLevel(INFO)
 
-    from scripts.example_sids import sids
+    # from hamlet_scripts.example_sids import sids
+    sids = []
 
     check_path_sids(sids)
