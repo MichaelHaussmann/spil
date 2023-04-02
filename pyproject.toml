@@ -35,12 +35,13 @@ dependencies = [
     "Fileseq",
     "future",
     "logzero",
-    "typing-extensions"
+    "typing-extensions",
+    "codetiming",
 ]
 requires-python = ">=3.7"
 
 [project.optional-dependencies]
-dev = ["codetiming", "pytest"]  # "Faker"
+dev = ["pytest"]  # "Faker"
 qc = ["mypy", "black", "flake8", "isort", "refurb"]  # Code Quality
 sg = ["shotgun-api3", "Unidecode"]  # SG plugin
 
