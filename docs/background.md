@@ -97,8 +97,9 @@ Spil aims to be : flexible, pragmatic, simple - and reliable.
 Spil thrives to be used interactively. 
 It's performance depends on the data sources that are used.
 
-- Spil ships with a configurable `FindInCache` class to handle data that changes rarely (projects, sequences, assets, etc.). 
-- Spil uses a `FindInConstant` class to handle configurable data that mostly doesn't change (types, asset types)
+- Spil uses a `FindInConstants` class to handle configurable data that mostly doesn't change (types, asset types)
+- Spil ships with a configurable `FindInCache` class to handle data that changes rarely (projects, sequences, assets, etc.).
+  (not production ready in current release)
 - String / Sid Resolves are internally stored in a custom lru_cache
 - `Finders` use generators
 

@@ -133,6 +133,7 @@ if __name__ == "__main__":
 
     setLevel(INFO)
 
-    from scripts.example_sids import sids
+    # from hamlet_scripts.example_sids import sids
+    sids = []
 
     check_typed_sids(sids)

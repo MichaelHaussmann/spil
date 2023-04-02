@@ -23,8 +23,8 @@ application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(
 )
 
 application_path = Path(__file__).parent.parent
-default_sid_conf_path = str(application_path.parent / "hamlet_conf")
-default_sid_conf_data_path = str(application_path.parent / "hamlet_conf" / "data")
+default_sid_conf_path = str(application_path.parent / "spil_hamlet_conf")
+default_sid_conf_data_path = str(application_path.parent / "spil_hamlet_conf" / "data")
 
 # automatic replacement to INFO and WARN in BETA and PROD
 loglevel = 80
@@ -62,7 +62,7 @@ sid_conf_import_error_message = """
 
     The configuration module "{module}" was not found.
 
-    Ensure to either include the demo "hamlet_conf" in your python path, 
+    Ensure to either include the demo "spil_hamlet_conf" in your python path, 
     or create your own "{module}" and add its folder to the python path.    
 
     (If you are running a py.test edit the SPIL_CONF_PATH variable in tests/test_00_init.py to match a python path.)

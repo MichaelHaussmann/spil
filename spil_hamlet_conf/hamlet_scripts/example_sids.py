@@ -7,8 +7,7 @@ The script can also launch a "test_config_coverage".
 This shows all the types covered by the test sids,
 and which types are not.
 """
-from scripts.save_examples_to_file import sid_file
-from spil_tests.config_checks.check_03_config_coverage import test_config_coverage
+from hamlet_scripts.save_examples_to_file import sid_file
 
 sids = []
 with sid_file.open() as f:
@@ -17,15 +16,14 @@ with sid_file.open() as f:
 if __name__ == "__main__":
 
     import sys
-    from spil_tests import Timer
+    from spil.tests import Timer
 
-    from spil.util.log import DEBUG, ERROR, get_logger
+    from spil.util.log import DEBUG, get_logger
 
     log = get_logger("spil_tests")
     log.setLevel(DEBUG)
 
     from spil import Sid
-    from pprint import pprint
 
     print("Start")
     # pprint(sids)

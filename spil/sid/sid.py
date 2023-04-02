@@ -657,8 +657,8 @@ class PathSid(TypedSid):
             True
 
             >>> path = Sid('hamlet/a/char/ophelia/model/v001/w/ma').path()
-            >>> path.relative_to(conf.default_sid_conf_path).as_posix()  # to be location and os independent
-            'data/testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma'
+            >>> path.relative_to(conf.default_sid_conf_data_path).as_posix()  # to be location and os independent
+            'testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma'
 
             >>> Sid('bla/bla').path()
 
@@ -948,7 +948,7 @@ class Sid(DataSid):
         >>> Sid(fields={'project': 'hamlet', 'sequence': 'sq010', 'type': 's'})  # fields dict
         Sid('shot__sequence:hamlet/s/sq010')
 
-        >>> path = Path(conf.default_sid_conf_path) / "data/testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma"
+        >>> path = Path(conf.default_sid_conf_data_path) / "testing/SPIL_PROJECTS/LOCAL/PROJECTS/HAMLET/PROD/ASSETS/char/ophelia/model/v001/char_ophelia_model_WORK_v001.ma"
         >>> Sid(path=path)           # path (default config) # TODO: any config
         Sid('asset__file:hamlet/a/char/ophelia/model/v001/w/ma')
 
@@ -967,11 +967,8 @@ class Sid(DataSid):
 
 if __name__ == "__main__":
 
-    from spil_tests import stop
-    from pprint import pprint
-    from spil.util.log import debug, setLevel, INFO, DEBUG, info
-
-    setLevel(INFO)
+    # from spil.util.log import setLevel, INFO
+    # setLevel(INFO)
 
     s = Sid("hamlet/s/sq010/sh0010/anim")
     print(s.exists())

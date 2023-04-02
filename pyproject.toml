@@ -5,15 +5,13 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 include = [
   "spil",
-  "spil_plugins",
-  "spil_tests",
-  "hamlet_conf"
+  "spil_hamlet_conf"
 ]
 exclude = [".gitignore"]
 
 [project]
 name = "spil"
-version = "0.1.0"
+version = "0.1.0rc2"
 description = "The Simple Pipeline Lib."
 readme = "README.md"
 authors = [{ name = "Michael Haussmann", email = "spil@xeo.info" }]
@@ -37,14 +35,15 @@ dependencies = [
     "Fileseq",
     "future",
     "logzero",
-    "typing-extensions"
+    "typing-extensions",
+    "codetiming",
 ]
 requires-python = ">=3.7"
 
 [project.optional-dependencies]
-dev = ["codetiming", "pytest"]  # "Faker"
-qc = ["mypy", "black", "flake8", "isort", "refurb"]
-sg = ["shotgun-api3", "Unidecode"]
+dev = ["pytest"]  # "Faker"
+qc = ["mypy", "black", "flake8", "isort", "refurb"]  # Code Quality
+sg = ["shotgun-api3", "Unidecode"]  # SG plugin
 
 [project.urls]
 "Homepage" = "https://github.com/MichaelHaussmann/spil"

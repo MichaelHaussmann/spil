@@ -27,7 +27,7 @@ path_config = get_path_config()
 path_templates = path_config.path_templates
 
 from spil.util.log import DEBUG, ERROR, get_logger
-log = get_logger('spil_tests')
+log = get_logger('tests')
 log.setLevel(DEBUG)
 
 

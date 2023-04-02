@@ -6,10 +6,9 @@ Uses the example sids.
 """
 import random
 
-import spil  # config path bootstrap
 import spil_data_conf  # type: ignore
-from scripts.example_sids import sids  # type: ignore
-from spil_tests.utils.sid_path_tester import check_path_sids
+from hamlet_scripts.example_sids import sids  # type: ignore
+from spil.tests.utils.sid_path_tester import check_path_sids
 
 
 def test_path_sids():

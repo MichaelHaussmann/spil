@@ -11,8 +11,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from spil.util.exception import raiser
-from spil.util.log import DEBUG, ERROR, get_logger
-from spil_tests import Timer
+from spil.util.log import get_logger
+from spil.tests import Timer
 
 log = get_logger("spil_tests")
 
@@ -65,8 +65,8 @@ def check_search_ab(searches, finderA, finderB, as_sid=False, raise_problems=Fal
 
 if __name__ == "__main__":
 
-    from spil import FindInList, FindInPaths, FindInAll
-    from spil.util.log import setLevel, ERROR, DEBUG
+    from spil import FindInPaths, FindInAll
+    from spil.util.log import setLevel, ERROR
 
     setLevel(ERROR)
 

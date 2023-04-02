@@ -319,10 +319,11 @@ More about installation, configuration and testing: [spil.readthedocs.io](https:
 Spil thrives to be used interactively. 
 It's performance depends on the data sources that are used.
 
-- Spil ships with a configurable FindInCache to handle data that changes rarely (projects, sequences, asset types). 
-- String / Sid Resolves are internally stored in a lru_cache
-- searches use generators
-
+- Spil uses a `FindInConstants` class to handle configurable data that mostly doesn't change (types, asset types)
+- Spil ships with a configurable `FindInCache` class to handle data that changes rarely (projects, sequences, assets, etc.).
+  (not production ready in current release)
+- String / Sid Resolves are internally stored in a custom lru_cache
+- `Finders` use generators
 
 ## Concepts  
 

@@ -5,16 +5,15 @@ Use test sids and the created test files.
 """
 import random
 
-import spil  # default config path bootstrap
-from scripts.example_sids import sids  # type: ignore
+from hamlet_scripts.example_sids import sids  # type: ignore
 
 # from spil_plugins.sg.find_sg import FindInSG
 from spil import FindInList, FindInPaths, FindInAll
-from spil_tests.prep.build_searches import from_sid_build_searches
-from spil_tests.utils.search_tester import check_searches_in_finder
+from spil.tests.prep.build_searches import from_sid_build_searches
+from spil.tests.utils.search_tester import check_searches_in_finder
 
 from spil.util.log import get_logger
-from spil_tests.utils.dualsearch_ab_tester import check_search_ab
+from spil.tests.utils.dualsearch_ab_tester import check_search_ab
 
 log = get_logger("spil_tests", color=False)
 
@@ -57,6 +56,6 @@ def test_finders():
 
 if __name__ == "__main__":
 
-    from spil.util.log import setLevel, INFO
+    from spil.util.log import INFO
     log.setLevel(INFO)
     test_finders()

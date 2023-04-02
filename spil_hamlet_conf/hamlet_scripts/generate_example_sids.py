@@ -19,12 +19,11 @@ import random
 from math import ceil
 from time import sleep
 
-import spil  # config path bootstrap
 from spil_sid_conf import projects, asset_types, asset_tasks
 from spil_sid_conf import extensions_scene, extensions_movie, shot_tasks, extensions_cache
 from logging import debug
 
-from spil_tests.config_checks.check_03_config_coverage import test_config_coverage
+from spil.tests.config_checks.check_03_config_coverage import test_config_coverage
 
 do_intermediates = True  # If this is False, only leave paths will be generated. See: LS extrapolate.
 repeat_times = 1  # 3
@@ -147,15 +146,15 @@ sids = sorted(list(set(sids)))
 if __name__ == '__main__':
 
     import sys
-    # from spil_tests import Timer
+    # from tests import Timer
 
-    from spil.util.log import DEBUG, ERROR, get_logger
+    from spil.util.log import DEBUG, get_logger
 
     log = get_logger("spil_tests")
     log.setLevel(DEBUG)
 
     from spil import Sid
-    from pprint import pprint
+
     print('Start')
     #pprint(sids)
 
