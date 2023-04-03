@@ -16,7 +16,7 @@ from pathlib import Path
 
 pysep = "/"  # python path separator
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 application_codename = "Artichoke"
 application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(
     __version__, application_codename
