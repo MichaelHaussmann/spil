@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Publish To PyPI
+name: Publish To Test PyPI
 
 on:
   workflow_dispatch:

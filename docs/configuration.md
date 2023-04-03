@@ -60,19 +60,25 @@ The easiest way to start, is to adapt the existing config to your needs.
 
 3 script files are included
 
-- `example_sids.py`
+- `generate_example_sids.py`
   This script generates Sids that are compatible with the configuration.
   Adapt the script to your configuration.
 
 - `save_examples_to_file.py`
   Uses the generated example sids and writes them to a file.
 
+- `example_sids.py`
+  Reads the example sid file into the module. Test Sids are then usable via:
+  ```python
+  from hamlet_scripts.example_sids import sids
+  ```
+
 - `save_examples_to_mock_fs.py`
   Uses the generated example sids and writes empty asset and shot files to disk.
   
 ### Included test files
 
-Under `spil_hamlet_conf/tests` are tests scripts, that test the functions of the Sid and the configuration.
+Under `spil_hamlet_conf/hamlet_tests` are tests scripts, that test the functions of the Sid and the configuration.
 While adapting the configuration, running the tests help detect problems.
 
 See below, [Testing the configuration](configuration.md).
@@ -153,14 +159,21 @@ It configures Finders (FindInCaches, FindInAll), Getters, and Writers.
 
 ## Testing the configuration
 
-- Recreate or adapt the `spil_hamlet_conf/scripts/example_sids.py` script, which generates correctly formatted test Sids.
-- Run `spil_hamlet_conf/scripts/save_examples_to_mock_fs.py`: this will create dummy project files and folders on disk
+- Recreate or adapt the `spil_hamlet_conf/hamlet_scripts/generate_example_sids.py` script, which generates correctly formatted test Sids.
+- Run `spil_hamlet_conf/hamlet_scripts/save_examples_to_mock_fs.py`: this will create dummy project files and folders on disk
+
+Directly in python:
+```python
+import spil  # adds spil_hamlet_conf to the python path
+import hamlet_scripts.save_examples_to_mock_fs as mfs
+mfs.run()
+```
 
 ### Checking the config
 
 First, run basic config conformity checks.
-- `spil_tests/config_checks/check_01_sid_config.py`: prints the processed Sid templates and checks for duplicates.
-- `spil_tests/config_checks/check_02_path_config.py`: prints the processed Path templates and checks for duplicates.
+- `spil/tests/config_checks/check_01_sid_config.py`: prints the processed Sid templates and checks for duplicates.
+- `spil/tests/config_checks/check_02_path_config.py`: prints the processed Path templates and checks for duplicates.
   Also checks if sid templates and path templates match.
 
 ### Testing the Sids
@@ -185,7 +198,7 @@ Found: hamlet/a/char/ghost
 Found: hamlet/a/char/gertrude
 ```
 
-Complete tests are found in `spil_hamlet_conf/tests`.
+Complete tests are found in `spil_hamlet_conf/hamlet_tests`.
 
 Read more here: [testing](testing.md).
 

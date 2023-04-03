@@ -82,7 +82,7 @@ So, you are about to create a new pipeline ? :)
 
 ### Testing the configuration
 
-- Create or adapt the **example_sids.py** script (as found in `spil_hamlet_conf/scripts`) which generates correctly formatted test Sids.
+- Create or adapt the **generate_example_sids.py** script (as found in `spil_hamlet_conf/hamlet_scripts`) which generates correctly formatted test Sids.
 - Run **save_examples_to_mock_fs.py**: this will create dummy project files and folders on disk
 
 
