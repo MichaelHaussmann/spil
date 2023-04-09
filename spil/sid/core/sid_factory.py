@@ -15,13 +15,14 @@ from typing import Optional
 import os
 
 from spil.sid.sid import Sid
+from spil.util.caching import lru_cache
 
 from spil.util.log import info, warning, debug
 from spil.sid.core import sid_resolver
 from spil.sid.core.query_helper import apply_query
 from spil.sid.pathops import fs_resolver
 
-
+@lru_cache
 def sid_to_sid(sid: str | Sid) -> Sid:
     """
     Creates a Sid from the given Sid object or string.
