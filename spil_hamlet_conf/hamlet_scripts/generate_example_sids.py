@@ -19,17 +19,33 @@ import random
 from math import ceil
 from time import sleep
 
+import spil  # bootstrap config path
 from spil_sid_conf import projects, asset_types, asset_tasks
 from spil_sid_conf import extensions_scene, extensions_movie, shot_tasks, extensions_cache
 from logging import debug
 
 from spil.tests.config_checks.check_03_config_coverage import test_config_coverage
 
-do_intermediates = True  # If this is False, only leave paths will be generated. See: LS extrapolate.
-repeat_times = 1  # 3
-num_sequences = 3  # 12
-num_shots = 4  # 24
-num_versions = 2  # 12
+size = "small"  # "small" is the default used for test set and doctests.
+
+if size == "small":  # 2.6 K - this is the default for tests
+    do_intermediates = True  # If this is False, only leave paths will be generated. See: LS extrapolate.
+    repeat_times = 1  # 3
+    num_sequences = 3  # 12
+    num_shots = 4  # 24
+    num_versions = 2  # 12
+elif size == "big":  # generates 464 K Sids (17.5 Mo file)
+    do_intermediates = True  # If this is False, only leave paths will be generated. See: LS extrapolate.
+    repeat_times = 3
+    num_sequences = 14
+    num_shots = 26
+    num_versions = 18
+elif size == "huge":  # 1.8 Mio Sids (71.2 Mo file)
+    do_intermediates = False  # If this is False, only leave paths will be generated. See: LS extrapolate.
+    repeat_times = 3
+    num_sequences = 30
+    num_shots = 60
+    num_versions = 20
 
 sid_types = ['a', 's']
 
