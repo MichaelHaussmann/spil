@@ -1,0 +1,21 @@
+#
+version: '0.1.1'
+services:
+  restapi:
+    image: spil/spil
+    build:
+      dockerfile: ./spil_server/docker/Dockerfile
+    restart: on-failure
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./spil_hamlet_conf:/spil_conf
+
+    # for development: edit the config will reload the app
+    environment:
+      - WATCHFILES_FORCE_POLLING=true
+
+    # development options for config hot reload.
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-dir", "/spil_conf"]
+    # https://www.uvicorn.org/settings/

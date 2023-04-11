@@ -1,0 +1,7 @@
+*.pyc
+**__pycache__**
+/spil_hamlet_conf/data/testing/SPIL_PROJECTS/**
+/spil_hamlet_conf/data/caches/**
+**/wip/**
+*_secret.py
+.git*
