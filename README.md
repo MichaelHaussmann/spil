@@ -275,6 +275,13 @@ It is possible to run actions on the currently selected Sid.
  
 **spil_ui** is a separate repository (in the process of being released).   
 
+## REST API
+
+Spil can run server side.
+
+![](docs/img/rest-small.png)
+
+*(REST API and docker under development)*
 
 ## Flexible and configurable
 

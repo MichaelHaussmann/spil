@@ -2,7 +2,6 @@
 # Build:                docker build -t spil/spil -f spil_server/docker/Dockerfile .
 # Run with python:      docker run -ti spil/spil python
 
-#FROM python:3.11
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.7
 
 COPY ./spil_server/docker/requirements.txt /spil/requirements.txt
@@ -19,6 +18,7 @@ ENV PYTHONPATH="${PYTHONPATH}:/spil:/spil_conf"
 COPY ./spil_hamlet_conf /spil/spil_hamlet_conf
 
 # Init test data
+# Only used for builtin demo. Can be removed for real usage.
 # PYTHONDONTWRITEBYTECODE avoids to have __pycache__ in the Image
 RUN export PYTHONDONTWRITEBYTECODE=1 && python -c "import spil;import hamlet_scripts.save_examples_to_mock_fs as mfs;mfs.run()"
 

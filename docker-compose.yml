@@ -9,13 +9,14 @@ services:
     ports:
       - "80:80"
 
+    # you can replace "./spil_hamlet_conf" by an actual config
     volumes:
       - ./spil_hamlet_conf:/spil_conf
 
-    # for development: edit the config will reload the app
+    # for development: this is needed to make hot reload work (see below)
     environment:
       - WATCHFILES_FORCE_POLLING=true
 
-    # development options for config hot reload.
+    # for development: runs with hot reload, reloads server when the config folder changes
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-dir", "/spil_conf"]
-    # https://www.uvicorn.org/settings/
+    # See https://www.uvicorn.org/settings/

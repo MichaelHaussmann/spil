@@ -18,6 +18,7 @@
    installation
    configuration
    configuration_advanced
+   client_server
 
 .. toctree::
    :caption: User Guides
