@@ -1,0 +1,26 @@
+#
+version: '3.8'
+services:
+  restapi:
+    image: spil/spil
+    build:
+      dockerfile: ./spil_server/docker/Dockerfile
+    restart: on-failure
+    ports:
+      - "2626:2626"
+
+    # you can replace "./spil_hamlet_conf" by an actual config
+    volumes:
+      - ./spil_hamlet_conf:/spil_conf
+
+    # for development: this is needed to make hot reload work (see below)
+    environment:
+      - WATCHFILES_FORCE_POLLING=true
+
+    # for development:
+    # Runs demo config inside mapped ./spil_hamlet_conf folder (mapped to /spil_conf inside docker)
+    # Starts uvicorn with hot reload (reloads server when the config folder changes)
+    command: >
+      sh -c "python -c \"import spil;import hamlet_scripts.save_examples_to_mock_fs as mfs;mfs.run()\" &&
+             uvicorn main:app --host 0.0.0.0 --port 2626 --reload --reload-dir /spil_conf"
+    # See https://www.uvicorn.org/settings/

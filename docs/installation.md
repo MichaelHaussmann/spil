@@ -76,3 +76,9 @@ Found: hamlet/a/char/gertrude
 
 You are all set, and can experiment with Spil.
 
+## Server Side Install
+
+Work in progress Docker and REST API.  
+See [Spil network deployment](client_server.md)
+
+
