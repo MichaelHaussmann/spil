@@ -7,7 +7,7 @@ services:
       dockerfile: ./spil_server/docker/Dockerfile
     restart: on-failure
     ports:
-      - "80:80"
+      - "2626:2626"
 
     # you can replace "./spil_hamlet_conf" by an actual config
     volumes:
@@ -18,5 +18,5 @@ services:
       - WATCHFILES_FORCE_POLLING=true
 
     # for development: runs with hot reload, reloads server when the config folder changes
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--reload", "--reload-dir", "/spil_conf"]
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "2626", "--reload", "--reload-dir", "/spil_conf"]
     # See https://www.uvicorn.org/settings/
