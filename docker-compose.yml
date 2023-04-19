@@ -17,6 +17,10 @@ services:
     environment:
       - WATCHFILES_FORCE_POLLING=true
 
-    # for development: runs with hot reload, reloads server when the config folder changes
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "2626", "--reload", "--reload-dir", "/spil_conf"]
+    # for development:
+    # Runs demo config inside mapped ./spil_hamlet_conf folder (mapped to /spil_conf inside docker)
+    # Starts uvicorn with hot reload (reloads server when the config folder changes)
+    command: >
+      sh -c "python -c \"import spil;import hamlet_scripts.save_examples_to_mock_fs as mfs;mfs.run()\" &&
+             uvicorn main:app --host 0.0.0.0 --port 2626 --reload --reload-dir /spil_conf"
     # See https://www.uvicorn.org/settings/

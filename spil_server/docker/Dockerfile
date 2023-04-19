@@ -17,11 +17,6 @@ ENV PYTHONPATH="${PYTHONPATH}:/spil:/spil_conf"
 # spil_hamlet_conf contains the spil demo config
 COPY ./spil_hamlet_conf /spil/spil_hamlet_conf
 
-# Init test data
-# Only used for builtin demo. Can be removed for real usage.
-# PYTHONDONTWRITEBYTECODE avoids to have __pycache__ in the Image
-RUN export PYTHONDONTWRITEBYTECODE=1 && python -c "import spil;import hamlet_scripts.save_examples_to_mock_fs as mfs;mfs.run()"
-
 # App will contain the fastapi app
 # Starting app:main.py is already included in the base docker image (tiangolo/uvicorn-gunicorn-fastapi)
 COPY ./spil_server/fastapi/app /app
