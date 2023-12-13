@@ -448,7 +448,7 @@ For example `cd hamlet/s/sq010`
 We'd love to hear from you.  
 We are interested in any kind of feedback: comments, questions, issues, pull requests.  
 
-Spil is released under Lesser GPL and is usable in closed source commercial applications.
+Spil is released under LGPL and is usable in closed source commercial applications.
 Other licensing is possible, please get in touch.
 
 Don't hesitate to contact us : [spil@xeo.info](mailto:spil@xeo.info).  
