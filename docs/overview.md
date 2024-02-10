@@ -287,7 +287,7 @@ Spil is a library, not a framework.<br>
 It is fully configurable. It adopts your naming conventions, and does not enforce specific workflows.   
 It easily integrates and connects onto existing pipelines.      
 
-The Sid is based on the [Lucidity](https://gitlab.com/4degrees/lucidity/) resolver.  
+The Sid is based on the [resolva](https://github.com/MichaelHaussmann/resolva) resolver.  
 
 Sid config example:
 ```

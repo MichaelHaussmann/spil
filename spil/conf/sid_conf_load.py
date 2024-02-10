@@ -4,7 +4,7 @@
 
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -18,6 +18,7 @@ import importlib
 import inspect
 
 from spil.conf.util import extrapolate_templates, pattern_replacing
+import resolva
 
 # stubs that are replaced by imports
 sid_templates = {}
@@ -59,8 +60,13 @@ for name, value in inspect.getmembers(module):
 sid_templates = extrapolate_templates(sid_templates, to_extrapolate)
 pattern_replacing(sid_templates, key_patterns)
 
+# loading into a resolva.Resolver instance (that will be cached)
+resolva.Resolver("sid", sid_templates)
+
 if __name__ == '__main__':
 
-    from pprint import pprint
-
-    pprint(globals())
+    # print the template as a dict
+    print("sid_templates = {")
+    for k, v in sid_templates.items():
+        print(f'    "{k}": r"{v}",')
+    print("}")
