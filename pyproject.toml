@@ -69,7 +69,7 @@ filterwarnings = [
     "ignore::DeprecationWarning",
 ]
 log_cli = true
-addopts = "--doctest-modules --ignore=spil_plugins --ignore=spil/sid/read/finders/find_cache.py --capture=no"
+addopts = "--doctest-modules --ignore=spil_plugins --ignore=spil/sid/read/finders/find_cache.py --ignore=spil_hamlet_conf/hamlet_tests/performance --capture=no"
 
 #log_cli_level = 10
 #testpaths = [
