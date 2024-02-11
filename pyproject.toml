@@ -11,7 +11,7 @@ exclude = [".gitignore"]
 
 [project]
 name = "spil"
-version = "0.1.2"
+version = "0.2.0"
 description = "The Simple Pipeline Lib."
 readme = "README.md"
 authors = [{ name = "Michael Haussmann", email = "spil@xeo.info" }]
@@ -32,6 +32,7 @@ keywords=[
     'vfx', 'cg', 'vfx-pipeline', 'cg-pipeline', 'path templates'
 ]
 dependencies = [
+    "resolva",
     "Fileseq",
     "future",
     "logzero",

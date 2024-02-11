@@ -1,3 +1,4 @@
+resolva
 Fileseq
 future
 logzero
