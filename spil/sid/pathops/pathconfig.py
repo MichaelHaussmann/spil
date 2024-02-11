@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -16,6 +16,8 @@ from typing import Optional
 
 import importlib
 import inspect
+
+from resolva import Resolver
 
 from spil import conf
 from spil.util.log import debug
@@ -55,10 +57,12 @@ class PathConfig:
         for name, value in inspect.getmembers(self.module):
             if name.startswith('__'):
                 continue
-
             setattr(self, name, value)
 
         pattern_replacing(self.path_templates, self.key_patterns)  # type: ignore
+
+        # instantiates a resolver if not already in instance cache
+        Resolver.get(self.name) or Resolver(self.name, self.path_templates)  # type: ignore
 
     def __str__(self):
         return f"PathConfig: {self.name} / {self.module}"

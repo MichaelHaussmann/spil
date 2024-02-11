@@ -1,7 +1,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -30,7 +30,7 @@ def to_dict(query_string):
     Converts a query string into a dictionary.
 
     All ? can be used as &.
-    Optionally leading or rtailing ? or & are ignored.
+    Optionally leading or trailing ? or & are ignored.
 
     Examples:
     >>> to_dict('keyA=valueA&keyB=valueB, XX')
@@ -84,8 +84,8 @@ def update(data, query, option_prefix="~"):
 
     Examples:
 
-        >>> update({'keyA': 'valueA', 'keyB': 'valueB'}, 'keyB=~replaceB&keyC=~skip this&keyD=keep this')
-        {'keyA': 'valueA', 'keyB': 'replaceB', 'keyD': 'keep this'}
+        >>> update({'keyA': 'valueA', 'keyB': 'valueB'}, 'keyB=~replaceB&keyC=~skip this&keyD=add this')
+        {'keyA': 'valueA', 'keyB': 'replaceB', 'keyD': 'add this'}
 
         >>> update({'keyA': 'valueA'}, 'keyB=~valueB', option_prefix=None)
         {'keyA': 'valueA', 'keyB': '~valueB'}

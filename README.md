@@ -3,7 +3,7 @@
 [![Spil, the simple pipeline lib.](https://raw.githubusercontent.com/MichaelHaussmann/spil/dev/docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
 Spil provides a simple, hierarchical, path-like, unique identifier for every entity or file of a CG production pipeline.      
-An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
+An intuitive API is built around this identifier, including glob-like search, CRUD data access and path resolving.  
 
 ## Motivation
 
@@ -289,7 +289,7 @@ Spil is a library, not a framework.<br>
 It is fully configurable. It adopts your naming conventions, and does not enforce specific workflows.   
 It easily integrates and connects onto existing pipelines.      
 
-The Sid is based on the [Lucidity](https://gitlab.com/4degrees/lucidity/) resolver.  
+The Sid is based on the [resolva](https://github.com/MichaelHaussmann/resolva) resolver.  
 
 Sid config example:
 ```
@@ -323,7 +323,7 @@ More about installation, configuration and testing: [spil.readthedocs.io](https:
 
 ## Performance
 
-Spil thrives to be used interactively. 
+Spil thrives to be used interactively.  
 It's performance depends on the data sources that are used.
 
 - Spil uses a `FindInConstants` class to handle configurable data that mostly doesn't change (types, asset types)
@@ -370,8 +370,8 @@ Spil builds upon general concepts, as well as production proven CG pipeline conc
 - Template based path resolving  
   As implemented in Shotgrid Toolkit:  
   [github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml](https://github.com/shotgunsoftware/tk-config-default/blob/master/core/templates.yml)   
-  Or by CGWire's kitsu [zou.cg-wire.com/file_trees](https://zou.cg-wire.com/file_trees)   
-  Or by Lucidity : [Lucidity](https://gitlab.com/4degrees/lucidity)  
+  By CGWire's kitsu [zou.cg-wire.com/file_trees](https://zou.cg-wire.com/file_trees)   
+  By [Lucidity](https://gitlab.com/4degrees/lucidity) or [resolva](https://github.com/MichaelHaussmann/resolva)
   
 - Middleware between Asset consumers or producers  
   [OpenAssetIO](https://github.com/OpenAssetIO/OpenAssetIO)  
@@ -420,8 +420,7 @@ Spil aims to be : flexible, pragmatic, simple - and reliable.
   But this version of "Spil" is a rewrite. It is currently used in production, but is still young.
   
 - Needs optimisation  
-  Core parts, like the resolver, will need a C++ implementation.      
-  Searches returning big result sets can be relatively slow.  
+  The resolver is fast (using caches and memoization), but would benefit from a faster rust implementation.       
   File sequence support (eg. image sequences using fileseq) is still very slow.     
 
   
@@ -430,7 +429,7 @@ Spil aims to be : flexible, pragmatic, simple - and reliable.
 The priority is to make the current feature set more robust, efficient, and easy to deploy.
 - tools to help create and verify the configuration files
 - more testing and profiling
-- adding a C++ resolver is planned, but not scheduled yet 
+- rust implementation of [resolva](https://github.com/MichaelHaussmann/resolva)
 
 To take profit from the Sids universality, we plan on building reusable open source bricks and pipeline tools.
 
