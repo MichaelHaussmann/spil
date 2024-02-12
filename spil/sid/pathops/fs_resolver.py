@@ -1,7 +1,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -17,13 +17,12 @@ import os
 from pathlib import Path
 from collections import OrderedDict  # TODO: replace by dict
 
-import spil.vendor  # SMELL
-import lucidity  # type: ignore
-from lucidity import Template  # type: ignore
+from resolva import Resolver
 
 from spil.util.caching import lru_kw_cache as cache
 from spil.util.log import debug
 from spil.util.exception import SpilException
+from spil.util import exception
 
 from spil.util import utils
 from spil.conf import key_types, sidtype_keytype_sep
@@ -36,23 +35,6 @@ Path <-> dict translation
 """
 
 
-def get_resolvers(config: PathConfig) -> dict:
-    """
-    Technical necessity for Lucidity template reference mechanism.
-
-    Args:
-        config:
-
-    Returns:
-
-    """
-    return {
-        config.path_templates_reference: Template(  # type: ignore
-            config.path_templates_reference, config.path_templates.get(config.path_templates_reference)  # type: ignore
-        )
-    }
-
-
 @cache
 def path_to_dict(
     path: str | os.PathLike[str], _type: Optional[str] = None, config: Optional[str] = None
@@ -61,49 +43,24 @@ def path_to_dict(
     Resolves the given path into the matching data dictionary.
     Uses the _type, if given, else looks up all templates and uses the first matching one.
 
-    Uses the Lucidity template mechanism,
+    Uses the Resolva template mechanism,
     then applies configured mappings.
 
     Returns a tuple with the type and the parsed data in an OrderedDict.
     If the parsing failed (no template matching) returns a None, None tuple.
 
     """
-    pc = get_path_config(config)
-    resolvers = get_resolvers(pc)
-
     path = str(path)
     path = path.replace(os.sep, "/")
 
+    pc = get_path_config(config)
+    r = Resolver.get(pc.name)
+
     if _type:
-        template = Template(
-            _type,
-            pc.path_templates.get(_type),
-            anchor=lucidity.Template.ANCHOR_BOTH,
-            default_placeholder_expression="[^/]*",
-            duplicate_placeholder_mode=lucidity.Template.STRICT,
-        )
-        template.template_resolver = resolvers
-        templates = [template]
-
+        data = r.resolve_one(path, _type)
+        template = _type
     else:
-        templates = []
-        for name, pattern in pc.path_templates.items():
-            template = Template(
-                name,
-                pattern,
-                anchor=lucidity.Template.ANCHOR_BOTH,
-                default_placeholder_expression="[^/]*",
-                duplicate_placeholder_mode=lucidity.Template.STRICT,
-            )
-            template.template_resolver = resolvers
-            templates.append(template)
-
-    try:
-        data, template = lucidity.parse(path, templates)
-        # print 'found', data, template
-    except lucidity.ParseError as e:
-        debug(f'Lucidity did not find a matching pattern. Type given: {_type} (Message: "{e}")')
-        return None, None
+        template, data = r.resolve_first(path)
 
     if not data:
         return None, None
@@ -115,7 +72,7 @@ def path_to_dict(
             value = pc.path_mapping.get(key).get(value, value)
             data[key] = value
 
-            mapping = pc.path_mapping.get((key, template.name))  # type specific mapping
+            mapping = pc.path_mapping.get((key, template))  # type specific mapping
             if mapping:
                 data[key] = mapping.get(value, value)
 
@@ -127,17 +84,21 @@ def path_to_dict(
                 if map_result:
                     data[key] = map_result
 
+    # FIXME: remove extra sorting and Ordered dict ?
     # Sorting the result data into an OrderedDict()
-    sid_type = template.name.split(sidtype_keytype_sep)[0]
+    sid_type = template.split(sidtype_keytype_sep)[0]
     keys = key_types.get(sid_type)  # using template to get sorted keys
     keys = filter(lambda x: x in data.keys(), keys)  # template.keys() is a set #
+
+    if data.keys() != r.get_keys_for(template):
+        raise SpilException(f'Data was changed after resolve. Can this end well ? Initial keys: {r.get_keys_for(template)} / Data keys: {data.keys()} ')
 
     data = data.copy()
     ordered = OrderedDict()
     for key in keys:
         ordered[key] = data.get(key)
 
-    return template.name, ordered
+    return template, ordered
 
 
 def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] = None) -> Path:
@@ -145,7 +106,7 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
     Resolves the given data dictionary into a path.
     Uses the _type, if given, else calls dict_to_type to find matching type.
 
-    Uses the Lucidity template mechanism.
+    Uses the Resolva template mechanism.
     Applies configured mappings and defaults before template formatting.
 
     Returns path string.
@@ -154,19 +115,26 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
         raise SpilException("[dict_to_path] Data is empty")
 
     pc = get_path_config(config)
-    resolvers = get_resolvers(pc)
+    r = Resolver.get(pc.name)
 
     data = data.copy()
 
     debug(f"Data: {data}")
 
-    # setting defaults on empty values
+    # setting defaults on empty values (before detecting the type)
     for key in data.keys():
         if not data.get(key) and pc.path_defaults.get(key):
             data[key] = pc.path_defaults.get(key)
 
+    # detecting the type if not given
     if not _type:
-        _type = dict_to_type(data)
+        _type, __ = r.format_first(data)
+        if not _type:
+            raise SpilException(f'Unable to detect type for Data: "{data}"')
+
+    # get template keys, which also checks if there is a matching pattern
+    template_keys = (r.get_keys_for(_type)
+                     or exception.raiser(f'Unable to find pattern for type: "{_type}" \nData: "{data}"'))
 
     # reverse path mapping
     for key, value in data.items():
@@ -178,25 +146,8 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
             if mapping:
                 data[key] = utils.get_key(mapping, value, value)
 
-    debug(f"sidtype: {_type}")
-
-    pattern = pc.path_templates.get(_type)
-
-    debug(f"pattern: {pattern}")
-
-    if not pattern:
-        raise SpilException(f'Unable to find pattern for type: "{_type}" \nData: "{data}"')
-
-    template = Template(_type, pattern)
-    template.template_resolver = resolvers
-
-    debug(f"template: {template}")
-
-    if not template:
-        raise SpilException(f"Unexpected: No template for type: {_type}")
-
     # adding template specific defaults
-    for key in template.keys():
+    for key in template_keys:
         if key not in data.keys() and pc.path_defaults.get(key):
             data[key] = pc.path_defaults.get(key)
 
@@ -206,8 +157,19 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
             for new_key, mapping in pc.sidkeys_to_extrakeys.get(key, {}).items():
                 data[new_key] = mapping.get(data.get(key))
 
+    # Data is updated, formatting now
     debug(f"data after path_defaults: {data}")
-    path = template.format(data)
+    # path = r.format_one(data, _type) or exception.raiser(f'Unable to format Data: "{data}" with type: "{_type}" \n')
+
+    if data.keys() != r.get_keys_for(_type):
+        raise SpilException(f' ? Initial keys: {r.get_keys_for(_type)} / Dict keys: {data.keys()} ')
+
+    # formatting without check  # FIXME: choose one method
+    path = r.get_format_for(_type).format(**data)
+    path_checked = r.format_one(data, _type)  # check at least if not None
+
+    if path != path_checked:
+        raise SpilException(f' ? Path returned after format is not matching checkless formatted. "{path}" v> {path_checked}')
 
     debug(f"found: {path}")
 

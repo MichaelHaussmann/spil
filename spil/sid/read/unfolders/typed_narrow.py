@@ -11,7 +11,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 from spil import Sid
-from spil.conf import basetyped_search_narrowing  # type: ignore
+from spil.conf import basetyped_search_narrowing, typed_search_narrowing  # type: ignore
 
 
 def execute(sids):
@@ -49,16 +49,19 @@ def execute(sids):
 
 def type_narrow(sid: Sid) -> Sid:
     """
-    For a given basetype, looks up the configured query, and applies it.
+    For a sids basetype, then type, looks up the configured query, and applies it.
 
     Args:
         sid:
 
     Returns:
-
+        sid with applied configured queries
     """
 
     query = basetyped_search_narrowing.get(sid.basetype, "")
+    if query:
+        sid = sid.get_with(query=query)
+    query = typed_search_narrowing.get(sid.type, "")
     if query:
         sid = sid.get_with(query=query)
     return sid
@@ -66,11 +69,11 @@ def type_narrow(sid: Sid) -> Sid:
 
 if __name__ == "__main__":
 
-    from spil.util.log import DEBUG, setLevel
+    from spil.util.log import DEBUG, setLevel, INFO
 
     # import doctest
     # doctest.testmod()
-    setLevel(DEBUG)
+    setLevel(INFO)
     # sid = Sid("asset__assettype:hamlet/a/char")
     sid = Sid("asset__file:hamlet/a/char/hamlet/model/v001/p/*")
     s = type_narrow(sid)

@@ -2,10 +2,9 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
 SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
@@ -16,6 +15,8 @@ from typing import Optional
 
 import importlib
 import inspect
+
+from resolva import Resolver
 
 from spil import conf
 from spil.util.log import debug
@@ -40,7 +41,7 @@ def get_path_config(name: Optional[str] = None) -> PathConfig:
 
 class PathConfig:
 
-    def __init__(self, name: Optional[str] = 'fs_conf', config_module_name: Optional[str] = None):
+    def __init__(self, name: Optional[str] = 'spil_fs_conf', config_module_name: Optional[str] = None):
 
         self.name = name
         config_module_name = config_module_name or name
@@ -55,10 +56,12 @@ class PathConfig:
         for name, value in inspect.getmembers(self.module):
             if name.startswith('__'):
                 continue
-
             setattr(self, name, value)
 
         pattern_replacing(self.path_templates, self.key_patterns)  # type: ignore
+
+        # instantiates a resolver if not already in instance cache
+        Resolver.get(self.name) or Resolver(self.name, self.path_templates)  # type: ignore
 
     def __str__(self):
         return f"PathConfig: {self.name} / {self.module}"
@@ -66,8 +69,7 @@ class PathConfig:
 
 if __name__ == '__main__':
 
-    from pprint import pprint
-    from spil.util.log import setLevel, INFO, info, DEBUG
+    from spil.util.log import setLevel, INFO, info
 
     info('Tests start')
 
@@ -77,16 +79,19 @@ if __name__ == '__main__':
     get_path_config.cache_clear()
 
     pc = get_path_config()
-    pprint(pc.path_templates.get('project_root'))
+    info(pc.path_templates.get('project'))
 
     conf.set('default_path_config', 'server')
     get_path_config.cache_clear()
 
     pc = get_path_config()
-    pprint(pc.path_templates.get('project_root'))
+    info(pc.path_templates.get('project'))
 
     pc = get_path_config('local')
-    pprint(pc.path_templates.get('project_root'))
+    info(pc.path_templates.get('project'))
 
     pc = get_path_config('server')
-    pprint(pc.path_templates.get('project_root'))
+    info(pc.path_templates.get('project'))
+
+    # clear at the end, because this is written to the user prefs.
+    conf.set('default_path_config', None)

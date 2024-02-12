@@ -13,7 +13,7 @@ project_root_path = Path(__file__).parent / "data" / "testing" / "SPIL_PROJECTS"
 
 path_templates = {
 
-    'project_root':            project_root_path.as_posix(),
+    # 'project_root':            project_root_path.as_posix(),
 
     # type asset
     'asset__file':             '{@project_root}/{project}/PROD/{type:ASSETS}/{assettype}/{asset}/{task}/{version}/{assettype}_{asset}_{task}_{state}_{version}.{ext:scenes}',
@@ -43,7 +43,9 @@ path_templates = {
     'project':                '{@project_root}/{project}',
 }
 
-path_templates_reference = 'project_root'
+# quick replace, for resolva compatibility
+qr = ('{@project_root}', project_root_path.as_posix())
+path_templates = {k: v.replace(qr[0], qr[1]) for k, v in path_templates.items()}
 
 # Specific mappings not needed here
 path_defaults = {
@@ -84,9 +86,9 @@ key_patterns['__'].update({
     })
 
 key_patterns['t'].update({
-        '{project}':        r'{project:(' + '|'.join(project_path_names) + r'|\*\>)}',
-        '{type:SEQUENCES}': r'{type:(SEQUENCES|\*\>)}',
-        '{type:ASSETS}':    r'{type:(ASSETS|\*\>)}',
+        '{project}':        r'{project:(' + '|'.join(project_path_names) + r'|\*|\>)}',
+        '{type:SHOTS}':     r'{type:(SHOTS|\*|\>)}',
+        '{type:ASSETS}':    r'{type:(ASSETS|\*|\>)}',
     })
 
 if __name__ == '__main__':

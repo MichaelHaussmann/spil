@@ -39,23 +39,40 @@ def test_finders():
         print("#" * 100)
 
         for search_sid, comment in searches.items():
+            print("#" * 100)
             log.info(f"Running search: {search_sid}")
             search = {search_sid: comment}
 
+            print("-" * 50)
             log.info("Comparing finders")
             check_search_ab(search, find_in_list, find_in_all, raise_problems=True)
             check_search_ab(search, find_in_paths_server, find_in_paths_local, raise_problems=True)
+            # some searches are not findable on disk
+            # check_search_ab(search, find_in_list, find_in_paths_local, raise_problems=True)
 
             print("-" * 50)
+            log.info("Running finders")
             for finder in finders:
                 log.info(f"Running searches on {finder}")
                 check_searches_in_finder(
-                    search, finder, reraise=True  # , do_deep=(finder == find_in_list)
+                    search, finder, reraise=True, do_deep=(finder == find_in_list)
                 )
+
+            log.info(f"Done search: {search_sid}")
+            print(" " * 50)
+
+            # input()  # option to wait for user between each loop
 
 
 if __name__ == "__main__":
 
-    from spil.util.log import INFO
+    from resolva.utils import log as rlog
+    # rlog.setLevel(10)
+
+    import spil.util.log as slog
+    # slog.setLevel(10)
+
+    from spil.util.log import INFO, DEBUG
     log.setLevel(INFO)
+
     test_finders()

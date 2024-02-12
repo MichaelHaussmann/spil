@@ -106,6 +106,9 @@ basetyped_search_narrowing = {
 
 typed_search_narrowing = {  # type: ignore
     # not implemented yet.
+
+    # this does not work because the Sid is typed (signle values only)
+    # 'asset__movie_file': 'ext=~' + ','.join(extension_alias.get('movie'))  # type: ignore
 }
 
 
