@@ -1,17 +1,16 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2021 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
 SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License along with SPIL.
 If not, see <https://www.gnu.org/licenses/>.
-
-
 """
+
+'''
 import os
 import tempfile
 
@@ -59,7 +58,7 @@ def uniqfy(seq, reverse=False):
         return result
     else:
         return [x for x in seq if not (x in seen or seen_add(x))]
-
+'''
 
 def get_key(adict, value, default=None):
     """
@@ -68,8 +67,6 @@ def get_key(adict, value, default=None):
     If a value exists multiple times:
         If the dictionary is ordered, returns the first key.
         Otherwise key is returned "randomly".
-
-    NB: to get a consistent result in py < 3.6, we need to use an OrderedDict as input.
     """
     try:
         index = list(adict.values()).index(value)
@@ -81,39 +78,19 @@ def get_key(adict, value, default=None):
     return result
 
 
-def is_fs_case_sensitive():  # FIXME: not used, clean up.
-    """
-    Checks if the file system is case-sensitive.
-
-    https://stackoverflow.com/questions/7870041/check-if-file-system-is-case-insensitive-in-python
-    @author Steve Cohen, https://stackoverflow.com/users/6194443/steve-cohen
-
-    :return: True or False
-    """
-
-    if not hasattr(is_fs_case_sensitive, 'case_sensitive'):
-        with tempfile.NamedTemporaryFile(prefix='TmP') as tmp_file:
-            setattr(is_fs_case_sensitive,
-                    'case_sensitive',
-                    not os.path.exists(tmp_file.name.lower()))
-
-    return is_fs_case_sensitive.case_sensitive
-
-
 if __name__ == '__main__':
     
-    print( is_sequence('toto') )
-    
-    print( uniqfy(['a', 'b', 'c', 'a', 'c', 'd']) )
-
-    print( is_filename('folder/02_260_0200-animation_export-setDressing.json') )
-    print( is_filename('folder') )
-    print( is_filename('test/toto.json') )
+    # print( is_sequence('toto') )
+    #
+    # print( uniqfy(['a', 'b', 'c', 'a', 'c', 'd']) )
+    #
+    # print( is_filename('folder/02_260_0200-animation_export-setDressing.json') )
+    # print( is_filename('folder') )
+    # print( is_filename('test/toto.json') )
 
     _dict = {'name': 'Doe',
              'first_name': 'John',
              'middle_name': 'John'}
     print(get_key(_dict, 'John'))
 
-    print('is fs case_sensitive? {}'.format(is_fs_case_sensitive()))
 
