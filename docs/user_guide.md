@@ -24,7 +24,7 @@ Examples (for a movie called "hamlet"):
 ```
 
 At creation time, the string is "resolved", matched against configurated templates.
-(Resolving done by [Lucidity](https://gitlab.com/4degrees/lucidity/))
+(Resolving done by [resolva](https://github.com/MichaelHaussmann/resolva))
 
 If the resolve succeeds, it defines the Sids type, and store its data in a dictionary.
 Finally, a Sid contains 3 values.

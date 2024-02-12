@@ -159,8 +159,8 @@ will generate:
 
 ### Resolving
 
-Globally, resolving means translating a string into meaningful data, in dictionary form.
-Spil uses Lucidity as the resolver.
+Globally, *resolving* means translating a string into meaningful data, in dictionary form.
+Spil uses [resolva](https://github.com/MichaelHaussmann/resolva) as the resolver.
 
 Spil uses resolving for 2 types of strings: 
 - the Sid string, for example `hamlet/a/char/ophelia`.
@@ -169,14 +169,14 @@ Spil uses resolving for 2 types of strings:
 *Sid resolving*
 
 Upon instantiation, the Sid factory attempts to resolve the Sid string, for example `hamlet/a/char/ophelia`.
-It uses the `spil_sid_conf` configuration, containing a dictionary with all available Lucidity templates.
+It uses the `spil_sid_conf` configuration, containing a dictionary with all available sid templates.
 (The templates are "extrapolated" and augmented with configured mappings, prior to resolving, see configuration.)
 If the resolve is a success, the Sids `type` becomes the template's name, and `fields` the resolved dictionary.
 
 *Path resolving*
 
 Sid instantiation using the `path` parameter triggers a path resolving.
-The Lucidity resolver uses `spil_data_conf.path_configs` to find one or more path template configurations.
+The resolver uses `spil_data_conf.path_configs` to find one or more path template configurations.
 These templates are then used to resolve the given path string to the Sids dictionary.
 
 Sid and Path templates should match (although some Sid types may not have a path counterpart). 
