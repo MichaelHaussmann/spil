@@ -10,39 +10,14 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 
-'''
-import os
-import tempfile
-
-
-def is_filename(path):
-    """
-    if the given string ends with an extension, e.g. a dot followed by 2 to 5 signs, we suppose it's a file name.
-
-    :param path: path string
-    :return:
-    """
-    return len(str(path).rsplit('.')) > 1 and 1 < len(str(path).rsplit('.')[-1]) < 6
-
-
-def is_sequence(arg): 
-    """
-    Duck-typing-style sequence detection 
-    
-    @author Alex Martelli
-    http://stackoverflow.com/questions/2937114/python-check-if-an-object-is-a-sequence 
-    """
-    return (not hasattr(arg, "strip") and
-            hasattr(arg, "__getitem__") or
-            hasattr(arg, "__iter__"))
-
-
 def uniqfy(seq, reverse=False):
     """
     Returns a list with unique items, preserving order.
     
     If optional "reverse", the last duplicated item is kept. 
     (back is not optimized)
+
+    (used by spil_ui)
     
     http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
     http://www.peterbe.com/plog/uniqifiers-benchmark
@@ -58,7 +33,7 @@ def uniqfy(seq, reverse=False):
         return result
     else:
         return [x for x in seq if not (x in seen or seen_add(x))]
-'''
+
 
 def get_key(adict, value, default=None):
     """
