@@ -28,9 +28,9 @@ sys.path.append(str(spil_conf))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 project = 'Spil'
-copyright = '2023, Michael Haussmann'
+copyright = '2024, Michael Haussmann'
 author = 'Michael Haussmann'
-release = '0.1.0'  # see also from spil import __version__
+release = '0.2.0'  # see also from spil import __version__
 
 extensions = ['myst_parser',
     # 'sphinx.ext.duration',
