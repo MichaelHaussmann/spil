@@ -4,3 +4,4 @@ future
 logzero
 codetiming
 typing-extensions
+sphinx-rtd-theme
