@@ -38,8 +38,8 @@ docker compose up -d
 This will build `spil/spil_server/docker/Dockerfile`
 And run as defined in `spil/docker-compose.yml`  
 
-The API will run on [http://127.0.0.1/find](http://127.0.0.1/find) and [http://127.0.0.1/get](http://127.0.0.1/get)    
-Example: [http://127.0.0.1/find/all/hamlet/a/**/maya?asset=*&task=rig&version=v001](http://127.0.0.1/find/all/hamlet/a/**/maya?asset=*&task=rig&version=v001)  
+The API will run on [http://127.0.0.1:2626/find](http://127.0.0.1:2626/find) and [http://127.0.0.1:2626/get](http://127.0.0.1:2626/get)    
+Example: [http://127.0.0.1:2626/find/all/hamlet/a/**/maya?asset=*&task=rig&version=v001](http://127.0.0.1:2626/find/all/hamlet/a/**/maya?asset=*&task=rig&version=v001)  
 
 
 ### Production config
