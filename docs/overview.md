@@ -267,7 +267,7 @@ Spil can be used with the spil_ui.browser.
 
 [![Spil Qt UI](img/spil_ui_dark.png)](https://github.com/MichaelHaussmann/spil_ui)
   
-**Spil_UI** is a Qt browser UI, built on top of QtPy (PySide2/PySide6).     
+**Spil_UI** is a Qt browser UI, built on top of QtPy (PySide2/PySide6).    
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
 It is possible to run actions on the currently selected Sid.  
  
@@ -313,8 +313,8 @@ The Data Source is configurable depending on the given Sid or Sid type.
 ## Installation
 
 Spil works in Python >=3.7.  
-Spil is available on pypi and can be installed using `pip install spil`,  
-or from github `pip install git+https://github.com/MichaelHaussmann/spil.git`
+Spil is available on pypi and can be installed using `pip install spil`.  
+To install with the UI, use `pip install spil_ui`.  
 
 More about installation, configuration and testing: [spil.readthedocs.io](https://spil.readthedocs.io).
 
