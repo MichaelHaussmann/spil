@@ -1,6 +1,6 @@
 # Spil, the Simple Pipeline lib.
 
-[![Spil, the simple pipeline lib.](https://raw.githubusercontent.com/MichaelHaussmann/spil/dev/docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
+[![Spil, the simple pipeline lib.](https://raw.githubusercontent.com/MichaelHaussmann/spil/main/docs/img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
 Spil provides a simple, hierarchical, path-like, unique identifier for every entity or file of a CG production pipeline.      
 An intuitive API is built around this identifier, including glob-like search, CRUD data access and path resolving.  
@@ -269,17 +269,17 @@ Spil can be used with the spil_ui.browser.
 
 [![Spil Qt UI](https://raw.githubusercontent.com/MichaelHaussmann/spil/main/docs/img/spil_ui.png)](https://github.com/MichaelHaussmann/spil_ui)
   
-**Spil_UI** is a Qt browser UI, built on top of Qt.py (PySide/PySide2).   
+**Spil_UI** is a Qt browser UI, built on top of QtPy (PySide2/PySide6).   
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
 It is possible to run actions on the currently selected Sid.  
  
-**spil_ui** is a separate repository (in the process of being released).   
+**[spil_ui](https://github.com/MichaelHaussmann/spil_ui)** is a separate repository.   
 
 ## REST API
 
 Spil can run server side.
 
-![](docs/img/rest-small.png)
+![](https://raw.githubusercontent.com/MichaelHaussmann/spil/main/docs/img/rest-small.png)
 
 *(REST API and docker under development)*
 
@@ -329,7 +329,8 @@ It's performance depends on the data sources that are used.
 - Spil uses a `FindInConstants` class to handle configurable data that mostly doesn't change (types, asset types)
 - Spil ships with a configurable `FindInCache` class to handle data that changes rarely (projects, sequences, assets, etc.).
   (not production ready in current release)
-- String / Sid Resolves are internally stored in a custom lru_cache
+- Pattern regex-compiles are instance cached
+- String Resolves are internally stored in a custom lru_cache
 - `Finders` use generators
 
 ## Concepts  
@@ -447,7 +448,7 @@ For example `cd hamlet/s/sq010`
 We'd love to hear from you.  
 We are interested in any kind of feedback: comments, questions, issues, pull requests.  
 
-Spil is released under Lesser GPL and is usable in closed source commercial applications.
+Spil is released under LGPL and is usable in closed source commercial applications.
 Other licensing is possible, please get in touch.
 
 Don't hesitate to contact us : [spil@xeo.info](mailto:spil@xeo.info).  

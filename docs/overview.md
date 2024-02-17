@@ -3,7 +3,7 @@
 [![Spil, the simple pipeline lib.](img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
 Spil provides a simple, hierarchical, path-like, unique identifier for every entity or file of a CG production pipeline.<br>      
-An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
+An intuitive API is built around this identifier, including glob-like search, CRUD data access and path resolving.  
 
 ## Motivation
 
@@ -271,7 +271,7 @@ Spil can be used with the spil_ui.browser.
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
 It is possible to run actions on the currently selected Sid.  
  
-**spil_ui** is a separate repository (in the process of being released).   
+**[spil_ui](https://github.com/MichaelHaussmann/spil_ui)** is a separate repository.   
 
 ## REST API
 
@@ -324,7 +324,7 @@ More about installation, configuration and testing: [spil.readthedocs.io](https:
 We'd love to hear from you.  
 We are interested in any kind of feedback: comments, questions, issues, pull requests.  
 
-Spil is released under Lesser GPL and is usable in closed source commercial applications.
+Spil is released under LGPL and is usable in closed source commercial applications.
 Other licensing is possible, please get in touch.
 
 Don't hesitate to contact us : [spil@xeo.info](mailto:spil@xeo.info).  
