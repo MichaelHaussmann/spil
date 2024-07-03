@@ -96,7 +96,12 @@ Once you add your configuration folder (or the demo configuration folder) to the
 
 Learn more at the [configuration documentation](configuration.md).
 
+### Default configuration with spil and spil_ui
 
+Both **spil** and **spil_ui** contain a `spil_hamlet_conf` folder.
+When installing with pip, both folders are merged.
+
+If **spil** or **spil_ui** are installed or cloned separately, both `spil_hamlet_conf` folders need to be explicitly added to the python path.
 
 ### Install latest from git repo
 

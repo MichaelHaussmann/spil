@@ -2,7 +2,7 @@
 
 ## What is Spil ?
 
-Spil is a pure python library for CG and VFX pipelines. 
+Spil is a pure python library for CG and VFX pipelines.  
 Spil provides a simple, human-readable, hierarchical, path-like unique identifier for every entity or file of a CG production pipeline.    
 An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
 
@@ -23,8 +23,12 @@ Spil is open source and can be used for free.
 It can be installed using `pip install spil` or forked from [github](https://github.com/MichaelHaussmann/spil).
 See [installation](installation.md).
 
-Spil is released under Lesser GPL and is usable in **closed source commercial applications**.  
+Spil is released under Lesser GPL (LGPL) and is usable in **closed source commercial applications**.  
 (Only modifications to Spil itself must be open sourced).
+
+## I only need simple path resolving
+
+Check out [resolva](https://github.com/MichaelHaussmann/resolva), which is used at Spil's core.
 
 
 ## Why does Spil print the message "USING DEMO CONFIGURATION ...." ?
@@ -131,7 +135,7 @@ With loose rules, the configuration becomes tricky. Some cases may not work out 
 
 ## Who makes Spil ?
 
-The Sid concept goes back to Studio100Animation in 2011.  
+The **Sid** concept goes back to Studio100Animation in 2011.  
 History page in the making.  
 It was rewritten and open sourced in 2019, by [Michael Haussmann](https://github.com/MichaelHaussmann), [spil@xeo.info](mailto:spil@xeo.info).
 
