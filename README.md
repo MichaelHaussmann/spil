@@ -269,11 +269,11 @@ Spil can be used with the spil_ui.browser.
 
 [![Spil Qt UI](https://raw.githubusercontent.com/MichaelHaussmann/spil/main/docs/img/spil_ui.png)](https://github.com/MichaelHaussmann/spil_ui)
   
-**Spil_UI** is a Qt browser UI, built on top of QtPy (PySide2/PySide6).   
+**Spil_UI** is a Qt browser UI, built on top of QtPy (PySide2/PySide6).      
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
 It is possible to run actions on the currently selected Sid.  
  
-**spil_ui** is a separate repository (in the process of being released).   
+**[spil_ui](https://github.com/MichaelHaussmann/spil_ui)** is a separate repository.   
 
 ## REST API
 
@@ -315,8 +315,8 @@ The Data Source is configurable depending on the given Sid or Sid type.
 ## Installation
 
 Spil works in Python >=3.7.  
-Spil is available on pypi and can be installed using `pip install spil`,  
-or from github `pip install git+https://github.com/MichaelHaussmann/spil.git`
+Spil is available on pypi and can be installed using `pip install spil`.  
+To install with the UI, use `pip install spil_ui`.  
 
 More about installation, configuration and testing: [spil.readthedocs.io](https://spil.readthedocs.io).
 
@@ -329,7 +329,8 @@ It's performance depends on the data sources that are used.
 - Spil uses a `FindInConstants` class to handle configurable data that mostly doesn't change (types, asset types)
 - Spil ships with a configurable `FindInCache` class to handle data that changes rarely (projects, sequences, assets, etc.).
   (not production ready in current release)
-- String / Sid Resolves are internally stored in a custom lru_cache
+- Pattern regex-compiles are instance cached
+- String Resolves are internally stored in a custom lru_cache
 - `Finders` use generators
 
 ## Concepts  

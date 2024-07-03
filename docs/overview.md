@@ -3,7 +3,7 @@
 [![Spil, the simple pipeline lib.](img/spil-logo.png)](https://github.com/MichaelHaussmann/spil)
 
 Spil provides a simple, hierarchical, path-like, unique identifier for every entity or file of a CG production pipeline.<br>      
-An intuitive API is built around this identifier, including glob-like query, CRUD data access and path resolving.  
+An intuitive API is built around this identifier, including glob-like search, CRUD data access and path resolving.  
 
 ## Motivation
 
@@ -267,11 +267,11 @@ Spil can be used with the spil_ui.browser.
 
 [![Spil Qt UI](img/spil_ui_dark.png)](https://github.com/MichaelHaussmann/spil_ui)
   
-**Spil_UI** is a Qt browser UI, built on top of QtPy (PySide2/PySide6).     
+**Spil_UI** is a Qt browser UI, built on top of QtPy (PySide2/PySide6).    
 Navigating through the columns builds a **"Search Sid"** and calls a **Finder**.    
 It is possible to run actions on the currently selected Sid.  
  
-**spil_ui** is a separate repository (in the process of being released).   
+**[spil_ui](https://github.com/MichaelHaussmann/spil_ui)** is a separate repository.   
 
 ## REST API
 
@@ -313,8 +313,8 @@ The Data Source is configurable depending on the given Sid or Sid type.
 ## Installation
 
 Spil works in Python >=3.7.  
-Spil is available on pypi and can be installed using `pip install spil`,  
-or from github `pip install git+https://github.com/MichaelHaussmann/spil.git`
+Spil is available on pypi and can be installed using `pip install spil`.  
+To install with the UI, use `pip install spil_ui`.  
 
 More about installation, configuration and testing: [spil.readthedocs.io](https://spil.readthedocs.io).
 
@@ -324,7 +324,7 @@ More about installation, configuration and testing: [spil.readthedocs.io](https:
 We'd love to hear from you.  
 We are interested in any kind of feedback: comments, questions, issues, pull requests.  
 
-Spil is released under Lesser GPL and is usable in closed source commercial applications.
+Spil is released under LGPL and is usable in closed source commercial applications.
 Other licensing is possible, please get in touch.
 
 Don't hesitate to contact us : [spil@xeo.info](mailto:spil@xeo.info).  

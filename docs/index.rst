@@ -31,6 +31,15 @@
    testing
 
 .. toctree::
+   :caption: Spil Qt Ui
+   :maxdepth: 2
+   :titlesonly:
+   :hidden:
+
+   spil_ui_usage
+   spil_ui_notes
+
+.. toctree::
    :caption: Reference Documentation
    :maxdepth: 2
    :hidden:

@@ -62,6 +62,9 @@ The biggest disadvantage is the locking of names. It becomes difficult to rename
 *(Example: if the sid is stored in a database, it gets complicated to rename an asset category)*.  
 But we still believe the advantage is worth the price.  
 
+It actually can have a beneficial effect on naming and data understanding.  
+It is "Wyniwyg": What you name is what you get.
+
 Please see also the blue sky tech blog on the subject:  
 [medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575](https://medium.com/blue-sky-tech-blog/a-rose-by-any-other-name-4b569309b575)  
 
