@@ -2,7 +2,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -16,7 +16,7 @@ from pathlib import Path
 
 pysep = "/"  # python path separator
 
-__version__ = "0.1.2"
+__version__ = "0.2.1"
 application_codename = "Artichoke"
 application_name = 'SPIL The Simple Pipeline Lib - v{0} ("{1}")'.format(
     __version__, application_codename
