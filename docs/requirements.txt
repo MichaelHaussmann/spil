@@ -1,7 +1,9 @@
-myst-parser
+resolva
 Fileseq
 future
 logzero
 codetiming
 typing-extensions
 sphinx-rtd-theme
+myst-parser
+# sphinx
