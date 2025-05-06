@@ -1,7 +1,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2025 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
@@ -107,6 +107,8 @@ def dict_to_sid(data: dict, _type: Optional[str] = None) -> str:
     r = Resolver.get("sid")
 
     if _type:
+        # We remove keys that are not in the given type (flex / non-strict)
+        data = {k: v for k, v in data.items() if k in r.get_keys_for(_type)}
         result = r.format_one(data, _type)
     else:
         name, result = r.format_first(data)

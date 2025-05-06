@@ -1,7 +1,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2023 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2025 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -110,6 +110,7 @@ def path_to_sid(path: str | os.Pathlike[str], config: Optional[str]) -> Sid | No
     """
     # resolving
     _type, fields = fs_resolver.path_to_dict(path, config=config)
+    debug(f'Resolved "{path}" to {_type} / "{fields}"')
 
     if not fields:
         info(f"Path [{path}] did not resolve to valid Sid fields (config_name:{config}.")
@@ -118,7 +119,7 @@ def path_to_sid(path: str | os.Pathlike[str], config: Optional[str]) -> Sid | No
     # Now getting sid
     resolved_sid = sid_resolver.dict_to_sid(fields, _type)
     if not resolved_sid:
-        info('Path "{}" did resolve to fields {}, but not back to Sid'.format(path, fields))
+        info(f'Path "{path}" did resolve to fields {fields}, but not to Sid')
         return None
 
     new_sid = Sid(from_factory=True)

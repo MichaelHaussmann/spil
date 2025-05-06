@@ -1,7 +1,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2025 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -83,6 +83,8 @@ def path_to_dict(
                 map_result = _dict.get(data.get(new_key))
                 if map_result:
                     data[key] = map_result
+                    # if key not in r.get_keys_for(template):
+                    data.pop(new_key)
 
     # FIXME: remove extra sorting and Ordered dict ?
     # Sorting the result data into an OrderedDict()
@@ -91,7 +93,7 @@ def path_to_dict(
     keys = filter(lambda x: x in data.keys(), keys)  # template.keys() is a set #
 
     if data.keys() != r.get_keys_for(template):
-        raise SpilException(f'Data was changed after resolve. Can this end well ? Initial keys: {r.get_keys_for(template)} / Data keys: {data.keys()} ')
+        debug(f'Data was changed after resolve. Initial keys: {r.get_keys_for(template)} / Data keys: {data.keys()} ')
 
     data = data.copy()
     ordered = OrderedDict()
@@ -156,6 +158,8 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
         if key in data.keys():
             for new_key, mapping in pc.sidkeys_to_extrakeys.get(key, {}).items():
                 data[new_key] = mapping.get(data.get(key))
+                if key not in template_keys:
+                    data.pop(key)
 
     # Data is updated, formatting now
     debug(f"data after path_defaults: {data}")
