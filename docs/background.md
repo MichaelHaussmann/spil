@@ -28,7 +28,7 @@ Spil builds upon general concepts, as well as production proven CG pipeline conc
 - Unique Identifier & Resource Locator, as seen in:  
   - Blue Sky's ["Pipeline Resource Identifier (PRI)"](https://medium.com/blue-sky-tech-blog/conduit-pipeline-resource-identifiers-4432776da6ab)
   - Sony Pictures "SPREF"
-  - Animal Logic [USD Asset Resolver URIs](https://github.com/DigitalProductionExampleLibrary/ALab/blob/main/docs/src/pages/alSpecific.md#uris--relative-filepaths)
+  - Animal Logic [USD Asset Resolver URIs](https://github.com/DigitalProductionExampleLibrary/ALab/blob/main/docs/src/pages/nasSpecific.md#uris--relative-filepaths)
   - Also OpenAssetIO's [Entity Reference](https://openassetio.github.io/OpenAssetIO/glossary.html#entity_reference)  
   
 - Resource description and "Context" (Shotgrid Toolkit)  
