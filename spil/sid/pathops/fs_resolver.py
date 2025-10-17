@@ -86,6 +86,12 @@ def path_to_dict(
                     # if key not in r.get_keys_for(template):
                     data.pop(new_key)
 
+    # callbacks
+    try:
+        data = pc.from_path_callback(data)
+    except AttributeError:
+        debug(f"No from_path_callback")
+
     # FIXME: remove extra sorting and Ordered dict ?
     # Sorting the result data into an OrderedDict()
     sid_type = template.split(sidtype_keytype_sep)[0]
@@ -161,19 +167,25 @@ def dict_to_path(data: dict, _type: Optional[str] = None, config: Optional[str] 
                 if key not in template_keys:
                     data.pop(key)
 
+    # callbacks
+    try:
+        data = pc.to_path_callback(data)
+    except AttributeError:
+        debug(f"No to_path_callback")
+
     # Data is updated, formatting now
     debug(f"data after path_defaults: {data}")
     # path = r.format_one(data, _type) or exception.raiser(f'Unable to format Data: "{data}" with type: "{_type}" \n')
 
-    if data.keys() != r.get_keys_for(_type):
-        raise SpilException(f' ? Initial keys: {r.get_keys_for(_type)} / Dict keys: {data.keys()} ')
+    # if data.keys() != r.get_keys_for(_type):
+    #     raise SpilException(f' ? Initial keys: {r.get_keys_for(_type)} / Dict keys: {data.keys()} ')
 
     # formatting without check  # FIXME: choose one method
     path = r.get_format_for(_type).format(**data)
-    path_checked = r.format_one(data, _type)  # check at least if not None
-
-    if path != path_checked:
-        raise SpilException(f' ? Path returned after format is not matching checkless formatted. "{path}" v> {path_checked}')
+    # path_checked = r.format_one(data, _type)  # check at least if not None
+    #
+    # if path != path_checked:
+    #     raise SpilException(f' ? Path returned after format is not matching checkless formatted. "{path}" v> {path_checked}')
 
     debug(f"found: {path}")
 
