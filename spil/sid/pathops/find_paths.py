@@ -122,7 +122,7 @@ class FindInPaths(FindByGlob):
                 searched[search.type].append(pattern)
 
             debug(f"Now searching pattern: {pattern}")
-            found = glob.glob(pattern)
+            found = glob.iglob(pattern, recursive=True)  # , recursive=True
             debug("found")
             debug(found)
             for path in found:
