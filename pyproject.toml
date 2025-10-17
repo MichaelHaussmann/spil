@@ -5,13 +5,12 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 include = [
   "spil",
-  "spil_hamlet_conf"
 ]
 exclude = [".gitignore"]
 
 [project]
 name = "spil"
-version = "0.2.1"
+version = "0.3.0"
 description = "The Simple Pipeline Lib."
 readme = "README.md"
 authors = [{ name = "Michael Haussmann", email = "spil@xeo.info" }]
@@ -22,6 +21,8 @@ classifiers=[
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.11",
         "Intended Audience :: Developers",
         "Natural Language :: English",
         "Topic :: Software Development",
@@ -55,10 +56,10 @@ profile = "black"
 
 [tool.black]
 line-length = 100
-target-version = ['py37']
+target-version = ['py39']
 
 [tool.refurb]
-python-version = 3.7
+python-version = 3.9
 ignore = [126]
 
 [tool.mypy]
