@@ -125,7 +125,7 @@ class WriteToPaths(Writer):
             )
 
         suffix = path.suffix
-        if suffix:
+        if suffix and _sid.is_leaf():
             debug(f"Path is a file: {path}")
             template = create_file_using_template.get(suffix[1:])  # we remove the dot of the suffix
             if template:
