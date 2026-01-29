@@ -3,7 +3,7 @@
 """
 This file is part of SPIL, The Simple Pipeline Lib.
 
-(C) copyright 2019-2024 Michael Haussmann, spil@xeo.info
+(C) copyright 2019-2026 Michael Haussmann, spil@xeo.info
 
 SPIL is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 SPIL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
@@ -33,6 +33,7 @@ key_patterns = {}
 extension_alias = {}
 projects = []
 leaf_keys = {}
+sid_factory = None  #
 
 try:
     module = importlib.import_module('spil_sid_conf')
